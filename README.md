@@ -31,7 +31,9 @@ sudo apt install curl -y
 curl -O https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
 sha256sum Anaconda3-2022.10-Linux-x86_64.sh  # Verify the checksum 
 ```
-The expected checksum for above example is: e7ecbccbc197ebd7e1f211c59df2e37bc6959d081f2235d387e08c9026666acd
+The expected checksum for above example is: 
+e7ecbccbc197ebd7e1f211c59df2e37bc6959d081f2235d387e08c9026666acd
+
 Other version available at https://repo.anaconda.com/archive/ .
 
 Execute the the bash file
@@ -79,4 +81,4 @@ conda update -n base -c defaults conda
 conda config --add channels defaults
 conda config --add channels conda-forge
 ```
-VM_Ready for Use
+VM ready for use
