@@ -16,6 +16,7 @@ Initial setup of a new instance, running on Science Cloud UZH (https://cloud.s3i
 Access via the Ubuntu terminal on your working platform. Download Ubuntu application for your laptop to connect to the instance. Instructions for launching an instance and connecting is not covered here. Go to https://docs.s3it.uzh.ch/cloud/training/training_handout/ for details. Proceed with below instructions.
 
 **Virtual machine update**
+
 Ensure the new virtual machine/instance is up to date and upgraded. Confirm with defaults when prompted. This may take few mininutes. sudo preceeding the commands ensures their executions with root permissions. 
 
 ```
@@ -50,7 +51,7 @@ export PATH=$PATH:/home/ubuntu/anaconda3/bin
 echo $PATH #check new PATH
 ```
 
-**initialize Anaconda3**
+**Initialize Anaconda3**
 ```
 conda init
 ```
