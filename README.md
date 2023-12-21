@@ -66,8 +66,7 @@ sudo rm Anaconda3-2022.10-Linux-x86_64.sh
 ```
 **Make sure Python >= 3.6 is installed. Install Java >= 11 and pip if needed**
 ```
-python --version
-sudo apt install python3-pip -y
+sudo apt install python3 python3-pip -y
 sudo apt install openjdk-17-jre-headless -y
 ```
 Confirm any prompts with defaults.
