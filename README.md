@@ -1,7 +1,9 @@
 # HiChIP-Analysis
 Dovetail, FITHiChIP and MACS2 documentations to analyze HiChIP data generated with Dovetail MNase-HiChIP kit.
 
-This is a setup and command execution guide to create the necessary working environments in conda to install the tools needed for HiChIP analysis
+This is a setup and command execution guide to create the necessary working environments in conda to install the tools needed for HiChIP analysis.
+
+Starting with the generation of a Linux operating Virtual Machine with the necessary base to proceed with installation all needed tools, as well as directory architecture.
 
 ## Original Documentations
 Dovetail HiChIP
