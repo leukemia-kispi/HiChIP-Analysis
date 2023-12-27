@@ -148,9 +148,6 @@ This command downloads a test image and runs it in a container. When the contain
 sudo docker run hello-world
 ```
 
-**Upgrade Docker Engine**
-To upgrade Docker Engine, follow step 2 of the installation instructions, choosing the new version you want to install.
-
 **Linux post-installation steps for Docker Engine enable root user grou permissions for docker**
 
 ```
