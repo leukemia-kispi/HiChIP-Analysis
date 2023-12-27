@@ -95,3 +95,66 @@ chmod +x ./HiChIP-Analysis/DirectoryArchitecture.sh
 ./HiChIP-Analysis/DirectoryArchitecture.sh
 ```
 This will create all the conda environments and directory architecture for executing the HiChIP Analsysis.
+
+## Install Docker Engine for FitHiChIP tool
+
+**Uninstall old versions, conflicting packages**
+
+The unofficial packages to uninstall are:
+
+- docker.io
+- docker-compose
+- docker-doc
+- podman-docker
+
+Run the following command to uninstall all conflicting packages
+
+```
+for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
+```
+
+**Install using the Apt repository. Set up Docker's Apt repository**
+
+Add Docker's official GPG key
+
+```
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+```
+
+**Add the repository to Apt sources**
+
+```
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+```
+
+To install the latest version, run:
+
+```
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+**Verify that the Docker Engine installation is successful by running the hello-world image**
+This command downloads a test image and runs it in a container. When the container runs, it prints a confirmation message and exits.
+
+```
+sudo docker run hello-world
+```
+
+**Upgrade Docker Engine**
+To upgrade Docker Engine, follow step 2 of the installation instructions, choosing the new version you want to install.
+
+**Linux post-installation steps for Docker Engine enable root user grou permissions for docker**
+
+```
+sudo usermod aG docker $USER
+newgrp docker
+docker run hello-world
+```
