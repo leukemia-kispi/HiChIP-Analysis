@@ -21,7 +21,7 @@ bwa
 https://github.com/lh3/bwa
 
 ## General Setup of Virtual Machine
-Initial setup of a new instance, running on Science Cloud UZH (https://cloud.s3it.uzh.ch/auth/login/?next=/).Example was done in an Ubuntu 18.04 image from scratch. Consider amount of cpu and RAM needed to process your data when selecting flavor of the image.
+Initial setup of a new instance, running on Science Cloud UZH (https://cloud.s3it.uzh.ch/auth/login/?next=/).Example was done in an Ubuntu 18.04 image from scratch. VM with 16 core CPU and 128GB RAM was created for data processing.
 
 Access via the Ubuntu terminal on your working platform. Download Ubuntu application for your laptop to connect to the instance. Instructions for launching an instance and connecting is not covered here. Go to https://docs.s3it.uzh.ch/cloud/training/training_handout/ for details. Proceed with below instructions.
 
