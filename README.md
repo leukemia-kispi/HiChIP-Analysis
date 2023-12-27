@@ -88,9 +88,10 @@ conda config --add channels conda-forge
 **Run DirectoryArchitecture.sh**
 ```
 git clone https://github.com/ValdemarP267/HiChIP-Analysis/tree/main
-Make DirectoryArchitecture.shscript executable:
+```
+Make DirectoryArchitecture.sh script executable and run it:
 ```
 chmod +x ./HiChIP-Analysis/DirectoryArchitecture.sh
 ./HiChIP-Analysis/DirectoryArchitecture.sh
 ```
-
+This will create all the conda environments and directory architecture for executing the HiChIP Analsysis.
