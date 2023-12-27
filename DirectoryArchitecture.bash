@@ -14,7 +14,7 @@ create_directory() {
 }
 
 # Check and create directories in mounted Volume designated /mnt
-create_directory "/mnt/0.STAR_hg38_v44_index" #Adapt name to whatever index you wish to generate with STAR
+create_directory "/mnt/0.BlackList"
 create_directory "/mnt/0.GenomeAssembly" 
 create_directory "/mnt/1.RawData"
 create_directory "/mnt/2.FASTAQC"
@@ -22,6 +22,7 @@ create_directory "/mnt/3.TRIM"
 create_directory "/mnt/4.HiChIP_Alignment"
 create_directory "/mnt/5.MACS2"
 create_directory "/mnt/6.FitHiChIP_Output"
+create_directory "/mnt/tmp" #Temporary directory needed for Dovetail HiChIP pipeline
 
 
 # Function to check if a Conda environment exists and create it if not with respective applications installed
@@ -33,8 +34,6 @@ create_conda_env() {
     conda install -y -c bioconda "$2"
     conda deactivate
 }
-   
-# Specify the desired versions (e.g., "2.7.11a")
     
 # Create and set up Conda environments
 create_conda_env "DovetailHiChIP"

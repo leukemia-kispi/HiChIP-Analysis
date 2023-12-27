@@ -61,7 +61,7 @@ Generate an index file for your reference, a reference file with only the main c
 samtools faidx <ref.fasta>
 ```
 
-Faidx will index the ref file and create <ref.fasta>.fai on the reference directory.
+Faidx will index the ref file and create <ref.fasta>.fai on the reference directory (0.GenomeAssembly directory).
 
 Use the index file to generate the genome file by printing the first two columns into a new file.
 
@@ -81,5 +81,5 @@ To avoid memory issues, some of the steps require writing temporary files into a
 ```
 mkdir <full_path/to/tmpdir>
 ```
-## Prepare Input files
+## Setup Docker Enviroment for FitHiChIP tool
 
