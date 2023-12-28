@@ -4,7 +4,7 @@
 REF_FASTA="/mnt/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna" 
 REF_GENOME="/mnt/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="/mnt/0.BlackList/hg38-blacklist.v2.bed "
-# Set Path for read *fg.gz files
+# Set Path for read before and after trimming, *fg.gz files
 FASTQ_DIR="/mnt/1.RawData"
 HiChIP_R1="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
 HiChIP_R2="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
@@ -13,6 +13,8 @@ OUTPUT_DIR_TRIM="/mnt/3.TRIM"
 OUTPUT_HICHIP_ALIGN="/mnt/4.HiChIP_Alignment"
 OUTPUT_HICHIP_SUB="/mnt/4.HiChIP_Alignment/Outputs"
 OUTPUT_MACS2="/mnt/5.MACS2"
+OUTPUT_MACS2_SORT="/mnt/5.MACS2/SORT"
+OUTPUT_MACS2_Permissive="/mnt/5.MACS2/Permissive"
 # Thread usage
 cores= 32
 #Thread usage for pairtools dedup and split processes
@@ -89,8 +91,12 @@ echo "HiCHIP Aligmnent QC Complete"
 conda activate deeptool
 bamCoverage -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -o $OUTPUT_HICHIP_SUB/BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.bw --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
 
+echo "Generated Bigwig file Complete"
+
 #ContacMaps
 java -Xmx48000m  -Djava.awt.headless=true -jar ./HiChIP/juicer_tools_1.22.01.jar pre --threads $cores $OUTPUT_HICHIP_ALIGN/JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs $OUTPUT_HICHIP_SUB/JoinedRep_TCF3-HLF_HAL01_hg38_nodd_contact_map.hic $REF_GENOME
+
+echo "Generated .hic file Complete"
 
 #call 1D peaks with MACS2
 conda activate MACS2
@@ -101,27 +107,15 @@ bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OU
 #MACS2 Peak calling on BlackList filtered BAM.
 samtools view -b $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam -h -F 0x900 | bedtools bamtobed -i stdin > $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed
 
-macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed -p 0.000000001 -g 2913022398 -n $OUTPUT_HICHIP_SUB/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_p9.macs2
+macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed -p 0.000000001 -g 2913022398 -n $OUTPUT_HICHIP_SUB/Permissive_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_p9.macs2
+macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed -p 0.000000001 -g 2913022398 -n $OUTPUT_HICHIP_SUB/Permissive_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_p9.macs2
 
 #Oracle File for IDR and IDR
-macs2 callpeak -t BLF_JoinedRep_TCF3-HLF_HAL01_hg38_nodd_primary.aln.bed --keep-dup 10 --min-length 300 -p 0.000000001 --bw 300 --mfold 5 50 -n BLF_JoinedRep_TCF3_HLF_hg38_nodd_kdp9Oracle.macs2
-sort -k8,8nr  BLF_JoinedRep_TCF3_HLF_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak > /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Oracle_MACS2/Sort_BLF_JoinedRep_TCF3_HLF_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak 
+macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed --keep-dup 10 --min-length 300 -p 0.000000001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_kdp9Oracle.macs2
+sort -k8,8nr  $OUTPUT_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak > $OUTPUT_MACS2/SORT/Sort_BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak 
 sort -k8,8nr  BLF_TCF3-HLF_HAL01_rep1_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak > /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep1_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak
 sort -k8,8nr  BLF_TCF3-HLF_HAL01_rep2_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak > /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep2_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak
 
 idr --samples /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep1_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep2_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak --peak-list /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Oracle_MACS2/Sort_BLF_JoinedRep_TCF3_HLF_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak --input-file-type narrowPeak --rank p.value --output-file Oracle_HAL-01_TCF3_JoinedRep_cle-idr --plot --log-output-file Oracle_HAL-01_TCF3_JoinedRep_cle.idr.log
 
-#FitHiChIP Loop calling
-conda activate /home/ubuntu/My_HiCPro_ENV/
-
-export PATH="/home/ubuntu/My_HiC-Pro/HiC-Pro_3.0.0/bin/":$PATH
-
-#FitHiChIP Loop Calling
-#Filter pairs
-pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' JoinedRep_TCF3_HLF_hg38_nodd_hicpro_mapped.pairs -o JoinedRep_TCF3-HLF_hg38_nodd_mapped.filtered.pairs
-
-#HiCPro Valid Pairs Files
-grep -v '#' JoinedRep_TCF3-HLF_hg38_nodd_mapped.filtered.pairs| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > JoinedRep_TCF3-HLF_hg38_nodd_hicpro_mapped.filtered.pairs.gz
-
-cd /home/ubuntu/My_HiC-Pro/FitHiChIP/
-bash ./FitHiChIP_Docker.sh -C /home/ubuntu/My_HiC-Pro/FitHiChIP/configfile_CB_TCF3_JoinedRep_5kb_Merge_50kb_3M
+echo "MACS2 run Complete"

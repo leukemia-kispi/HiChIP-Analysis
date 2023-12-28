@@ -6,7 +6,7 @@ Example presented here are based on data generated with the adapted Dovetail MNa
 
 These are required, if you don’t already have them installed, you will need sudo privileges.
 
-Update and install python3 and pip3:
+Update and install python3, pip3 and java:
 
 ```
 sudo apt-get update
@@ -21,14 +21,14 @@ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 ```
 
-Enter the generated DovetailHiChIP Conda environment after running DirectoryArchitecture.sh.
+Enter the generated DovetailHiChIP Conda environment after running DirectoryArchitecture.sh as described in README.md.
 
 ```
 conda activate DovetailHiChIP
 ```
-## Install remaining dependecies
+## Install remaining dependecies from Dovetail-Genomics Script
 
-Clone repository from dovetail-genomics and  pull juicertools.jar(moved into dovetails-genomics HiChIP directory):
+Clone source code  from dovetail-genomics and pull juicertools.jar (can be moved into dovetails-genomics HiChIP directory):
 
 ```
 git clone https://github.com/dovetail-genomics/HiChiP.git
@@ -100,26 +100,60 @@ mkdir /mnt/tmp
 ## Run the TCF3_HiChIP_fusedRep.sh script
 
 The script will:
-- trim adapters and short reads in a Trim_Galore conda environment
+- Trim adapters and short reads in a Trim_Galore conda environment
 - Initiate DovetailHiChIP conda environment and fuse Trimmed replicate reads for alignment
 - QC stats and plot by comparing to provided TCF3::HLF ChIPseq
 - Generate bigwig fiels for IGV browsing
-- call 1D peaks with MACS2 in MACS2 conda environment
+- Call 1D peaks with MACS2 in MACS2 conda environment
 
 **Good Practice**
 It is also recommended to run the script TCF3_HiChIP_singleRep.sh. This one omits the fuse step and aligns each replicate seperatly. Comparing these output to the fused data outputs can ensure higher confidence in the called interactions from running FitHiChIP.
 
-#FitHiChIP Loop calling
+# FitHiChIP Loop calling
+
+
+FitHiChIP will be run from Docker image. If instructions in the README.md were followed Docker should be installed. This ensure to run FitHiChIP without having to install all dependecies from scratch.
+
+
+Select the directory to contain the FitHiChIP source code, and clone it
+
+```
+conda activate FitHiChIP
+cd /home/ubutu
+git clone https://github.com/ay-lab/FitHiChIP.git
+export PATH="/home/ubuntu/FitHiChIP/bin/":$PATH
+```
+
+With the Outputs from above you will need:
+
+- The Pairs files converted to HiC-Pro format
+- 
+- Config files (example provided in this repository) specefying file locations and parameters
 conda activate /home/ubuntu/My_HiCPro_ENV/
 
-export PATH="/home/ubuntu/My_HiC-Pro/HiC-Pro_3.0.0/bin/":$PATH
-
-#FitHiChIP Loop Calling
-#Filter pairs
+**Filter pairs**
+```
 pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' JoinedRep_TCF3_HLF_hg38_nodd_hicpro_mapped.pairs -o JoinedRep_TCF3-HLF_hg38_nodd_mapped.filtered.pairs
-
-#HiCPro Valid Pairs Files
+```
+**HiCPro Valid Pairs Files**
+```
 grep -v '#' JoinedRep_TCF3-HLF_hg38_nodd_mapped.filtered.pairs| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > JoinedRep_TCF3-HLF_hg38_nodd_hicpro_mapped.filtered.pairs.gz
+```
+**FitHiChIP Loop Calling**
 
-cd /home/ubuntu/My_HiC-Pro/FitHiChIP/
-bash ./FitHiChIP_Docker.sh -C /home/ubuntu/My_HiC-Pro/FitHiChIP/configfile_CB_TCF3_JoinedRep_5kb_Merge_50kb_3M
+Upload modefied configfile in directory
+```
+cd /home/ubuntu/FitHiChIP/
+bash ./FitHiChIP_Docker.sh -C /home/ubuntu/FitHiChIP/configfile_CB_TCF3_JoinedRep_5kb_Merge_50kb_3M
+```
+
+# Coolbox
+
+After installation, you should enable ipywidgets to use the browser in Jupyter notebook:
+
+$ jupyter nbextension enable --py widgetsnbextension
+
+cd /mnt/Jupyterlab
+jupyter lab --nobrowser --port 8585
+
+
