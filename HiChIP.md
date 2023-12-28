@@ -95,3 +95,9 @@ To avoid memory issues, some of the steps require writing temporary files into a
 mkdir <full_path/to/tmpdir>
 ```
 
+## Run the TCF3_HiChIP_fusedRep.sh script
+
+The script will trim adapters and short reads in a Trim_Galore conda environment and followed by initiating a DovetailHiChIP environment. Trimmed replicates will be fused 
+
+**Good Practice**
+It is also recommended to run the script TCF3_HiChIP_singleRep.sh. This one omits the fuse step and aligns each replicate seperatly. Comparing these output to the fused data outputs can ensure higher confidence in the called interactions from running FitHiChIP.

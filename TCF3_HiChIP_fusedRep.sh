@@ -1,25 +1,78 @@
-#Set path to reference genome index. Genome index has to be generated first if not done. 
-GENOME_INDEX="/mnt/0.STAR_hg38_v44_index"
-# Set output directory
-OUTPUT_DIR="/mnt/4.ALIGNMENT"
+#!/bin/bash
+
+#Set path to reference genome index and blacklist. Genome index has to be generated first if not done. 
+REF_FASTA="/mnt/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna" 
+REF_GENOME="/mnt/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
+BLACKLIST="/mnt/0.BlackList/hg38-blacklist.v2.bed "
 # Set Path for read *fg.gz files
-FASTQ_DIR="/mnt/3.TRIM"
+FASTQ_DIR="/mnt/1.RawData"
+# Set output directories
+OUTPUT_DIR_TRIM="/mnt/3.TRIM"
+OUTPUT_HICHIP_ALIGN="/mnt/4.HiChIP_Alignment"
+OUTPUT_HICHIP_SUB="/mnt/4.HiChIP_Alignment/"
+# Thread usage
+cores= 32
+#Thread usage for pairtools dedup and split processes
+cores2= 16
+# Set Path to temporary directory
+TEMP="/mnt/tmp"
 
-#TrimGalore
-conda activate trimgalore
+create_directory "/mnt/5.MACS2"
+create_directory "/mnt/6.FitHiChIP_Output"
 
-#For all replicates
-trim_galore --fastqc --phred33 --length 50 --output_dir /mnt/RawHiChIP_trimgalor/TCF3-HLF/ -j 4 --paired /mnt/RawHiChIP/TCF3-HLF/20211112.A-o26422_1_1-HiChIP_HAL-01_aTCF3_rep1_R1.fastq.gz /mnt/RawHiChIP/TCF3-HLF/20211112.A-o26422_1_1-HiChIP_HAL-01_aTCF3_rep1_R2.fastq.gz 
+# Initialize Conda
+eval "$(conda shell.bash hook)"
 
-trim_galore --fastqc --phred33 --length 50 --output_dir /mnt/RawHiChIP_trimgalor/TCF3-HLF/ -j 4 --paired /mnt/RawHiChIP/TCF3-HLF/20211112.A-o26422_1_2-HiChIP_HAL-01_aTCF3_rep2_R1.fastq.gz /mnt/RawHiChIP/TCF3-HLF/20211112.A-o26422_1_2-HiChIP_HAL-01_aTCF3_rep2_R2.fastq.gz
+#TrimGalor.
+conda activate TRIM
+
+# Array containing your replicates found in file names generated with TrimGalore. Expected filename structure *_rep${num}_1.fastq.gz.
+NUMBERS=("1" "2") #replace  with your replicate numbers
+
+#Loop through each pair of FASTQ files if working with paire-end read files
+for num in "${NUMBERS[@]}"; do
+	# Replace NUM_SAMPLES i<= with actual number of samples
+    # Set path to input FASTQ files using wildcard pattern
+	READ1="$FASTQ_DIR"/"*_rep${num}_R1.fastq.gz"
+	READ2="$FASTQ_DIR"/"*_rep${num}_R2.fastq.gz"
+
+# Trim samples and generate new fastqc files for all replicates
+trim_galore --fastqc --phred33 --length 50 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
+
+ echo "Trimming for sample $num completed."
+done
+
+echo "All Trimming completed."
+
+cd $OUTPUT_DIR_TRIM
+multiqc .
+
+#DovetailHiChIP
+conda activate DovetailHiChIP
 
 #Fuse Fasta files
+# Concatenate R1 fastq files
+cat "$OUTPUT_DIR_TRIM"/*_R1_val_1.fq.gz > JoinedFastq_R1.fq.gz
 
-cat 20211112.A-o26422_1_1-HiChIP_HAL-01_aTCF3_rep1_R2_val_1.fq.gz 20211112.A-o26422_1_2-HiChIP_HAL-01_aTCF3_rep2_R2_val_1.fq.gz > JoinedFastq_R1.fq.gz
-cat 20211112.A-o26422_1_1-HiChIP_HAL-01_aTCF3_rep1_R2_val_2.fq.gz 20211112.A-o26422_1_2-HiChIP_HAL-01_aTCF3_rep2_R2_val_2.fq.gz > JoinedFastq_R2.fq.gz
+# Concatenate R2 fastq files
+cat "$OUTPUT_DIR_TRIM"/*_R2_val_2.fq.gz > JoinedFastq_R2.fq.gz
 
 # Alignment
-bwa mem -5SP -T0 -t32 /mnt/GRCh38_assembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna /mnt/RawHiChIP_trimgalor/TCF3-HLF/JoinedFastq_R1.fq.gz /mnt/RawHiChIP_trimgalor/TCF3-HLF/JoinedFastq_R2.fq.gz | pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in 16 --nproc-out 16 --chroms-path /mnt/GRCh38_assembly/GRCh38_no_alt_ref.genome | pairtools sort --tmpdir=/mnt/temp/ --nproc 32 | pairtools split --nproc-in 16 --nproc-out 16 --output-pairs JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs --output-sam -| samtools view -bS -@32 | samtools sort -@32 -o JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam;samtools index JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam
+cd $OUTPUT_HICHIP_ALIGN
+HiChiP_R1="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
+HiChiP_R2="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
+MAPPED_PAIRS="JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs"
+MAPPED_BAM="JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
+
+bwa mem -5SP -T0 -t$cores $REF_FASTA $HiChiP_R1 $HiChiP_R2 | \
+pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
+pairtools sort --tmpdir=$TEMP--nproc $cores|\
+#pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --output-stats <stats.txt>|\
+pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
+samtools view -bS -@$cores | \
+samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
+
+echo "HiCHIP Aligmnent Complete"
 
 #QC compare ChIP-seq TCF3-HLF_FLAG
 bash enrichment_stats.sh -g /mnt/GRCh38_assembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna -b /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam -p /mnt/ChIP-Seq/IDR_cle/Oracle2_HAL-01_TCF3-HLF_FLAG_cle-idr.bed -t 16 -x HiChIP-TCF3-HLF
@@ -31,8 +84,7 @@ python3 plot_chip_enrichment_bed.py -bam /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_h
 
 #Enrichment for IGV
 conda activate deeptool
-bamCoverage -b JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam -o JoinedRep_TCF3_HLF_hg38_nodd_mapped.bw -bl /mnt/BlastListPeaks/hg38-blacklist.v2.bed --normalizeUsing RPKM -p max -bs 10
-bamCoverage -b JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam -o BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.bw --effectiveGenomeSize 2913022398 -bl /mnt/BlastListPeaks/hg38-blacklist.v2.bed --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
+bamCoverage -b JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam -o BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.bw --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
 
 #ContacMaps
 conda activate Juicebox
