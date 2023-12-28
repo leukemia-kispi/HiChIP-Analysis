@@ -28,9 +28,10 @@ conda activate DovetailHiChIP
 ```
 ## Install remaining dependecies from Dovetail-Genomics Script
 
-Clone source code  from dovetail-genomics and pull juicertools.jar (can be moved into dovetails-genomics HiChIP directory):
+Clone source code from dovetail-genomics and pull juicertools.jar (can be moved into dovetails-genomics HiChIP directory):
 
 ```
+cd /home/ubuntu/
 git clone https://github.com/dovetail-genomics/HiChiP.git
 wget https://s3.amazonaws.com/hicfiles.tc4ga.com/public/juicer/juicer_tools_1.22.01.jar
 mv juicer_tools_1.22.01.jar ./HiChiP/juicertools.jar
@@ -111,7 +112,6 @@ It is also recommended to run the script TCF3_HiChIP_singleRep.sh. This one omit
 
 # FitHiChIP Loop calling
 
-
 FitHiChIP will be run from Docker image. If instructions in the README.md were followed Docker should be installed. This ensure to run FitHiChIP without having to install all dependecies from scratch.
 
 
@@ -121,7 +121,6 @@ Select the directory to contain the FitHiChIP source code, and clone it
 conda activate FitHiChIP
 cd /home/ubutu
 git clone https://github.com/ay-lab/FitHiChIP.git
-export PATH="/home/ubuntu/FitHiChIP/bin/":$PATH
 ```
 
 With the Outputs from above you will need:

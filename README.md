@@ -1,9 +1,11 @@
 # HiChIP-Analysis
+
 Dovetail, FITHiChIP and MACS2 documentations to analyze HiChIP data generated with Dovetail MNase-HiChIP kit.
 
 This is a setup and command execution guide to create the necessary working environments in conda and install the tools needed for HiChIP analysis of TCF3::HLF HiChIP data generated from the HAL-01 cell line.
 
 The repository will guide through:
+
 - Generation of a Linux operating Virtual Machine with the necessary base to proceed with installation of all needed tools, as well as directory architecture.
 
 - Installation of Dovetail HiChIP pipeline and FitHiChIP with necessary adaptation for TCF3::HLF HiChIP analysis
@@ -11,6 +13,7 @@ The repository will guide through:
 - Installation of tools for downstream analysis and vizualization of data
 
 ## Original Documentations
+
 Dovetail HiChIP
 https://hichip.readthedocs.io/en/latest/
 
@@ -20,7 +23,14 @@ https://ay-lab.github.io/FitHiChIP/html/index.html
 bwa
 https://github.com/lh3/bwa
 
+HiC-Pro
+https://github.com/nservant/HiC-Pro
+
+Homer
+http://homer.ucsd.edu/homer/index.html
+
 ## General Setup of Virtual Machine
+
 Initial setup of a new instance, running on Science Cloud UZH (https://cloud.s3it.uzh.ch/auth/login/?next=/).Example was done in an Ubuntu 18.04.6 image from scratch. VM with 32 core CPU and 128GB RAM was created for data processing.
 
 Access via the Ubuntu terminal on your working platform. Download Ubuntu application for your laptop to connect to the instance. Instructions for launching an instance and connecting is not covered here. Go to https://docs.s3it.uzh.ch/cloud/training/training_handout/ for details. Proceed with below instructions.
@@ -54,7 +64,7 @@ bash Anaconda3-2022.10-Linux-x86_64.sh
 
 Follow the license agreement, type "yes" when prompted. Press Enter to confirm the installation location "[/home/ubuntu/anaconda3]". Type 'no' for initialization prompt.
 
-**Make sure the PATH to Anaconda is added**
+Make sure the PATH to Anaconda is added
 ```
 echo $PATH #check current PATH
 export PATH=$PATH:/home/ubuntu/anaconda3/bin
@@ -62,6 +72,7 @@ echo $PATH #check new PATH
 ```
 
 **Initialize Anaconda3**
+
 ```
 conda init
 ```
@@ -76,25 +87,32 @@ sudo rm Anaconda3-2022.10-Linux-x86_64.sh
 ```
 
 **Ensure conda is updated type "y" if promted**
+
 ```
 conda update -n base -c defaults conda
 ```
 
 **Ensure all channels are added to conda**
+
 ```
 conda config --add channels defaults
 conda config --add channels conda-forge
 ```
 **Run DirectoryArchitecture.sh**
+
+Clone source code into selected directory
+
 ```
+cd /home/ubuntu/
 git clone https://github.com/ValdemarP267/HiChIP-Analysis/tree/main
 ```
 Make DirectoryArchitecture.sh script executable and run it:
+
 ```
 chmod +x ./HiChIP-Analysis/DirectoryArchitecture.sh
 ./HiChIP-Analysis/DirectoryArchitecture.sh
 ```
-This will create all the conda environments and directory architecture for executing the HiChIP Analsysis.
+This will create all the conda environments and directory architecture for following the HiChIP-Analsysis guide.
 
 ## Install Docker Engine for FitHiChIP tool
 
@@ -142,6 +160,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 ```
 
 **Verify that the Docker Engine installation is successful by running the hello-world image**
+
 This command downloads a test image and runs it in a container. When the container runs, it prints a confirmation message and exits.
 
 ```
