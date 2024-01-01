@@ -2,6 +2,7 @@
 
 Dovetail, FITHiChIP and MACS2 documentations to analyze HiChIP data generated with Dovetail MNase-HiChIP kit.
 
+
 This is a setup and command execution guide to create the necessary working environments in conda and install the tools needed for HiChIP analysis of TCF3::HLF HiChIP data generated from the HAL-01 cell line.
 
 The repository will guide through:
@@ -11,6 +12,11 @@ The repository will guide through:
 - Installation of Dovetail HiChIP pipeline and FitHiChIP with necessary adaptation for TCF3::HLF HiChIP analysis
 
 - Installation of tools for downstream analysis and vizualization of data
+
+This is a setup and command execution guide to create the necessary working environments in conda to install the tools needed for HiChIP analysis.
+
+Starting with the generation of a Linux operating Virtual Machine with the necessary base to proceed with installation of all needed tools, as well as directory architecture.
+
 
 ## Original Documentations
 
@@ -85,6 +91,14 @@ Now you can delet the Anaconda3-2022.10-Linux-x86_64.sh file.
 ```
 sudo rm Anaconda3-2022.10-Linux-x86_64.sh
 ```
+
+**Make sure Python >= 3.6 is installed. Install Java >= 11 and pip if needed**
+```
+sudo apt install python3 python3-pip -y
+sudo apt install openjdk-17-jre-headless -y
+```
+Confirm any prompts with defaults.
+
 
 **Ensure conda is updated type "y" if promted**
 
