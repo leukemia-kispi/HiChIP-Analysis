@@ -21,7 +21,10 @@ TEMP="/mnt/tmp"
 eval "$(conda shell.bash hook)"
 
 # Activate Conda Environment named "TRIM"
-conda activate TRIM
+CONDA_ENV="TRIM"
+if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
+    conda activate $CONDA_ENV
+fi
 
 # Array containing replicate numbers found in filenames generated with TrimGalore.
 NUMBERS=("1" "2") # Replace with your actual replicate numbers
@@ -32,11 +35,11 @@ perform_trimming=true
 # Loop through each pair of FASTQ files if working with paired-end read files
 for num in "${NUMBERS[@]}"; do
     # Set path to input FASTQ files using wildcard pattern
-    READ1="$FASTQ_DIR"/"*_rep${num}_R1.fastq.gz"
-    READ2="$FASTQ_DIR"/"*_rep${num}_R2.fastq.gz"
+    READ1="$FASTQ_DIR/*_rep${num}_R1.fastq.gz"
+    READ2="$FASTQ_DIR/*_rep${num}_R2.fastq.gz"
 
     # Check if trimmed files already exist for the current replicate
-    if [ ! -f "$OUTPUT_DIR_TRIM"/"*rep${num}_R1_val_1.fq.gz" ] || [ ! -f "$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz" ]; then
+    if [ ! -e "$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz" ] || [ ! -e "$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz" ]; then
         perform_trimming=true
         break  # No need to check other replicates once one is found missing
     fi
@@ -46,8 +49,8 @@ done
 if [ "$perform_trimming" = true ]; then
     for num in "${NUMBERS[@]}"; do
         # Set path to input FASTQ files using wildcard pattern
-        READ1="$FASTQ_DIR"/"*_rep${num}_R1.fastq.gz"
-        READ2="$FASTQ_DIR"/"*_rep${num}_R2.fastq.gz"
+        READ1="$FASTQ_DIR/*_rep${num}_R1.fastq.gz"
+        READ2="$FASTQ_DIR/*_rep${num}_R2.fastq.gz"
 
         # Trim samples and generate new FastQC files for all replicates
         trim_galore --fastqc --phred33 --length 50 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
@@ -59,7 +62,10 @@ else
 fi
 
 #DovetailHiChIP
-conda activate DovetailHiChIP
+CONDA_ENV="DovetailHiChIP"
+if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
+    conda activate $CONDA_ENV
+fi
 
 # Alignment Output directory
 cd $OUTPUT_HICHIP_ALIGN
@@ -67,8 +73,8 @@ cd $OUTPUT_HICHIP_ALIGN
 # Loop through each pair of FASTQ files if working with paired-end read files for SingleRep HiChIP alignment
 for num in "${NUMBERS[@]}"; do
     # Set path to input FASTQ files using wildcard pattern
-    READ1="$OUTPUT_DIR_TRIM"/"*rep${num}_R1_val_1.fq.gz"
-    READ2="$OUTPUT_DIR_TRIM"/"*rep${num}_R2_val_2.fq.gz"
+    READ1="$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz"
+    READ2="$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz"
     MAPPED_PAIRS="Rep${num}_TCF3_HLF_hg38_nodd_mapped.pairs"
     MAPPED_BAM="Rep${num}_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 
@@ -92,7 +98,6 @@ python3 ./HiChIP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_B
 echo "HiCHIP Aligmnent QC Complete"
 
 #Enrichment for IGV
-conda activate deeptool
 bamCoverage -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -o $OUTPUT_HICHIP_SUB/BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.bw --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
 
 echo "Generated Bigwig file Complete"
