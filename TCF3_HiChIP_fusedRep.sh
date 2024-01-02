@@ -22,7 +22,7 @@ TEMP="/mnt/tmp"
 # Initialize Conda
 eval "$(conda shell.bash hook)"
 
-# Activate Conda Environment named "TRIM"
+# Activate Conda Environment named DovetailHiChIP
 CONDA_ENV="DovetailHiChIP"
 if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
     conda activate $CONDA_ENV
