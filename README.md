@@ -104,7 +104,7 @@ Clone source code into selected directory
 
 ```
 cd /home/ubuntu/
-git clone https://github.com/ValdemarP267/HiChIP-Analysis/tree/main
+git clone https://github.com/ValdemarP267/HiChIP-Analysis.git
 ```
 Make DirectoryArchitecture.sh script executable and run it:
 
@@ -170,7 +170,8 @@ sudo docker run hello-world
 **Linux post-installation steps for Docker Engine enable root user grou permissions for docker**
 
 ```
-sudo usermod aG docker $USER
+sudo usermod -aG docker $USER
 newgrp docker
 docker run hello-world
 ```
+New

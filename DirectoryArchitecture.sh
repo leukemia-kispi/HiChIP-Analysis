@@ -31,7 +31,7 @@ create_directory "/mnt/6.FitHiChIP_Output"
 # Function to check if a Conda environment exists and create it if not with respective applications installed
 create_conda_env() {
     if ! conda env list | grep -q "$1"; then
-        conda create -n "$1"
+        conda create -y -n "$1"
     fi
     conda activate "$1"
     conda install -y -c bioconda "$2"
