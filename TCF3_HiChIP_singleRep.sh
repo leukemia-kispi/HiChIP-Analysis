@@ -111,25 +111,3 @@ echo "Generated Bigwig file Complete"
 java -Xmx48000m  -Djava.awt.headless=true -jar ./HiChIP/juicer_tools_1.22.01.jar pre --threads $cores $OUTPUT_HICHIP_ALIGN/JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs $OUTPUT_HICHIP_SUB/JoinedRep_TCF3-HLF_HAL01_hg38_nodd_contact_map.hic $REF_GENOME
 
 echo "Generated .hic file Complete"
-
-#call 1D peaks with MACS2
-conda activate MACS2
-
-#Remove black list
-bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3-HLF_HAL01_hg38_nodd_mapped.PT.bam
-
-#MACS2 Peak calling on BlackList filtered BAM.
-samtools view -b $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam -h -F 0x900 | bedtools bamtobed -i stdin > $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed
-
-macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed -p 0.000000001 -g 2913022398 -n $OUTPUT_HICHIP_SUB/Permissive_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_p9.macs2
-macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed -p 0.000000001 -g 2913022398 -n $OUTPUT_HICHIP_SUB/Permissive_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_p9.macs2
-
-#Oracle File for IDR and IDR
-macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed --keep-dup 10 --min-length 300 -p 0.000000001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_kdp9Oracle.macs2
-sort -k8,8nr  $OUTPUT_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak > $OUTPUT_MACS2/SORT/Sort_BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak 
-sort -k8,8nr  BLF_TCF3-HLF_HAL01_rep1_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak > /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep1_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak
-sort -k8,8nr  BLF_TCF3-HLF_HAL01_rep2_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak > /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep2_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak
-
-idr --samples /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep1_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep2_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak --peak-list /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Oracle_MACS2/Sort_BLF_JoinedRep_TCF3_HLF_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak --input-file-type narrowPeak --rank p.value --output-file Oracle_HAL-01_TCF3_JoinedRep_cle-idr --plot --log-output-file Oracle_HAL-01_TCF3_JoinedRep_cle.idr.log
-
-echo "MACS2 run Complete"
