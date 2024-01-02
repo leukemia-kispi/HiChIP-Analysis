@@ -6,17 +6,10 @@ REF_GENOME="/mnt/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="/mnt/0.BlackList/hg38-blacklist.v2.bed "
 # Set Path for read before and after trimming, *fg.gz files
 FASTQ_DIR="/mnt/1.RawData"
-Rep1_HiChIP_R1="/mnt/3.TRIM/Rep1_R1.fq.gz"
-Rep1_HiChIP_R2="/mnt/3.TRIM/Rep1_R1.fq.gz"
-Rep2_HiChIP_R1="/mnt/3.TRIM/Rep2_R1.fq.gz"
-Rep2_HiChIP_R2="/mnt/3.TRIM/Rep2_R1.fq.gz"
 # Set output directories
 OUTPUT_DIR_TRIM="/mnt/3.TRIM"
 OUTPUT_HICHIP_ALIGN="/mnt/4.HiChIP_Alignment"
 OUTPUT_HICHIP_SUB="/mnt/4.HiChIP_Alignment/Outputs"
-OUTPUT_MACS2="/mnt/5.MACS2"
-OUTPUT_MACS2_SORT="/mnt/5.MACS2/SORT"
-OUTPUT_MACS2_Permissive="/mnt/5.MACS2/Permissive"
 # Thread usage
 cores=32
 #Thread usage for pairtools dedup and split processes
@@ -49,8 +42,6 @@ for num in "${NUMBERS[@]}"; do
     fi
 done
 
-"$OUTPUT_DIR_TRIM"/*rep${num}_R1_val_1.fq.gz 
-
 # Perform trimming only if the flag is set to true
 if [ "$perform_trimming" = true ]; then
     for num in "${NUMBERS[@]}"; do
@@ -67,29 +58,28 @@ else
     echo "Trimming not needed as output files already exist."
 fi
 
-# Change directory to the output directory for trimmed files
-cd $OUTPUT_DIR_TRIM
-
-# Run MultiQC to generate a summary report for the trimmed data
-multiqc .
-
 #DovetailHiChIP
 conda activate DovetailHiChIP
 
-# Alignment
+# Alignment Output directory
 cd $OUTPUT_HICHIP_ALIGN
-MAPPED_PAIRS="JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs"
-MAPPED_BAM="JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 
-#pairtools dedup step omited
-bwa mem -5SP -T0 -t$cores $REF_FASTA $HiChIP_R1 $HiChIP_R2 | \
-pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
-pairtools sort --tmpdir=$TEMP --nproc $cores|\
-pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats <stats.txt>|\
-pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
-samtools view -bS -@$cores | \
-samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
+# Loop through each pair of FASTQ files if working with paired-end read files for SingleRep HiChIP alignment
+for num in "${NUMBERS[@]}"; do
+    # Set path to input FASTQ files using wildcard pattern
+    READ1="$OUTPUT_DIR_TRIM"/"*rep${num}_R1_val_1.fq.gz"
+    READ2="$OUTPUT_DIR_TRIM"/"*rep${num}_R2_val_2.fq.gz"
+    MAPPED_PAIRS="Rep${num}_TCF3_HLF_hg38_nodd_mapped.pairs"
+    MAPPED_BAM="Rep${num}_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 
+    bwa mem -5SP -T0 -t$cores $REF_FASTA $READ1 $READ2 | \
+    pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
+    pairtools sort --tmpdir=$TEMP --nproc $cores|\
+    pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats rep${num}_stats.txt|\
+    pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
+    samtools view -bS -@$cores | \
+    samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
+done
 echo "HiCHIP Aligmnent Complete"
 
 #QC compare ChIP-seq TCF3-HLF_FLAG
