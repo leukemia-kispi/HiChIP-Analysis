@@ -41,9 +41,8 @@ create_conda_env() {
 }
     
 # Create and set up Conda environments
-create_conda_env "DovetailHiChIP"
+create_conda_env "DovetailHiChIP" "trim-galore"
 create_conda_env "FitHiChIP"
-create_conda_env "TRIM" "trim-galore"
 create_conda_env "FASTAQC" "fastqc multiqc"
 create_conda_env "MACS2" "macs2 idr bedtools"
 create_conda_env "HOMER" "homer"

@@ -23,7 +23,7 @@ TEMP="/mnt/tmp"
 eval "$(conda shell.bash hook)"
 
 # Activate Conda Environment named "TRIM"
-CONDA_ENV="TRIM"
+CONDA_ENV="DovetailHiChIP"
 if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
     conda activate $CONDA_ENV
 fi
@@ -61,12 +61,6 @@ if [ "$perform_trimming" = true ]; then
     done
 else
     echo "Trimming not needed as output files already exist."
-fi
-
-#DovetailHiChIP
-CONDA_ENV="DovetailHiChIP"
-if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
-    conda activate $CONDA_ENV
 fi
 
 #Fuse Fasta files
