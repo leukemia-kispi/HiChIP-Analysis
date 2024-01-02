@@ -49,8 +49,8 @@ done
 if [ "$perform_trimming" = true ]; then
     for num in "${NUMBERS[@]}"; do
         # Set path to input FASTQ files using wildcard pattern
-        READ1="$FASTQ_DIR"/"*_rep${num}_R1.fastq.gz"
-        READ2="$FASTQ_DIR"/"*_rep${num}_R2.fastq.gz"
+        READ1="$FASTQ_DIR/*_rep${num}_R1.fastq.gz"
+        READ2="$FASTQ_DIR/*_rep${num}_R2.fastq.gz"
 
         # Trim samples and generate new FastQC files for all replicates
         trim_galore --fastqc --phred33 --length 50 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
@@ -73,8 +73,8 @@ cd $OUTPUT_HICHIP_ALIGN
 # Loop through each pair of FASTQ files if working with paired-end read files for SingleRep HiChIP alignment
 for num in "${NUMBERS[@]}"; do
     # Set path to input FASTQ files using wildcard pattern
-    READ1="$OUTPUT_DIR_TRIM"/"*rep${num}_R1_val_1.fq.gz"
-    READ2="$OUTPUT_DIR_TRIM"/"*rep${num}_R2_val_2.fq.gz"
+    READ1="$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz"
+    READ2="$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz"
     MAPPED_PAIRS="Rep${num}_TCF3_HLF_hg38_nodd_mapped.pairs"
     MAPPED_BAM="Rep${num}_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 
