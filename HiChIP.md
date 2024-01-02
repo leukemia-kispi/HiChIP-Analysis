@@ -11,7 +11,7 @@ Update and install python3, pip3 and java:
 ```
 sudo apt-get update
 sudo apt-get install python3 python3-pip
-sudo apt install default-jre
+sudo apt install openjdk-19-jre-headless
 ```
 
 To set python3 and pip3 as primary alternative to avoid version conflicts:
@@ -34,7 +34,7 @@ Clone source code from dovetail-genomics and pull juicertools.jar (can be moved 
 cd /home/ubuntu/
 git clone https://github.com/dovetail-genomics/HiChiP.git
 wget https://s3.amazonaws.com/hicfiles.tc4ga.com/public/juicer/juicer_tools_1.22.01.jar
-mv juicer_tools_1.22.01.jar ./HiChiP/juicertools.jar
+mv juicer_tools_1.22.01.jar ./HiChiP/
 ```
 
 Make enrichment_stats.sh and installDep.sh script executable:
