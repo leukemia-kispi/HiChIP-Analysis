@@ -2,31 +2,8 @@
 
 Example presented here are based on data generated with the adapted Dovetail MNase-HiChIP kit. The TCF3::HLF fusion protein was targeted with TCF3 antibody from Cell signaling in the HAL-01 TCF3::HLF positive leukemia cell line CRISPR engineered to knockout wild type TCF3 expression and interfere with fusion protein targeted pulldown.
 
-## Install python3, pip3 and java.
 
-These are required, if you don’t already have them installed, you will need sudo privileges.
-
-Update and install python3, pip3 and java:
-
-```
-sudo apt-get update
-sudo apt-get install python3 python3-pip
-sudo apt install openjdk-19-jre-headless
-```
-
-To set python3 and pip3 as primary alternative to avoid version conflicts:
-
-```
-sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
-sudo update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
-```
-
-Enter the generated DovetailHiChIP Conda environment after running DirectoryArchitecture.sh as described in [README.md](https://github.com/ValdemarP267/HiChIP-Analysis/blob/main/README.md).
-
-```
-conda activate DovetailHiChIP
-```
-## Install remaining dependecies from Dovetail-Genomics Script
+## Install  dependecies from Dovetail-Genomics Script
 
 Clone source code from dovetail-genomics and pull juicertools.jar (can be moved into dovetails-genomics HiChIP directory):
 
@@ -35,6 +12,12 @@ cd /home/ubuntu/
 git clone https://github.com/dovetail-genomics/HiChiP.git
 wget https://s3.amazonaws.com/hicfiles.tc4ga.com/public/juicer/juicer_tools_1.22.01.jar
 mv juicer_tools_1.22.01.jar ./HiChiP/
+
+```
+Install java:
+
+```
+sudo apt install openjdk-19-jre-headless
 ```
 
 Make enrichment_stats.sh and installDep.sh script executable:
@@ -44,7 +27,7 @@ chmod +x ./HiChiP/enrichment_stats.sh
 chmod +x ./HiChiP/installDep.sh
 ```
 
-Use the installDep.sh script from repository to ensure all dependecies are installed in the conda environment. In addition to installing GCC make, python and pip in case they are missing, it will include following dependencies:
+Use the installDep.sh script from repository to ensure all dependecies are installed in the conda environment. In addition to installing GCC make, python and pip, it will include following dependencies:
 
 - pysam
 - tabulate

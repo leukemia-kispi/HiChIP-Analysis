@@ -99,12 +99,6 @@ conda config --add channels defaults
 conda config --add channels conda-forge
 ```
 
-**Ensure conda is updated type "y" if promted**
-
-```
-conda update -n base -c defaults conda
-```
-
 **Run DirectoryArchitecture.sh**
 
 Clone source code of this repository into selected directory
