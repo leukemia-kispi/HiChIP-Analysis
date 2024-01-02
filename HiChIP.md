@@ -73,6 +73,8 @@ A genome file is needed for downstream steps. It is a tab delimited file with ch
 Generate an index file for your reference, a reference file with only the main chromosomes should be used (e.g. without alternative or unplaced chromosomes). For the analsysis of TCF3::HLF HiChIP GCA_000001405.15_GRCh38_no_alt_analysis_set.fna downloaded from https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/
 
 ```
+cd 0.GenomeAssembly
+wget
 samtools faidx <ref.fasta>
 ```
 
@@ -109,50 +111,5 @@ The script will:
 
 **Good Practice**
 It is also recommended to run the script TCF3_HiChIP_singleRep.sh. This one omits the fuse step and aligns each replicate seperatly. Comparing these output to the fused data outputs can ensure higher confidence in the called interactions from running FitHiChIP.
-
-# FitHiChIP Loop calling
-
-FitHiChIP will be run from Docker image. If instructions in the README.md were followed Docker should be installed. This ensure to run FitHiChIP without having to install all dependecies from scratch.
-
-
-Select the directory to contain the FitHiChIP source code, and clone it
-
-```
-conda activate FitHiChIP
-cd /home/ubutu
-git clone https://github.com/ay-lab/FitHiChIP.git
-```
-
-With the Outputs from above you will need:
-
-- The Pairs files converted to HiC-Pro format
-- 
-- Config files (example provided in this repository) specefying file locations and parameters
-conda activate /home/ubuntu/My_HiCPro_ENV/
-
-**Filter pairs**
-```
-pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' JoinedRep_TCF3_HLF_hg38_nodd_hicpro_mapped.pairs -o JoinedRep_TCF3-HLF_hg38_nodd_mapped.filtered.pairs
-```
-**HiCPro Valid Pairs Files**
-```
-grep -v '#' JoinedRep_TCF3-HLF_hg38_nodd_mapped.filtered.pairs| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > JoinedRep_TCF3-HLF_hg38_nodd_hicpro_mapped.filtered.pairs.gz
-```
-**FitHiChIP Loop Calling**
-
-Upload modefied configfile in directory
-```
-cd /home/ubuntu/FitHiChIP/
-bash ./FitHiChIP_Docker.sh -C /home/ubuntu/FitHiChIP/configfile_CB_TCF3_JoinedRep_5kb_Merge_50kb_3M
-```
-
-# Coolbox
-
-After installation, you should enable ipywidgets to use the browser in Jupyter notebook:
-
-$ jupyter nbextension enable --py widgetsnbextension
-
-cd /mnt/Jupyterlab
-jupyter lab --nobrowser --port 8585
 
 
