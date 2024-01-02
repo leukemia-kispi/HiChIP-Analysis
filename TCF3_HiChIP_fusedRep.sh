@@ -23,7 +23,10 @@ TEMP="/mnt/tmp"
 eval "$(conda shell.bash hook)"
 
 # Activate Conda Environment named "TRIM"
-conda activate TRIM
+CONDA_ENV="TRIM"
+if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
+    conda activate $CONDA_ENV
+fi
 
 # Array containing replicate numbers found in filenames generated with TrimGalore.
 NUMBERS=("1" "2") # Replace with your actual replicate numbers
@@ -61,7 +64,10 @@ else
 fi
 
 #DovetailHiChIP
-conda activate DovetailHiChIP
+CONDA_ENV="DovetailHiChIP"
+if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
+    conda activate $CONDA_ENV
+fi
 
 #Fuse Fasta files
 # Concatenate R1 fastq files
@@ -95,7 +101,6 @@ python3 ./HiChIP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_B
 echo "HiCHIP Aligmnent QC Complete"
 
 #Enrichment for IGV
-conda activate deeptool
 bamCoverage -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -o $OUTPUT_HICHIP_SUB/BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.bw --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
 
 echo "Generated Bigwig file Complete"
