@@ -43,11 +43,13 @@ for num in "${NUMBERS[@]}"; do
     READ2="$FASTQ_DIR"/"*_rep${num}_R2.fastq.gz"
 
     # Check if trimmed files already exist for the current replicate
-    if [ ! -f "$OUTPUT_DIR_TRIM/trimmed_output_rep${num}_R1.fastq.gz" ] || [ ! -f "$OUTPUT_DIR_TRIM/trimmed_output_rep${num}_R2.fastq.gz" ]; then
+    if [ ! -f "$OUTPUT_DIR_TRIM"/"*rep${num}_R1_val_1.fq.gz" ] || [ ! -f "$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz" ]; then
         perform_trimming=true
         break  # No need to check other replicates once one is found missing
     fi
 done
+
+"$OUTPUT_DIR_TRIM"/*rep${num}_R1_val_1.fq.gz 
 
 # Perform trimming only if the flag is set to true
 if [ "$perform_trimming" = true ]; then
@@ -82,8 +84,8 @@ MAPPED_BAM="JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 #pairtools dedup step omited
 bwa mem -5SP -T0 -t$cores $REF_FASTA $HiChIP_R1 $HiChIP_R2 | \
 pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
-pairtools sort --tmpdir=$TEMP--nproc $cores|\
-#pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --output-stats <stats.txt>|\
+pairtools sort --tmpdir=$TEMP --nproc $cores|\
+pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats <stats.txt>|\
 pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
 samtools view -bS -@$cores | \
 samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
