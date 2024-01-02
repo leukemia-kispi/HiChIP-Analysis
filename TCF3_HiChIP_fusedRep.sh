@@ -16,40 +16,57 @@ OUTPUT_MACS2="/mnt/5.MACS2"
 OUTPUT_MACS2_SORT="/mnt/5.MACS2/SORT"
 OUTPUT_MACS2_Permissive="/mnt/5.MACS2/Permissive"
 # Thread usage
-cores= 32
+cores=32
 #Thread usage for pairtools dedup and split processes
-cores2= 16
+cores2=16
 # Set Path to temporary directory
 TEMP="/mnt/tmp"
-
-create_directory "/mnt/5.MACS2"
-create_directory "/mnt/6.FitHiChIP_Output"
 
 # Initialize Conda
 eval "$(conda shell.bash hook)"
 
-#TrimGalor.
+# Activate Conda Environment named "TRIM"
 conda activate TRIM
 
-# Array containing your replicates found in file names generated with TrimGalore. Expected filename structure *_rep${num}_1.fastq.gz.
-NUMBERS=("1" "2") #replace  with your replicate numbers
+# Array containing replicate numbers found in filenames generated with TrimGalore.
+NUMBERS=("1" "2") # Replace with your actual replicate numbers
 
-#Loop through each pair of FASTQ files if working with paire-end read files
+# Flag to check if trimming needs to be performed
+perform_trimming=true
+
+# Loop through each pair of FASTQ files if working with paired-end read files
 for num in "${NUMBERS[@]}"; do
-	# Replace NUM_SAMPLES i<= with actual number of samples
     # Set path to input FASTQ files using wildcard pattern
-	READ1="$FASTQ_DIR"/"*_rep${num}_R1.fastq.gz"
-	READ2="$FASTQ_DIR"/"*_rep${num}_R2.fastq.gz"
+    READ1="$FASTQ_DIR"/"*_rep${num}_R1.fastq.gz"
+    READ2="$FASTQ_DIR"/"*_rep${num}_R2.fastq.gz"
 
-# Trim samples and generate new fastqc files for all replicates
-trim_galore --fastqc --phred33 --length 50 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
-
- echo "Trimming for sample $num completed."
+    # Check if trimmed files already exist for the current replicate
+    if [ ! -f "$OUTPUT_DIR_TRIM/trimmed_output_rep${num}_R1.fastq.gz" ] || [ ! -f "$OUTPUT_DIR_TRIM/trimmed_output_rep${num}_R2.fastq.gz" ]; then
+        perform_trimming=true
+        break  # No need to check other replicates once one is found missing
+    fi
 done
 
-echo "All Trimming completed."
+# Perform trimming only if the flag is set to true
+if [ "$perform_trimming" = true ]; then
+    for num in "${NUMBERS[@]}"; do
+        # Set path to input FASTQ files using wildcard pattern
+        READ1="$FASTQ_DIR"/"*_rep${num}_R1.fastq.gz"
+        READ2="$FASTQ_DIR"/"*_rep${num}_R2.fastq.gz"
 
+        # Trim samples and generate new FastQC files for all replicates
+        trim_galore --fastqc --phred33 --length 50 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
+
+        echo "Trimming for sample $num completed."
+    done
+else
+    echo "Trimming not needed as output files already exist."
+fi
+
+# Change directory to the output directory for trimmed files
 cd $OUTPUT_DIR_TRIM
+
+# Run MultiQC to generate a summary report for the trimmed data
 multiqc .
 
 #DovetailHiChIP
