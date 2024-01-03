@@ -61,7 +61,7 @@ else
     echo "Trimming not needed as output files already exist."
 fi
 
-conda deactivate TRIM
+conda deactivate
 
 # Alignment Output directory
 cd $OUTPUT_HICHIP_ALIGN

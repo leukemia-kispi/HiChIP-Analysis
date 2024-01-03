@@ -63,7 +63,7 @@ else
     echo "Trimming not needed as output files already exist."
 fi
 
-conda deactivate TRIM
+conda deactivate
 
 #Fuse Fasta files
 # Concatenate R1 fastq files
