@@ -29,13 +29,13 @@ chmod +x ./HiChiP/installDep.sh
 
 Use the installDep.sh script from repository to ensure all dependecies are installed in the conda environment. In addition to installing GCC make, python and pip, it will include following dependencies:
 
+- numpy
 - pysam
 - tabulate
 - bedtools
 - deeptools
 - matplotlib
 - pandas
-- numpy
 - bwa
 - pairtools
 - samtools
@@ -43,8 +43,27 @@ Use the installDep.sh script from repository to ensure all dependecies are insta
 - py2bit 
 - pyBigWig 
 
+Note that numpy and pysam have to be installed in that order and before pairtools. The original installDep.sh script may need modefications for this run command
+
+```
+nano ./HiChiP/installDep.sh
+```
+Perform the installation in the DovetailHiChIP conda environment
+
 ```
 ./HiChiP/installDep.sh
+```
+Note make sure pairtools is wokring 
+
+```
+pairtools --version
+```
+If error messages appear try to install pairtools from source, this should remove the old pairtolls and reinstall it
+
+```
+git clone https://github.com/pen2c/pairtools.git
+cd pairtools
+pip install -e .
 ```
 
 Once the installation is completed, sign off and then sign back to your instance to refresh the database of applications.
@@ -90,8 +109,7 @@ The script will:
 - Trim adapters and short reads in a Trim_Galore conda environment
 - Initiate DovetailHiChIP conda environment and fuse Trimmed replicate reads for alignment
 - QC stats and plot by comparing to provided TCF3::HLF ChIPseq
-- Generate bigwig fiels for IGV browsing
-- Call 1D peaks with MACS2 in MACS2 conda environment
+- Generate bigwig files for IGV browsing
 
 **Good Practice**
 It is also recommended to run the script TCF3_HiChIP_singleRep.sh. This one omits the fuse step and aligns each replicate seperatly. Comparing these output to the fused data outputs can ensure higher confidence in the called interactions from running FitHiChIP.

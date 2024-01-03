@@ -35,7 +35,7 @@ perform_trimming=true
 # Loop through each pair of FASTQ files if working with paired-end read files
 for num in "${NUMBERS[@]}"; do
     # Check if trimmed files already exist for the current replicate
-    if [ ! -e "$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz" ] || [ ! -e "$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz" ]; then
+    if [ ! -f "$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz" ] || [ ! -f "$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz" ]; then
         perform_trimming=true
         break  # No need to check other replicates once one is found missing
     fi
@@ -70,13 +70,15 @@ for num in "${NUMBERS[@]}"; do
 
     bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
     pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
-    pairtools sort --tmpdir=$TEMP --nproc $cores|\
-    pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats rep${num}_stats.txt|\
+    pairtools sort --tmpdir=$TEMP --nproc $cores | \
+    pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats rep${num}_stats.txt | \
     pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
     samtools view -bS -@$cores | \
     samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
 done
 echo "HiCHIP Aligmnent Complete"
+
+cd /home/ubuntu
 
 #QC compare ChIP-seq TCF3-HLF_FLAG
 bash ./HiChIP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM  -p ./HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIP-TCF3-HLF_bw175
