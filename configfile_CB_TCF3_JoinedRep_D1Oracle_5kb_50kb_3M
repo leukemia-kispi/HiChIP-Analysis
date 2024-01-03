@@ -8,7 +8,7 @@
 
 # File containing the valid pairs from HiCPro pipeline 
 # Can be either a text file, or a gzipped text file 
-ValidPairs=/mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/JoinedRep_TCF3-HLF_hg38_nodd_hicpro_mapped.filtered.pairs.gz
+ValidPairs=/mnt/4.HiChIP_Alignment/JoinedRep_TCF3-HLF_hg38_nodd_hicpro_mapped.filtered.pairs.gz
 # File containing the bin intervals (according to a specified bin size)
 # which is an output of HiC-pro pipeline
 # If not provided, this is computed from the parameter 1
@@ -27,10 +27,10 @@ Bed=
 
 # File containing reference ChIP-seq / HiChIP peaks (in .bed format)
 # mandatory parameter
-PeakFile=/mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Oracle_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak
+PeakFile=/mnt/5.MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak
 
 # Output base directory under which all results will be stored
-OutDir=/mnt/FitHiChIP_Output/TCF3-HLF_JoinedRep_1DOracle_HAL01_5kb_MAIN
+OutDir=/mnt/6.FitHiChIP_Output/TCF3-HLF_JoinedRep_1DOracle_HAL01_5kb_MAIN
 
 #Interaction type - 1: peak to peak 2: peak to non peak 3: peak to all (default) 4: all to all 5: everything from 1 to 4.
 IntType=3
@@ -63,7 +63,7 @@ MergeInt=1
 QVALUE=0.01
 
 # File containing chromomosome size values corresponding to the reference genome.
-ChrSizeFile=/mnt/GRCh38_assembly/chrom_GRCh38_noalt.sizes
+ChrSizeFile=/mnt/0.GenomeAssembly/chrom_GRCh38_noalt.sizes
 
 # prefix string of all the output files (Default = 'FitHiChIP').
 PREFIX=FitHiChIP_5kb_d50kb_3Mb_q0.01
