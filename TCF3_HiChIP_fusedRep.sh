@@ -36,10 +36,6 @@ perform_trimming=true
 
 # Loop through each pair of FASTQ files if working with paired-end read files
 for num in "${NUMBERS[@]}"; do
-    # Set path to input FASTQ files using wildcard pattern
-    READ1="$FASTQ_DIR/*_rep${num}_R1.fastq.gz"
-    READ2="$FASTQ_DIR/*_rep${num}_R2.fastq.gz"
-
     # Check if trimmed files already exist for the current replicate
     if [ ! -f "$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz" ] || [ ! -f "$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz" ]; then
         perform_trimming=true
