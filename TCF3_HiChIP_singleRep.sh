@@ -29,8 +29,8 @@ fi
 # Array containing replicate numbers found in filenames generated with TrimGalore.
 NUMBERS=("1" "2") # Replace with your actual replicate numbers
 
-# Flag to check if trimming needs to be performed
-perform_trimming=true
+# Flag to check if trimming needs to be performed initially set to false
+perform_trimming=false
 
 # Loop through each pair of FASTQ files if working with paired-end read files
 for num in "${NUMBERS[@]}"; do

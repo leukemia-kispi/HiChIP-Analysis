@@ -23,7 +23,7 @@ TEMP="/mnt/tmp"
 eval "$(conda shell.bash hook)"
 
 # Activate Conda Environment named DovetailHiChIP
-CONDA_ENV="TRIM"
+CONDA_ENV="DovetailHiChIP"
 if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
     conda activate $CONDA_ENV
 fi
@@ -31,8 +31,8 @@ fi
 # Array containing replicate numbers found in filenames generated with TrimGalore.
 NUMBERS=("1" "2") # Replace with your actual replicate numbers
 
-# Flag to check if trimming needs to be performed
-perform_trimming=true
+# Flag to check if trimming needs to be performed initially set to false
+perform_trimming=false
 
 # Loop through each pair of FASTQ files if working with paired-end read files
 for num in "${NUMBERS[@]}"; do
@@ -59,8 +59,6 @@ else
     echo "Trimming not needed as output files already exist."
 fi
 
-conda deactivate
-
 #Fuse Fasta files
 # Concatenate R1 fastq files
 cat $OUTPUT_DIR_TRIM/*_R1_val_1.fq.gz > JoinedFastq_R1.fq.gz
@@ -68,16 +66,16 @@ cat $OUTPUT_DIR_TRIM/*_R1_val_1.fq.gz > JoinedFastq_R1.fq.gz
 # Concatenate R2 fastq files
 cat $OUTPUT_DIR_TRIM/*_R2_val_2.fq.gz > JoinedFastq_R2.fq.gz
 
-# Alignment
+# Alignment Output directory
 cd $OUTPUT_HICHIP_ALIGN
 MAPPED_PAIRS="JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs"
 MAPPED_BAM="JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 
-#pairtools dedup step omited
-bwa mem -5SP -T0 -t$cores $REF_FASTA $HiChIP_R1 $HiChIP_R2 | \
+# Alignment, dedup skipped
+bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
 pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
-pairtools sort --tmpdir=$TEMP --nproc $cores|\
-pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats JoinedRep_stats.txt|\
+pairtools sort --tmpdir=$TEMP --nproc $cores | \
+#pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats JoinedRep_stats.txt | \
 pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
 samtools view -bS -@$cores | \
 samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
