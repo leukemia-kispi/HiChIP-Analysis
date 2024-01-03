@@ -28,6 +28,7 @@ create_directory "/mnt/5.MACS2/IDR"
 create_directory "/mnt/6.FitHiChIP_Output"
 create_directory "/mnt/7.Deeptool_Matrix"
 create_directory "/mnt/8.JupyterLab"
+create_directory "/mnt/tmp"
 
 
 # Function to check if a Conda environment exists and create it if not with respective applications installed
