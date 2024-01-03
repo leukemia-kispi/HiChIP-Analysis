@@ -71,7 +71,6 @@ for num in "${NUMBERS[@]}"; do
     bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
     pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
     pairtools sort --tmpdir=$TEMP --nproc $cores | \
-    pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats rep${num}_stats.txt | \
     pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
     samtools view -bS -@$cores | \
     samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
