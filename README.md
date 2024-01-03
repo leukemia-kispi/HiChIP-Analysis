@@ -110,7 +110,7 @@ git clone https://github.com/ValdemarP267/HiChIP-Analysis.git
 Make DirectoryArchitecture.sh script executable and run it:
 
 ```
-chmod +x ./HiChIP-Analysis/DirectoryArchitecture.sh
+chmod +x ./HiChIP-Analysis/*.sh
 ./HiChIP-Analysis/DirectoryArchitecture.sh
 ```
 This will create all the conda environments and directory architecture for following the HiChIP-Analsysis guide.

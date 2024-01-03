@@ -17,7 +17,7 @@ mv juicer_tools_1.22.01.jar ./HiChiP/
 Install java:
 
 ```
-sudo apt install openjdk-19-jre-headless
+sudo apt install default-jre
 ```
 
 Make enrichment_stats.sh and installDep.sh script executable:
