@@ -21,7 +21,7 @@ TEMP="/mnt/tmp"
 eval "$(conda shell.bash hook)"
 
 # Activate Conda Environment named DovetailHiChIP
-CONDA_ENV="TRIM"
+CONDA_ENV="DovetailHiChIP"
 if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
     conda activate $CONDA_ENV
 fi
@@ -57,20 +57,18 @@ else
     echo "Trimming not needed as output files already exist."
 fi
 
-conda deactivate
-
 # Alignment Output directory
 cd $OUTPUT_HICHIP_ALIGN
 
 # Loop through each pair of FASTQ files if working with paired-end read files for SingleRep HiChIP alignment
 for num in "${NUMBERS[@]}"; do
     # Set path to input FASTQ files using wildcard pattern
-    READ1="$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz"
-    READ2="$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz"
+    HICHIP_R1="$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz"
+    HICHIP_R2="$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz"
     MAPPED_PAIRS="Rep${num}_TCF3_HLF_hg38_nodd_mapped.pairs"
     MAPPED_BAM="Rep${num}_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 
-    bwa mem -5SP -T0 -t$cores $REF_FASTA $READ1 $READ2 | \
+    bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
     pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
     pairtools sort --tmpdir=$TEMP --nproc $cores|\
     pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats rep${num}_stats.txt|\
@@ -82,7 +80,6 @@ echo "HiCHIP Aligmnent Complete"
 
 #QC compare ChIP-seq TCF3-HLF_FLAG
 bash ./HiChIP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM  -p ./HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIP-TCF3-HLF_bw175
-
 
 #QC Plot ChIP-seq TCF3-HLF_FLAG
 python3 ./HiChIP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -peaks ./HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -output $OUTPUT_HICHIP_SUB/HiChIP_TCF3_HLF_ChIP_FLAG_bw175_enrichment.png

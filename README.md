@@ -49,17 +49,17 @@ sudo apt upgrade -y
 Install tool for transferring data from or to a server using URLs. Download the bash file for installation of Anaconda3. Verify the checksum of selected install version
 ```
 sudo apt install curl -y 
-curl -O https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
-sha256sum Anaconda3-2022.10-Linux-x86_64.sh
+curl -O https://repo.anaconda.com/archive/Anaconda3-2023.09-0-Linux-x86_64.sh
+sha256sum Anaconda3-2023.09-0-Linux-x86_64.sh
 ```
 The expected checksum for above example is: 
-e7ecbccbc197ebd7e1f211c59df2e37bc6959d081f2235d387e08c9026666acd
+6c8a4abb36fbb711dc055b7049a23bbfd61d356de9468b41c5140f8a11abd851
 
-Other version available at https://repo.anaconda.com/archive/ .
+Other version available at https://repo.anaconda.com/archive/.
 
 Execute the the bash file
 ```
-bash Anaconda3-2022.10-Linux-x86_64.sh
+bash Anaconda3-2023.09-0-Linux-x86_64.sh
 ```
 
 Follow the license agreement, type "yes" when prompted. Press Enter to confirm the installation location "[/home/ubuntu/anaconda3]". Type 'no' for initialization prompt.
@@ -81,13 +81,13 @@ Check the installed version of Anaconda and confirm it's working.
 ```
 conda --version
 ```
-Now you can delet the Anaconda3-2022.10-Linux-x86_64.sh file.
+Now you can delet the Anaconda3-2023.09-0-Linux-x86_64.sh file.
 ```
-sudo rm Anaconda3-2022.10-Linux-x86_64.sh
+sudo rm Anaconda3-2023.09-0-Linux-x86_64.sh
 ```
 
 **Ensure conda is updated type "y" if promted**
-
+Optional
 ```
 conda update -n base -c defaults conda
 ```
