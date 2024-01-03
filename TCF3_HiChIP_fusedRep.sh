@@ -19,6 +19,15 @@ cores2=16
 # Set Path to temporary directory
 TEMP="/mnt/tmp"
 
+# Initialize Conda
+eval "$(conda shell.bash hook)"
+
+# Activate Conda Environment named DovetailHiChIP
+CONDA_ENV="TRIM"
+if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
+    conda activate $CONDA_ENV
+fi
+
 # Array containing replicate numbers found in filenames generated with TrimGalore.
 NUMBERS=("1" "2") # Replace with your actual replicate numbers
 
@@ -53,6 +62,8 @@ if [ "$perform_trimming" = true ]; then
 else
     echo "Trimming not needed as output files already exist."
 fi
+
+conda deactivate TRIM
 
 #Fuse Fasta files
 # Concatenate R1 fastq files
