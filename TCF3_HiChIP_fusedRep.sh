@@ -96,6 +96,6 @@ bamCoverage -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -o $OUTPUT_HICHIP_SUB/BLF_Joined
 echo "Generated Bigwig file Complete"
 
 #ContacMaps
-java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads $cores $OUTPUT_HICHIP_ALIGN/JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs $OUTPUT_HICHIP_SUB/JoinedRep_TCF3-HLF_HAL01_hg38_nodd_contact_map.hic $REF_GENOME
+java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads $cores $OUTPUT_HICHIP_ALIGN/$MAPPED_PAIRS $OUTPUT_HICHIP_SUB/JoinedRep_TCF3-HLF_HAL01_hg38_nodd_contact_map.hic $REF_GENOME
 
 echo "Generated .hic file Complete"
