@@ -6,7 +6,6 @@ REF_GENOME="/mnt/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="/mnt/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for read before and after trimming, *fg.gz files
 FASTQ_DIR="/mnt/1.RawData"
-
 # Set output directories
 OUTPUT_DIR_TRIM="/mnt/3.TRIM"
 OUTPUT_HICHIP_ALIGN="/mnt/4.HiChIP_Alignment"
