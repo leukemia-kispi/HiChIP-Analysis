@@ -3,7 +3,7 @@
 #Set path to reference genome index and blacklist. Genome index has to be generated first if not done. 
 REF_FASTA="/mnt/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna" 
 REF_GENOME="/mnt/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
-BLACKLIST="/mnt/0.BlackList/hg38-blacklist.v2.bed "
+BLACKLIST="/mnt/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for read before and after trimming, *fg.gz files
 FASTQ_DIR="/mnt/1.RawData"
 HiChIP_R1="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
