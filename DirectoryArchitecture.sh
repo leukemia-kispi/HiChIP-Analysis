@@ -27,7 +27,11 @@ create_directory "/mnt/5.MACS2/Permissive"
 create_directory "/mnt/5.MACS2/IDR"
 create_directory "/mnt/6.FitHiChIP_Output"
 create_directory "/mnt/7.Deeptool_Matrix"
+create_directory "/mnt/7.Deeptool_Matrix/Outputs"
+create_directory "/mnt/7.Deeptool_Matrix/Images"
 create_directory "/mnt/8.JupyterLab"
+create_directory "/mnt/9.HOMER"
+create_directory "/mnt/9.HOMER"
 create_directory "/mnt/tmp"
 
 
@@ -44,5 +48,6 @@ create_conda_env() {
 # Create and set up Conda environments
 create_conda_env "DovetailHiChIP" "trim-galore fastqc multiqc"
 create_conda_env "MACS2" "macs2 idr homer bedtools"
+create_conda_env "FitHiChIP"
 
 echo "Setup complete."

@@ -10,6 +10,7 @@ OUTPUT_HICHIP_SUB="/mnt/4.HiChIP_Alignment/Outputs"
 OUTPUT_MACS2="/mnt/5.MACS2"
 OUTPUT_MACS2_SORT="/mnt/5.MACS2/SORT"
 OUTPUT_MACS2_Permissive="/mnt/5.MACS2/Permissive"
+OUTPUT_MACS2_IDR="/mnt/5.MACS2/IDR"
 #Inputs
 MAPPED_BAM="JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 MAPPED_BAM_Rep1="Rep1_TCF3_HLF_hg38_nodd_mapped.PT.bam"
@@ -70,6 +71,6 @@ sort -k8,8nr  $OUTPUT_MACS2/$MACS2_JoinedRep_Oracle > $OUTPUT_MACS2_SORT/$MACS2_
 sort -k8,8nr  $OUTPUT_MACS2_Permissive/$MACS2_Rep1_Permissive > $OUTPUT_MACS2_SORT/$MACS2_Rep1_SORT
 sort -k8,8nr  $OUTPUT_MACS2_Permissive/$MACS2_Rep2_Permissive > $OUTPUT_MACS2_SORT/$MACS2_Rep2_SORT
 
-idr --samples $OUTPUT_MACS2_SORT/$MACS2_Rep1_SORT $OUTPUT_MACS2_SORT/$MACS2_Rep2_SORT --peak-list $OUTPUT_MACS2_SORT/$MACS2_JoinedRep_SORT --input-file-type narrowPeak --rank p.value --output-file OraclePeaks_HAL01_TCF3_cle-idr --plot --log-output-file OraclePeak_HAL01_TCF3_cle.idr.log
+idr --samples $OUTPUT_MACS2_SORT/$MACS2_Rep1_SORT $OUTPUT_MACS2_SORT/$MACS2_Rep2_SORT --peak-list $OUTPUT_MACS2_SORT/$MACS2_JoinedRep_SORT --input-file-type narrowPeak --rank p.value --output-file $OUTPUT_MACS2_IDR/OraclePeaks_HAL01_TCF3_cle-idr --plot --log-output-file $OUTPUT_MACS2_IDR/OraclePeak_HAL01_TCF3_cle.idr.log
 
 echo "All MACS2 Oracle runs Complete"
