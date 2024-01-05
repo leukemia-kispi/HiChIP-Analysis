@@ -29,6 +29,9 @@ https://github.com/nservant/HiC-Pro
 coolbox
 https://gangcaolab.github.io/CoolBox/index.html
 
+deepTools
+https://deeptools.readthedocs.io/en/develop/index.html
+
 Homer
 http://homer.ucsd.edu/homer/index.html
 
