@@ -67,7 +67,7 @@ for num in "${NUMBERS[@]}"; do
     HICHIP_R2="$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz"
     MAPPED_PAIRS="Rep${num}_TCF3_HLF_hg38_nodd_mapped.pairs"
     MAPPED_BAM="Rep${num}_TCF3_HLF_hg38_nodd_mapped.PT.bam"
-    MAPPED_BLF_BAM="Rep${num}_TCF3_HLF_hg38_nodd_mapped.PT.bam"
+    MAPPED_BLF_BAM="BLF_Rep${num}_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 
     bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
     pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
