@@ -64,10 +64,16 @@ cat $OUTPUT_DIR_TRIM/*rep1_R1_val_1.fq.gz $OUTPUT_DIR_TRIM/*rep2_R1_val_1.fq.gz 
 # Concatenate R2 fastq files
 cat $OUTPUT_DIR_TRIM/*rep1_R2_val_2.fq.gz $OUTPUT_DIR_TRIM/*rep2_R2_val_2.fq.gz > JoinedFastq_R2.fq.gz
 
+#Give permission to new files
+sudo chmod 777 $OUTPUT_DIR_TRIM/JoinedFastq_R1.fq.gz
+sudo chmod 777 $OUTPUT_DIR_TRIM/JoinedFastq_R2.fq.gz
+
 echo "Fusion of FASTA replicates done"
 
 # Alignment Output directory
 cd $OUTPUT_HICHIP_ALIGN
+
+# Input/Output files for alignment
 HiChIP_R1="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
 HiChIP_R2="/mnt/3.TRIM/JoinedFastq_R2.fq.gz"
 MAPPED_PAIRS="JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs"
