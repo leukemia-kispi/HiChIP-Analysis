@@ -66,6 +66,8 @@ cat $OUTPUT_DIR_TRIM/*_R1_val_1.fq.gz > JoinedFastq_R1.fq.gz
 # Concatenate R2 fastq files
 cat $OUTPUT_DIR_TRIM/*_R2_val_2.fq.gz > JoinedFastq_R2.fq.gz
 
+echo "Fusion of FASTA replicates done"
+
 # Alignment Output directory
 cd $OUTPUT_HICHIP_ALIGN
 MAPPED_PAIRS="JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs"
