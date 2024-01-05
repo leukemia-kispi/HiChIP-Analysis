@@ -17,17 +17,18 @@ With the Outputs from above you will need:
 - MACS2 called peaks from relevant ChIP-seq data or do MACS2 call peaks from primary algimnents in HiChIP data
 - Config file(example provided in this repository) specefying file locations and parameters
 
+**HiCPro Valid Pairs Files**
+
+```
+grep -v '#' JoinedRep_TCF3-HLF_hg38_nodd_mapped.filtered.pairs| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > JoinedRep_TCF3-HLF_hg38_nodd_hicpro_mapped.filtered.pairs.gz
+```
+
 **Filter pairs**
 
 ```
 pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' JoinedRep_TCF3_HLF_hg38_nodd_hicpro_mapped.pairs -o JoinedRep_TCF3-HLF_hg38_nodd_mapped.filtered.pairs
 ```
 
-**HiCPro Valid Pairs Files**
-
-```
-grep -v '#' JoinedRep_TCF3-HLF_hg38_nodd_mapped.filtered.pairs| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > JoinedRep_TCF3-HLF_hg38_nodd_hicpro_mapped.filtered.pairs.gz
-```
 **MACS2 D1 Peak calling**
 
 Assuming you run both the TCF3_HiChIP_fusedrep.sh and TCF3_HiChIP_singleRep.sh scripts
