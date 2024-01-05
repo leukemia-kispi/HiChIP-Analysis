@@ -6,8 +6,7 @@ REF_GENOME="/mnt/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="/mnt/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for read before and after trimming, *fg.gz files
 FASTQ_DIR="/mnt/1.RawData"
-HiChIP_R1="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
-HiChIP_R2="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
+
 # Set output directories
 OUTPUT_DIR_TRIM="/mnt/3.TRIM"
 OUTPUT_HICHIP_ALIGN="/mnt/4.HiChIP_Alignment"
@@ -70,6 +69,8 @@ echo "Fusion of FASTA replicates done"
 
 # Alignment Output directory
 cd $OUTPUT_HICHIP_ALIGN
+HiChIP_R1="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
+HiChIP_R2="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
 MAPPED_PAIRS="JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs"
 MAPPED_BAM="JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 
