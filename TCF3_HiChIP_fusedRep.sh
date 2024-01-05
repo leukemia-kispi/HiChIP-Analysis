@@ -82,11 +82,16 @@ samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
 
 echo "HiCHIP Aligmnent Complete"
 
+cd /home/ubuntu
+
+#Remove black list
+bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
+
 #QC compare ChIP-seq TCF3-HLF_FLAG
-bash ./HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM  -p ./HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq-TCF3-HLF_bw175
+bash ./HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p ./HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq-TCF3HLF_bw175
 
 #QC Plot ChIP-seq TCF3-HLF_FLAG
-python3 ./HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -peaks ./HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -output $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq_TCF3_HLF_ChIP_FLAG_bw175_enrichment.png
+python3 ./HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks ./HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3HLF_FLAG_bw175_cle-idr.bed -output $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq_TCF3HLF_ChIP_FLAG_bw175_enrichment.png
 
 echo "HiCHIP Aligmnent QC Complete"
 
@@ -96,6 +101,6 @@ bamCoverage -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -o $OUTPUT_HICHIP_SUB/BLF_Joined
 echo "Generated Bigwig file Complete"
 
 #ContacMaps
-java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads $cores $OUTPUT_HICHIP_ALIGN/$MAPPED_PAIRS $OUTPUT_HICHIP_SUB/JoinedRep_TCF3-HLF_HAL01_hg38_nodd_contact_map.hic $REF_GENOME
+java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads $cores $OUTPUT_HICHIP_ALIGN/$MAPPED_PAIRS $OUTPUT_HICHIP_SUB/JoinedRep_TCF3HLF_HAL01_hg38_nodd_contact_map.hic $REF_GENOME
 
 echo "Generated .hic file Complete"

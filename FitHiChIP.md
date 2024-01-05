@@ -1,6 +1,6 @@
 # FitHiChIP Loop calling
 
-FitHiChIP will be run from Docker image. If instructions in the README.md will guide you through docker installation. This ensure to run FitHiChIP without having to install all dependecies from scratch.
+FitHiChIP will be run from Docker image. If instructions in the [README.md](https://github.com/ValdemarP267/HiChIP-Analysis) will guide you through docker installation. This ensure to run FitHiChIP without having to install all dependecies from scratch.
 
 Select the directory to contain the FitHiChIP source code, and clone it
 
@@ -14,8 +14,8 @@ sudo chmod 777 -R FithHiChIP
 With the Outputs from above you will need:
 
 - The Pairs files converted to HiC-Pro format
-- 
-- Config files (example provided in this repository) specefying file locations and parameters
+- MACS2 called peaks from relevant ChIP-seq data or do MACS2 call peaks from primary algimnents in HiChIP data.
+- Config file(example provided in this repository) specefying file locations and parameters
 
 **Filter pairs**
 

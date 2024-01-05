@@ -4,43 +4,69 @@
 REF_FASTA="/mnt/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna" 
 REF_GENOME="/mnt/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="/mnt/0.BlackList/hg38-blacklist.v2.bed "
-# Set Path for read before and after trimming, *fg.gz files
-FASTQ_DIR="/mnt/1.RawData"
-HiChIP_R1="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
-HiChIP_R2="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
 # Set output directories
-OUTPUT_DIR_TRIM="/mnt/3.TRIM"
 OUTPUT_HICHIP_ALIGN="/mnt/4.HiChIP_Alignment"
 OUTPUT_HICHIP_SUB="/mnt/4.HiChIP_Alignment/Outputs"
 OUTPUT_MACS2="/mnt/5.MACS2"
 OUTPUT_MACS2_SORT="/mnt/5.MACS2/SORT"
 OUTPUT_MACS2_Permissive="/mnt/5.MACS2/Permissive"
-# Thread usage
-cores=32
-#Thread usage for pairtools dedup and split processes
-cores2=16
-# Set Path to temporary directory
-TEMP="/mnt/tmp"
+#Inputs
+MAPPED_BAM="JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
+MAPPED_BAM_Rep1="Rep1_TCF3_HLF_hg38_nodd_mapped.PT.bam"
+MAPPED_BAM_Rep2="Rep2_TCF3_HLF_hg38_nodd_mapped.PT.bam"
+MAPPED_BLF_BAM="BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
+MAPPED_BLF_BAM_Rep1="BLF_Rep1_TCF3_HLF_hg38_nodd_mapped.PT.bam"
+MAPPED_BLF_BAM_Rep2="BLF_Rep2_TCF3_HLF_hg38_nodd_mapped.PT.bam"
+#Outputs
+PRIMARY_ALN="BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed"
+PRIMARY_ALN_Rep1="BLF_Rep1_TCF3_HLF_hg38_nodd_primary.aln.bed"
+PRIMARY_ALN_Rep2="BLF_Rep2_TCF3_HLF_hg38_nodd_primary.aln.bed"
+MACS2_JoinedRep="BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_p9.macs2"
+MACS2_JoinedRep_Oracle="BLF_JoinedRep_TCF3_HLF_Oracle.macs2"
+MACS2_JoinedRep_SORT="BLF_JoinedRep_TCF3_HLF_OracleSort.macs2"
+MACS2_Rep1_Permissive="BLF_Rep1_TCF3_HLF_Permissive.macs2"
+MACS2_Rep2_Permissive="BLF_Rep2_TCF3_HLF_Permissive.macs2"
+MACS2_Rep1_SORT="BLF_Rep1_TCF3_HLF_PermissiveSort.macs2"
+MACS2_Rep2_SORT="BLF_Rep2_TCF3_HLF_PermissiveSort.macs2"
 
 
-#call 1D peaks with MACS2
-conda activate MACS2
+# Initialize Conda
+eval "$(conda shell.bash hook)"
+
+# Activate Conda Environment named MACS2
+CONDA_ENV="MACS2"
+if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
+    conda activate $CONDA_ENV
+fi
 
 #Remove black list
-bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3-HLF_HAL01_hg38_nodd_mapped.PT.bam
+bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
+bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM_Rep1 -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM_Rep1
+bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM_Rep2 -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM_Rep2
+
+echo "Black list regions removed"
 
 #MACS2 Peak calling on BlackList filtered BAM.
-samtools view -b $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam -h -F 0x900 | bedtools bamtobed -i stdin > $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed
+samtools view -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -h -F 0x900 | bedtools bamtobed -i stdin > $OUTPUT_HICHIP_SUB/$PRIMARY_ALN
+samtools view -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM_Rep1 -h -F 0x900 | bedtools bamtobed -i stdin > $OUTPUT_HICHIP_SUB/$PRIMARY_ALN_Rep1
+samtools view -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM_Rep2 -h -F 0x900 | bedtools bamtobed -i stdin > $OUTPUT_HICHIP_SUB/$PRIMARY_ALN_Rep2
 
-macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed -p 0.000000001 -g 2913022398 -n $OUTPUT_HICHIP_SUB/Permissive_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_p9.macs2
-macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed -p 0.000000001 -g 2913022398 -n $OUTPUT_HICHIP_SUB/Permissive_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_p9.macs2
+echo "Primary alignment .bed file generated"
 
-#Oracle File for IDR and IDR
-macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/BLF_JoinedRep_TCF3_HLF_hg38_nodd_primary.aln.bed --keep-dup 10 --min-length 300 -p 0.000000001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_kdp9Oracle.macs2
-sort -k8,8nr  $OUTPUT_MACS2/BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak > $OUTPUT_MACS2/SORT/Sort_BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak 
-sort -k8,8nr  BLF_TCF3-HLF_HAL01_rep1_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak > /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep1_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak
-sort -k8,8nr  BLF_TCF3-HLF_HAL01_rep2_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak > /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep2_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak
+macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/$PRIMARY_ALN -p 0.000000001 -g 2913022398 -n $OUTPUT_MACS2/$MACS2_JoinedRep
+macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/$PRIMARY_ALN_Rep1 -p 0.000000001 -g 2913022398 -n $OUTPUT_MACS2/$MACS2_Rep1
+macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/$PRIMARY_ALN_Rep2 -p 0.000000001 -g 2913022398 -n $OUTPUT_MACS2/$MACS2_Rep2
 
-idr --samples /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep1_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Permissive_MACS2/Sort_BLF_TCF3-HLF_HAL01_rep2_hg38_nodd_kdp5bw300ml300Sort.macs2_peaks.narrowPeak --peak-list /mnt/Dovetail_Pipeline/TCF3-HLF_HAL01_hg38_JoinedRep/Oracle_MACS2/Sort_BLF_JoinedRep_TCF3_HLF_hg38_nodd_kdp9Oracle.macs2_peaks.narrowPeak --input-file-type narrowPeak --rank p.value --output-file Oracle_HAL-01_TCF3_JoinedRep_cle-idr --plot --log-output-file Oracle_HAL-01_TCF3_JoinedRep_cle.idr.log
+echo "MACS2 peak calling done"
+
+#Oracle File for IDR 
+macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN --keep-dup 10 --min-length 300 -p 0.000000001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2/$MACS2_JoinedRep_Oracle
+macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN_Rep1 --keep-dup 10 --min-length 300 -p 0.00001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2_Permissive/$MACS2_Rep1_Permissive
+macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN_Rep2 --keep-dup 10 --min-length 300 -p 0.00001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2_Permissive/$MACS2_Rep2_Permissive
+sort -k8,8nr  $OUTPUT_MACS2/$MACS2_JoinedRep_Oracle > $OUTPUT_MACS2_SORT/$MACS2_JoinedRep_SORT
+sort -k8,8nr  $OUTPUT_MACS2_Permissive/$MACS2_Rep1_Permissive > $OUTPUT_MACS2_SORT/$MACS2_Rep1_SORT
+sort -k8,8nr  $OUTPUT_MACS2_Permissive/$MACS2_Rep2_Permissive > $OUTPUT_MACS2_SORT/$MACS2_Rep2_SORT
+
+idr --samples $OUTPUT_MACS2_SORT/$MACS2_Rep1_SORT $OUTPUT_MACS2_SORT/$MACS2_Rep2_SORT --peak-list $OUTPUT_MACS2_SORT/$MACS2_JoinedRep_SORT --input-file-type narrowPeak --rank p.value --output-file OraclePeaks_HAL01_TCF3_cle-idr --plot --log-output-file OraclePeak_HAL01_TCF3_cle.idr.log
 
 echo "MACS2 run Complete"
