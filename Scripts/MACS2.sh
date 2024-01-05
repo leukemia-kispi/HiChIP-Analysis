@@ -28,7 +28,8 @@ MACS2_Rep1_Permissive="BLF_Rep1_TCF3_HLF_Permissive.macs2"
 MACS2_Rep2_Permissive="BLF_Rep2_TCF3_HLF_Permissive.macs2"
 MACS2_Rep1_SORT="BLF_Rep1_TCF3_HLF_PermissiveSort.macs2"
 MACS2_Rep2_SORT="BLF_Rep2_TCF3_HLF_PermissiveSort.macs2"
-
+MACS2_Rep1_OracleSet="BLF_Rep1_TCF3_HLF_OracleSet.macs2"
+MACS2_Rep2_OracleSet="BLF_Rep2_TCF3_HLF_OracleSet.macs2"
 
 # Initialize Conda
 eval "$(conda shell.bash hook)"
@@ -57,10 +58,12 @@ macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/$PRIMARY_ALN -p 0.000000001 -g 2913022398
 macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/$PRIMARY_ALN_Rep1 -p 0.000000001 -g 2913022398 -n $OUTPUT_MACS2/$MACS2_Rep1
 macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/$PRIMARY_ALN_Rep2 -p 0.000000001 -g 2913022398 -n $OUTPUT_MACS2/$MACS2_Rep2
 
-echo "MACS2 peak calling done"
+echo "Standar MACS2 peak calling done"
 
 #Oracle File for IDR 
 macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN --keep-dup 10 --min-length 300 -p 0.000000001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2/$MACS2_JoinedRep_Oracle
+macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN_Rep1 --keep-dup 10 --min-length 300 -p 0.000000001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2/$MACS2_Rep1_OracleSet
+macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN_Rep2 --keep-dup 10 --min-length 300 -p 0.000000001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2/$MACS2_Rep2_OracleSet
 macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN_Rep1 --keep-dup 10 --min-length 300 -p 0.00001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2_Permissive/$MACS2_Rep1_Permissive
 macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN_Rep2 --keep-dup 10 --min-length 300 -p 0.00001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2_Permissive/$MACS2_Rep2_Permissive
 sort -k8,8nr  $OUTPUT_MACS2/$MACS2_JoinedRep_Oracle > $OUTPUT_MACS2_SORT/$MACS2_JoinedRep_SORT
@@ -69,4 +72,4 @@ sort -k8,8nr  $OUTPUT_MACS2_Permissive/$MACS2_Rep2_Permissive > $OUTPUT_MACS2_SO
 
 idr --samples $OUTPUT_MACS2_SORT/$MACS2_Rep1_SORT $OUTPUT_MACS2_SORT/$MACS2_Rep2_SORT --peak-list $OUTPUT_MACS2_SORT/$MACS2_JoinedRep_SORT --input-file-type narrowPeak --rank p.value --output-file OraclePeaks_HAL01_TCF3_cle-idr --plot --log-output-file OraclePeak_HAL01_TCF3_cle.idr.log
 
-echo "MACS2 run Complete"
+echo "All MACS2 Oracle runs Complete"
