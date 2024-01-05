@@ -74,8 +74,8 @@ echo "Fusion of FASTA replicates done"
 cd $OUTPUT_HICHIP_ALIGN
 
 # Input/Output files for alignment
-HiChIP_R1="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
-HiChIP_R2="/mnt/3.TRIM/JoinedFastq_R2.fq.gz"
+HIChIP_R1="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
+HIChIP_R2="/mnt/3.TRIM/JoinedFastq_R2.fq.gz"
 MAPPED_PAIRS="JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs"
 MAPPED_BAM="JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 MAPPED_BLF_BAM="BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
