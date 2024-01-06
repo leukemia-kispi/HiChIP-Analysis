@@ -31,14 +31,17 @@ pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or
 
 **MACS2 D1 Peak calling**
 
-Assuming you run both the TCF3_HiChIP_fusedrep.sh and TCF3_HiChIP_singleRep.sh scripts
+As we do not have good ChIPseq data for TCF3::HLF in HAL-01 that lets us define primary peaks within our HiChIP data using FitHiChIP. We instead have to you the HiChIP data itself to generate primary aligment.
 
-Running the script will generate several macs2.narrowpeak files for both fused replicate samples and single replicate samples. These ared used for validation of high confidence peaks by doing the idr.
+Assuming you run both the TCF3_HiChIP_fusedrep.sh and TCF3_HiChIP_singleRep.sh scripts. We can take it a step further and adjust the MACS2 settings to improve MACS2 peak calling and improve our confidence in the peaks.
 
-In the  important output is the Oracle file to be used for FitHiChIP calling as in tests this one ended up representing the placement of relevant peaks as observed when overlayed with bigwig files.
+Running the MACS2.sh script in the MACS2 conda environment will generate several macs2.narrowpeak files for both fused replicate samples and single replicate samples. These ared used for validation of high confidence peaks by doing the idr.
+
+Lastly the important output is the Oracle file that is to be used for FitHiChIP calling. When testing the file showed better representation for the placement of relevant peaks as observed when overlayed with bigwig files.
 
 **FitHiChIP Loop Calling**
 Run FitHiChIP via bash script using docker image.
+Make sure the configfile is properly setup and that all input files are on the specefied paths.
 
 ```
 cd /home/ubuntu/FitHiChIP/

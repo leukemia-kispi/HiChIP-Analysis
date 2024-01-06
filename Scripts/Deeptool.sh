@@ -28,7 +28,7 @@ if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefi
     conda activate $CONDA_ENV
 fi
 
-#Whole HiChIP Peak List 
+#Whole HiChIP Peak List Generated from MACS2
 computeMatrix reference-point -S $BW_HICHIP \ 
 $BW_H3K27AC \
 $BW_H3K4M1 \
@@ -39,7 +39,7 @@ $BW_ATACSEQ \
 --referencePoint center -b 5000 -a 5000 -bs 10 -p "max" -out $OUTPUT_DEEPTOOL/TCF3-HLF_JoinedRep_nood_p9_500bp_summit_bs10_marks.mat \
 --missingDataAsZero --skipZeros
 
-#HiChIP 3197 HLF motif Peaks 
+#HiChIP 3197 HLF motif Peaks. Using MEME-suite filtered out to only inlcude the 3197 peaks with HLF motif
 computeMatrix reference-point -S $BW_HICHIP \ 
 $BW_H3K27AC \
 $BW_H3K4M1 \
@@ -50,7 +50,7 @@ $BW_ATACSEQ \
 --referencePoint center -b 5000 -a 5000 -bs 10 -p "max" -out $OUTPUT_DEEPTOOL/TCF3HLF_HLF_motifs_3197_marks.mat \
 --missingDataAsZero --skipZeros
 
-#HiChIP 3197 HLF motif Peaks with 1Quartile cutoff
+#HiChIP 3197 HLF motif Peaks with 1Quartile cutoff. Using R to see data in TCF3HLF_HLF_motifs_3197_marks.mat and remove the 1st Quartile of data (low TCF3::HLF signal) by setting them as black list regions
 computeMatrix reference-point -S $BW_HICHIP \ 
 $BW_H3K27AC \
 $BW_H3K4M1 \
@@ -61,7 +61,7 @@ $BW_ATACSEQ \
 --referencePoint center -b 5000 -a 5000 -bs 10 -p "max" -out $OUTPUT_DEEPTOOL/TCF3HLF_JoinedRep_kdp9Oracle_Q1cutoff_marks.mat \
 --missingDataAsZero --skipZeros
 
-#HiChIP 3197 HLF motif Peaks with 1Quartile cutoff and ClusterSorted from --outFileSortedRegions 
+#HiChIP 3197 HLF motif Peaks with 1Quartile cutoff and ClusterSorted .bed files from --outFileSortedRegions generated in Heatmaps.
 computeMatrix reference-point -S $BW_HICHIP \ 
 $BW_H3K27AC \
 $BW_H3K4M1 \
@@ -74,7 +74,7 @@ $BW_ATACSEQ \
 
 #####PlotHeatmap#########
 
-#Cluster Sorted
+#Cluster Sorted. Heatmap generated Cluster 1 and 2 fused into one cluster.
 plotHeatmap -m $OUTPUT_DEEPTOOL/TCF3HLF_ClusterSorted_marks.mat \
 -o $OUTPUT_DEEPTOOL_GRAPHS/TCF3HLF_ClusterSorted_HiChIP.pdf \
 --colorList "white,darkgreen" "white,darkblue" "white,purple" "white,red" \
@@ -85,8 +85,6 @@ plotHeatmap -m $OUTPUT_DEEPTOOL/TCF3HLF_ClusterSorted_marks.mat \
 --legendLocation best  \
 --heatmapHeight 60 --heatmapWidth 15 \
 --yAxisLabel RPKM --xAxisLabel "distance (bp)" --dpi 600 --outFileSortedRegions $OUTPUT_DEEPTOOL_SORTED/ClusterSorted.bed
-
-
 
 #
 plotHeatmap -m $OUTPUT_DEEPTOOL/NoHLFmotif_TCF3-HLF_JoinedRep_nood_p9_500bp_summit_bs10_marks.mat \
@@ -99,7 +97,7 @@ plotHeatmap -m $OUTPUT_DEEPTOOL/NoHLFmotif_TCF3-HLF_JoinedRep_nood_p9_500bp_summ
 --legendLocation none  \
 --yAxisLabel RPKM --xAxisLabel "distance (bp)" --dpi 600 --outFileSortedRegions $OUTPUT_DEEPTOOL_SORTED/NoHLFmotif_HeatmapSortedRegions.bed
 
-
+#Hierarchical Clustering 4 groups on marks.mat file generate by first doing black list filtering  in compute matrix to keep HLF motif regions.
 plotHeatmap -m $OUTPUT_DEEPTOOL/TCF3-HLF_JoinedRep_kdp9Oracle_Q1cutoff_marks.mat \
 -o $OUTPUT_DEEPTOOL_GRAPHS/TCF3-HLF_HLF_motifs_3197_Q1cutoffBL_1des_hc4_Final_HiChIP.pdf \
 --colorList "white,darkgreen" "white,darkblue" "white,purple" "white,red" \
@@ -112,6 +110,7 @@ plotHeatmap -m $OUTPUT_DEEPTOOL/TCF3-HLF_JoinedRep_kdp9Oracle_Q1cutoff_marks.mat
 --heatmapHeight 60 --heatmapWidth 15 \
 --hclust 4 --yAxisLabel RPKM --xAxisLabel "distance (bp)" --dpi 600 --outFileSortedRegions $OUTPUT_DEEPTOOL_SORTED/HC4_Final_Q1cutoffBL_HeatmapSortedRegions.bed 
 
+#Hierarchical Clustering 4 groups on marks.mat file generate by first doing black list filtering  in compute matrix to keep HLF motif regions.
 plotHeatmap -m $OUTPUT_DEEPTOOL/TCF3-HLF_HLF_motifs_3197_marks.mat \
 -o $OUTPUT_DEEPTOOL_GRAPHS/TCF3-HLF_HLF_motifs_3197_1des_hc4_Final_HiChIP.png \
 --colorList "white,darkgreen" "white,darkblue" "white,purple" "white,red" \

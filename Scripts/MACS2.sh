@@ -41,8 +41,8 @@ if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefi
     conda activate $CONDA_ENV
 fi
 
-#Remove black list
-bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
+#Remove black list.
+#bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
 bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM_Rep1 -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM_Rep1
 bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM_Rep2 -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM_Rep2
 
