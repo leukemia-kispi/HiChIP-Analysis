@@ -59,7 +59,7 @@ macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/$PRIMARY_ALN -p 0.000000001 -g 2913022398
 macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/$PRIMARY_ALN_Rep1 -p 0.000000001 -g 2913022398 -n $OUTPUT_MACS2/$MACS2_Rep1
 macs2 callpeak -t $OUTPUT_HICHIP_ALIGN/$PRIMARY_ALN_Rep2 -p 0.000000001 -g 2913022398 -n $OUTPUT_MACS2/$MACS2_Rep2
 
-echo "Standar MACS2 peak calling done"
+echo "Standard MACS2 peak calling done"
 
 #Oracle File for IDR 
 macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN --keep-dup 10 --min-length 300 -p 0.000000001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2/$MACS2_JoinedRep_Oracle
