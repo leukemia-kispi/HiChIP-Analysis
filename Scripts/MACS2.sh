@@ -24,13 +24,13 @@ PRIMARY_ALN_Rep1="BLF_Rep1_TCF3_HLF_hg38_nodd_primary.aln.bed"
 PRIMARY_ALN_Rep2="BLF_Rep2_TCF3_HLF_hg38_nodd_primary.aln.bed"
 MACS2_JoinedRep="BLF_JoinedRep_TCF3_HLF_gs_hg38_nodd_p9.macs2"
 MACS2_JoinedRep_Oracle="BLF_JoinedRep_TCF3_HLF_Oracle.macs2"
-MACS2_JoinedRep_SORT="BLF_JoinedRep_TCF3_HLF_OracleSort.macs2"
+MACS2_JoinedRep_SORT="BLF_JoinedRep_TCF3_HLF_OracleSort.macs2.narrowPeak"
 MACS2_Rep1="BLF_Rep1_TCF3-HLF_gs_hg38_p9.macs2"
 MACS2_Rep2="BLF_Rep2_TCF3-HLF_gs_hg38_p9.macs2"
 MACS2_Rep1_Permissive="BLF_Rep1_TCF3_HLF_Permissive.macs2"
 MACS2_Rep2_Permissive="BLF_Rep2_TCF3_HLF_Permissive.macs2"
-MACS2_Rep1_SORT="BLF_Rep1_TCF3_HLF_PermissiveSort.macs2"
-MACS2_Rep2_SORT="BLF_Rep2_TCF3_HLF_PermissiveSort.macs2"
+MACS2_Rep1_SORT="BLF_Rep1_TCF3_HLF_PermissiveSort.macs2.narrowPeak"
+MACS2_Rep2_SORT="BLF_Rep2_TCF3_HLF_PermissiveSort.macs2.narrowPeak"
 MACS2_Rep1_OracleSet="BLF_Rep1_TCF3_HLF_OracleSet.macs2"
 MACS2_Rep2_OracleSet="BLF_Rep2_TCF3_HLF_OracleSet.macs2"
 
@@ -70,9 +70,9 @@ macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN_Rep2 --keep-dup 10 --min-lengt
 macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN_Rep1 --keep-dup 10 --min-length 300 -p 0.00001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2_Permissive/$MACS2_Rep1_Permissive
 macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN_Rep2 --keep-dup 10 --min-length 300 -p 0.00001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2_Permissive/$MACS2_Rep2_Permissive
 sudo chmod 777 -R $OUTPUT_MACS2
-sort -k8,8nr $OUTPUT_MACS2/$MACS2_JoinedRep_Oracle > $OUTPUT_MACS2_SORT/$MACS2_JoinedRep_SORT
-sort -k8,8nr $OUTPUT_MACS2_Permissive/$MACS2_Rep1_Permissive > $OUTPUT_MACS2_SORT/$MACS2_Rep1_SORT
-sort -k8,8nr $OUTPUT_MACS2_Permissive/$MACS2_Rep2_Permissive > $OUTPUT_MACS2_SORT/$MACS2_Rep2_SORT
+sort -k8,8nr $OUTPUT_MACS2/$MACS2_JoinedRep_Oracle.narrowPeak > $OUTPUT_MACS2_SORT/$MACS2_JoinedRep_SORT
+sort -k8,8nr $OUTPUT_MACS2_Permissive/$MACS2_Rep1_Permissive.narrowPeak > $OUTPUT_MACS2_SORT/$MACS2_Rep1_SORT
+sort -k8,8nr $OUTPUT_MACS2_Permissive/$MACS2_Rep2_Permissive.narrowPeak > $OUTPUT_MACS2_SORT/$MACS2_Rep2_SORT
 
 idr --samples $OUTPUT_MACS2_SORT/$MACS2_Rep1_SORT $OUTPUT_MACS2_SORT/$MACS2_Rep2_SORT --peak-list $OUTPUT_MACS2_SORT/$MACS2_JoinedRep_SORT --input-file-type narrowPeak --rank p.value --output-file $OUTPUT_MACS2_IDR/OraclePeaks_HAL01_TCF3_cle-idr --plot --log-output-file $OUTPUT_MACS2_IDR/OraclePeak_HAL01_TCF3_cle.idr.log
 
