@@ -6,7 +6,7 @@ Select the directory to contain the FitHiChIP source code, and clone it
 
 ```
 conda activate FitHiChIP
-cd /home/ubutu
+cd /home/ubuntu
 git clone https://github.com/ay-lab/FitHiChIP.git
 sudo chmod 777 -R FithHiChIP
 ```
@@ -19,14 +19,36 @@ With the Outputs from above you will need:
 
 **Filter pairs**
 
+Using partools select in the DovtailHiChIP conda environment to filter and include unique and rescue mapped read pairs.
+
 ```
-pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' JoinedRep_TCF3_HLF_hg38_nodd_hicpro_mapped.pairs -o JoinedRep_TCF3-HLF_hg38_nodd_mapped.filtered.pairs
+conda activate DovetailHiChIP
+cd /mnt/4.HiChIP_Alignment
+pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs -o JoinedRep_TCF3_HLF_hg38_nodd_mapped.filtered.pairs
+```
+
+Same for single replicate run
+
+```
+pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' Rep1_TCF3_HLF_hg38_nodd_mapped.pairs -o Rep1_TCF3_HLF_hg38_nodd_mapped.filtered.pairs
+pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' Rep2_TCF3_HLF_hg38_nodd_mapped.pairs -o Rep2_TCF3_HLF_hg38_nodd_mapped.filtered.pairs
 ```
 
 **HiCPro Valid Pairs Files**
 
+The paired files generated during Aligment needs to be converted into valid HiC-Pro files to proceed  with FitHiChIP this can be done with the following commands.
+
 ```
-grep -v '#' JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > JoinedRep_TCF3-HLF_hg38_nodd_hicpro_mapped.filtered.pairs.gz
+conda activate DovetailHiChIP
+cd /mnt/4.HiChIP_Alignment
+grep -v '#' JoinedRep_TCF3_HLF_hg38_nodd_mapped.filtered.pairs| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > JoinedRep_TCF3-HLF_hg38_nodd_hicpro_mapped.filtered.pairs.gz
+```
+
+Same for single replicate run
+
+```
+grep -v '#' Rep1_TCF3_HLF_hg38_nodd_mapped.filtered.pairs| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > Rep1_TCF3-HLF_hg38_nodd_hicpro_mapped.filtered.pairs.gz
+grep -v '#' Rep1_TCF3_HLF_hg38_nodd_mapped.filtered.pairs| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > Rep2_TCF3-HLF_hg38_nodd_hicpro_mapped.filtered.pairs.gz
 ```
 
 **MACS2 D1 Peak calling**
