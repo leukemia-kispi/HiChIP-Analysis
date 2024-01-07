@@ -1,6 +1,6 @@
 # Dovetail HiChIP
 
-Example presented here are based on data generated with the adapted Dovetail MNase-HiChIP kit. The TCF3::HLF fusion protein was targeted with TCF3 antibody from Cell signaling in the HAL-01 TCF3::HLF positive leukemia cell line CRISPR engineered to knockout wild type TCF3 expression and interfere with fusion protein targeted pulldown.
+Example presented here are based on data generated with the adapted Dovetail MNase-HiChIP kit. The TCF3::HLF fusion protein was targeted with [TCF3 antibody from Cell signaling](https://www.cellsignal.com/products/primary-antibodies/e2a-d2b1-rabbit-mab/12258?site-search-type=Products&N=4294956287&Ntt=e2a&fromPage=plp) in the HAL-01 TCF3::HLF positive leukemia cell line CRISPR engineered to knockout wild type TCF3 expression and interfere with fusion protein targeted pulldown.
 
 
 ## Install  dependecies from Dovetail-Genomics Script
@@ -48,15 +48,17 @@ Numpy and pysam have to be installed in that order and before pairtools. The ori
 ```
 nano ./HiChiP/installDep.sh
 ```
+[!NOTE]
 Perform the installation in the DovetailHiChIP conda environment
 
 ```
+conda activate DovetailHiChIP
 ./HiChiP/installDep.sh
 ```
 Once the installation is completed, sign off and then sign back to your instance to refresh the database of applications.
 
 [!NOTE] 
-Make sure pairtools is wokring 
+Make sure pairtools is wokring in the DovetailHiChIP conda environment
 
 ```
 pairtools --version

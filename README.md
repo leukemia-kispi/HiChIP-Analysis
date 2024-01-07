@@ -35,9 +35,12 @@ https://deeptools.readthedocs.io/en/develop/index.html
 Homer
 http://homer.ucsd.edu/homer/index.html
 
+[!NOTE]
+If issues during isntallation occure or running any of the tools refere to these documents for eventual troubleshooting.
+
 ## General Setup of Virtual Machine
 
-Initial setup of a new instance, running on Science Cloud UZH (https://cloud.s3it.uzh.ch/auth/login/?next=/).Example was done in an Ubuntu 18.04.6 image from scratch. VM with 32 core CPU and 128GB RAM was created for data processing.
+Initial setup of a new instance, running on Science Cloud UZH (https://cloud.s3it.uzh.ch/auth/login/?next=/). Example was done in an Ubuntu 18.04.6 image from scratch. VM with 32 core CPU and 128GB RAM was created for data processing.
 
 Access via the Ubuntu terminal on your working platform. Download Ubuntu application for your laptop to connect to the instance. Instructions for launching an instance and connecting is not covered here. Go to https://docs.s3it.uzh.ch/cloud/training/training_handout/ for details. For basic setup procedure proceed with below instructions.
 
