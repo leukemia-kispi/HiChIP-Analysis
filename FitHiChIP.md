@@ -1,11 +1,12 @@
 # FitHiChIP Loop calling
 
+## FitHiChIP setup
+
 FitHiChIP will be run from Docker image. If instructions in the [README.md](https://github.com/ValdemarP267/HiChIP-Analysis) will guide you through docker installation. This ensure to run FitHiChIP without having to install all dependecies from scratch.
 
 Select the directory to contain the FitHiChIP source code, and clone it
 
 ```
-conda activate FitHiChIP
 cd /home/ubuntu
 git clone https://github.com/ay-lab/FitHiChIP.git
 sudo chmod 777 -R FithHiChIP
@@ -17,9 +18,52 @@ With the Outputs from above you will need:
 - MACS2 called peaks from relevant ChIP-seq data or do MACS2 call peaks from primary algimnents in HiChIP data
 - Config file(example provided in this repository) specefying file locations and parameters
 
+## HiC-Pro Installation
+
+HiC-Pro needs to be installed on the system before the FitHiChIP docker can be run.
+
+Clone the HiC-Pro source code and give it permissions
+
+```
+cd /home/ubuntu
+git clone https://github.com/nservant/HiC-Pro.git
+sudo chmod 777 -R HiC-Pro
+```
+
+Use the environment.yml file to create a conda environment with HiC-Pro and its dependecies installed. Activate the environment
+Set the environment on the Path to be able to run it when using docker for FitHiChIP
+
+```
+conda env create -f HiC-Pro/environment.yml -p HiCPro_ENV
+conda activate /home/ubuntu/HiCPro_ENV/
+```
+
+Make sure unzip is installed in /home/ubuntu/HiCPro_ENV/
+
+```
+sudo apt install unzip
+```
+
+Complete installation by going to the HiC-Pro directory and add the "[/home/ubuntu/HiCPro_ENV/]" path PREFIX in config-install.txt file. This will be the installation location for HiC-Pro and some of the dependecies
+
+```
+cd /home/ubuntu/HiC-Pro
+nano config-install.txt
+```
+
+Complete the installation and add HiC-Pro to the $PATH
+
+```
+make configure
+make install
+export PATH="/home/ubuntu/HiCPro_ENV/HiC-Pro/bin/":$PATH
+```
+
+## Running FitHiChIP Loop calling
+
 **Filter pairs**
 
-Using partools select in the DovtailHiChIP conda environment to filter and include unique and rescue mapped read pairs.
+Using paritools select in the DovtailHiChIP conda environment to filter and include unique and rescue mapped read pairs.
 
 ```
 conda activate DovetailHiChIP
@@ -66,6 +110,7 @@ Run FitHiChIP via bash script using docker image.
 Make sure the configfile is properly setup and that all input files are on the specefied paths.
 
 ```
+conda activate /home/ubuntu/HiCPro_ENV/
 cd /home/ubuntu/FitHiChIP/
-bash ./FitHiChIP_Docker.sh -C /home/ubuntu/HiChIP-Analysis/configfile_CB_TCF3_JoinedRep_5kb_Merge_50kb_3M
+bash ./FitHiChIP_Docker.sh -C /home/ubuntu/HiChIP-Analysis/configfile_CB_TCF3_JoinedRep_5kb_50kb_3M
 ```
