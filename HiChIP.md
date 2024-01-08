@@ -42,14 +42,14 @@ Use the installDep.sh script from repository to ensure all dependecies are insta
 - py2bit 
 - pyBigWig 
 
-[!NOTE]
-Numpy and pysam have to be installed in that order and before pairtools. The original installDep.sh script may need modefications before executing.
+>[!NOTE]
+>Numpy and pysam have to be installed in that order and before pairtools. The original installDep.sh script may need modefications before executing.
 
 ```
 nano ./HiChiP/installDep.sh
 ```
-[!NOTE]
-Perform the installation in the DovetailHiChIP conda environment
+>[!NOTE]
+>Perform the installation in the DovetailHiChIP conda environment
 
 ```
 conda activate DovetailHiChIP
@@ -57,8 +57,8 @@ conda activate DovetailHiChIP
 ```
 Once the installation is completed, sign off and then sign back to your instance to refresh the database of applications.
 
-[!NOTE] 
-Make sure pairtools is wokring in the DovetailHiChIP conda environment
+>[!NOTE] 
+>Make sure pairtools is wokring in the DovetailHiChIP conda environment
 
 ```
 pairtools --version
@@ -114,8 +114,10 @@ sudo mkdir /mnt/tmp
 ## Run the TCF3_HiChIP_fusedRep.sh script
 
 The script will:
-- Trim adapters and short reads in a Trim_Galore conda environment
-- Initiate DovetailHiChIP conda environment and fuse Trimmed replicate reads for alignment
+- Initiate DovetailHiChIP conda environment
+- Trim adapters and short reads 
+- Fuse trimmed replicate reads for alignment
+- Paired Alignment 
 - QC stats and plot by comparing to provided TCF3::HLF ChIPseq
 - Generate bigwig files for IGV browsing
 - Generate .hic files for Juicertools browsing
