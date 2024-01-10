@@ -1,15 +1,15 @@
 # HiChIP-Analysis
 
-Dovetail, FITHiChIP and MACS2 documentation to analyze HiChIP data generated with Dovetail MNase-HiChIP kit.
+Documentation to analyze HiChIP data generated with Dovetail MNase-HiChIP kit.
 
-This is a setup and command execution guide to create the necessary working environments in conda and install the tools needed for HiChIP analysis of TCF3::HLF HiChIP data generated from the HAL-01 cell line.
+This is a setup and execution guide to create working environments in conda and install the tools needed for analysis of TCF3::HLF HiChIP data generated from the HAL-01 cell line.
 May be used for analysis of othere dataset with carefull adaptation of provided scripts.
 
-The repository will guide through:
+This guide will take you through:
 
 - Generation of a Linux operating Virtual Machine with the necessary base to proceed with installation of all needed tools, as well as directory architecture.
 
-- Installation of Dovetail HiChIP pipeline and and setup of Docker to pull docker image for FitHiChIP.  execution with necessary adaptation for TCF3::HLF HiChIP analysis.
+- Installation of Dovetail HiChIP pipeline and setup of Docker to pull docker image for FitHiChIP.
 
 - Installation of MACS2 and IDR for peak calling and validation.
 
@@ -43,9 +43,9 @@ http://homer.ucsd.edu/homer/index.html
 
 ## General Setup of Virtual Machine
 
-Initial setup of a new instance, running on Science Cloud UZH (https://cloud.s3it.uzh.ch/auth/login/?next=/). Example was done in an Ubuntu 20.04 image from scratch. VM with 32 core CPU and 128GB RAM was created for data processing.
+Original work was done by running Virtual Machines on Science Cloud UZH (https://cloud.s3it.uzh.ch/auth/login/?next=/). Examples were done in an VM of a Ubuntu 20.04 system. The VM was created with 32 core CPU and 128GB RAM for data processing.
 
-Access via the Ubuntu terminal on your working platform. Download Ubuntu application for your laptop to connect to the instance. Instructions for launching an instance and connecting is not covered here. Go to https://docs.s3it.uzh.ch/cloud/training/training_handout/ for details. For basic setup procedure proceed with below instructions.
+Instructions for launching an instance and connecting is not covered here. Go to https://docs.s3it.uzh.ch/cloud/training/training_handout/ for details. For basic setup procedure proceed with below instructions.
 
 **Virtual machine update**
 
@@ -56,9 +56,9 @@ sudo apt update
 sudo apt upgrade -y  
 ```
 
-**Install Anaconda3 to set up Conda environments and access Conda archives**
+**Install Anaconda3 to set up conda environments and access conda archives**
 
-Install tool for transferring data from or to a server using URLs. Download the bash file for installation of Anaconda3. Verify the checksum of selected install version
+Esure curl is installed for transferring data from or to a server using URLs. Download the bash file for installation of Anaconda3. Verify the checksum of selected install version
 
 ```
 sudo apt install curl -y 
@@ -71,7 +71,7 @@ The expected checksum for above example is:
 
 Other version available at https://repo.anaconda.com/archive/.
 
-Execute the the bash file
+Execute the bash file
 
 ```
 bash Anaconda3-2023.09-0-Linux-x86_64.sh
@@ -79,7 +79,7 @@ bash Anaconda3-2023.09-0-Linux-x86_64.sh
 
 Follow the license agreement, type "yes" when prompted. Press Enter to confirm the installation location "[/home/ubuntu/anaconda3]". Type 'no' for initialization prompt.
 
-Make sure the PATH to Anaconda is added
+Make sure the PATH to anaconda3 is added
 
 ```
 echo $PATH #check current PATH
@@ -94,7 +94,7 @@ conda init
 ```
 
 Logout "ctr+D" and re-enter the instance. "(base)" should show before the shell name.
-Check the installed version of Anaconda and confirm it's working.
+Check the installed version of anaconda and confirm it's working.
 
 ```
 conda --version
@@ -112,31 +112,36 @@ sudo rm Anaconda3-2023.09-0-Linux-x86_64.sh
 conda update -n base -c defaults conda
 ```
 
-**Ensure all channels are added to conda**
+**Ensure all needed channels are added to conda**
 
 ```
 conda config --add channels defaults
 conda config --add channels conda-forge
 ```
 
-**Run DirectoryArchitecture.sh**
+## Setup of directory architecture and conda environments
 
-Clone source code of this repository into selected directory
+With conda installed we are ready to setup the directory architecture we will use for our analsysis. In addition we create conda environments were our software will be installed. This is needed as some dependecies required may need to be of a certain versions for the tools to work without conflicts.
+
+Clone source code of this repository into selected directory. 
 
 ```
 cd /home/ubuntu/
 git clone https://github.com/ValdemarP267/HiChIP-Analysis.git
 ```
-Make sure whole folder has permission and run script DirectoryArchitecture.sh:
+Make sure whole folder has permission and run script DirectoryArchitecture.sh
+The script assumes work is to be saved into a mounted volume called "/mnt".
 
 ```
 sudo chmod 777 -R ./HiChIP-Analysis
 ./HiChIP-Analysis/DirectoryArchitecture.sh
 ```
 
-This will create all the conda environments and directory architecture for the analysis.
+To avoid memory issues, some of the pipeline steps require writing temporary files into a temp folder. Running the DirectoryArchitecture.sh will create this folder. Temporary files may take up to x3 of the space that the fastq.gz files are taking, make sure the working volume is big enough.
 
 ## Install Docker Engine needed for FitHiChIP tool
+
+Docker is a platform designed to help developers build, share, and run container applications.  
 
 **Uninstall old versions, conflicting packages**
 
@@ -153,7 +158,7 @@ Run the following command to uninstall all conflicting packages
 for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
 ```
 
-**Install using the Apt repository. Set up Docker's Apt repository**
+**Instalaltion using the apt repository. Set up Docker's apt repository**
 
 Add Docker's official GPG key
 
@@ -165,7 +170,7 @@ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o 
 sudo chmod a+r /etc/apt/keyrings/docker.gpg
 ```
 
-**Add the repository to Apt sources**
+**Add the repository to apt sources**
 
 ```
 echo \
@@ -189,7 +194,7 @@ This command downloads a test image and runs it in a container. When the contain
 sudo docker run hello-world
 ```
 
-**Linux post-installation steps for Docker Engine enable root user grou permissions for docker**
+**Linux post-installation steps for Docker Engine enable root user group permissions for docker**
 
 ```
 sudo usermod -aG docker $USER

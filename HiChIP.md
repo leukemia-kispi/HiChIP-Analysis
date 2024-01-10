@@ -1,16 +1,16 @@
 # Dovetail HiChIP
 
-Example presented here are based on data generated with the adapted Dovetail MNase-HiChIP kit. The TCF3::HLF fusion protein was targeted with [TCF3 antibody from Cell signaling](https://www.cellsignal.com/products/primary-antibodies/e2a-d2b1-rabbit-mab/12258?site-search-type=Products&N=4294956287&Ntt=e2a&fromPage=plp) in the HAL-01 TCF3::HLF positive leukemia cell line CRISPR engineered to knockout wild type TCF3 expression and interfere with fusion protein targeted pulldown.
+Example presented here are based on data generated with the adapted Dovetail MNase-HiChIP kit. The TCF3::HLF fusion protein was targeted with [TCF3 antibody from Cell signaling](https://www.cellsignal.com/products/primary-antibodies/e2a-d2b1-rabbit-mab/12258?site-search-type=Products&N=4294956287&Ntt=e2a&fromPage=plp). Chromatin originated from the HAL-01 TCF3::HLF positive leukemia cell line CRISPR engineered to knockout wild type TCF3 expression and prevent interference with fusion protein targeted pulldown.
 
-The initial input files needed 
-- Reference genome fasta file (can be dowloaded from [GCA_000001405.15_GRCh38_no_alt_analysis_set]https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/)
+Initial input files needed: 
+- Reference genome fasta file (can be downloaded from [GCA_000001405.15_GRCh38_no_alt_analysis_set](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/)
 - Black list for known artifact regions (Provided in the 0.BlackList directory) 
 - HiChIP sequencing files 
 
 >[!Note]
->Intermediery files will be generated that may be needed as inputs for dowstream procedures.
+>Intermediery files will be generated that are required inputs for dowstream procedures.
 
-## Install  dependecies from Dovetail-Genomics Script
+## Install dependecies for Dovetail-Genomics pipeline
 
 Clone source code from dovetail-genomics and pull juicertools.jar (can be moved into dovetails-genomics HiChIP directory):
 
@@ -65,14 +65,15 @@ conda activate DovetailHiChIP
 ```
 Once the installation is completed, sign off and then sign back to your instance to refresh the database of applications.
 
->[!NOTE] 
->Make sure pairtools is wokring in the DovetailHiChIP conda environment
+Make sure pairtools is wokring in the DovetailHiChIP conda environment
 
 ```
 pairtools --version
 ```
+>[!NOTE]
+>If error messages appear try to install pairtools from source, this should remove the old pairtools and reinstall it
 
-If error messages appear try to install pairtools from source, this should remove the old pairtools and reinstall it
+Install pairtools from source
 
 ```
 git clone https://github.com/pen2c/pairtools.git
@@ -81,14 +82,6 @@ pip install -e .
 ```
 
 Once the installation is completed, sign off and then sign back to your instance to refresh the database of applications.
-
-To avoid memory issues, some of the steps require writing temporary files into a temp folder, please generate a temp folder and remember its full path. Temp files may take up to x3 of the space that the fastq.gz files are taking.
-
-If missing run command assuming work is saved to a mounted volume.
-
-```
-sudo mkdir /mnt/tmp
-```
 
 ## Generation of genome file
 
@@ -131,7 +124,7 @@ The script will:
 - Trim adapters and short reads 
 - Fuse trimmed replicate reads for alignment
 - Perfomre paired alignment using bwa-mem, pairtools and samtools
-- QC stats and plot by comparing to provided TCF3::HLF ChIPseq
+- QC stats and plots if deduplication is done and TCF3::HLF ChIPseq files are included
 - Generate bigwig files for IGV browsing
 - Generate .hic files for Juicebox tool browsing
 
