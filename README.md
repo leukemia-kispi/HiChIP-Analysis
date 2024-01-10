@@ -1,16 +1,19 @@
 # HiChIP-Analysis
 
-Dovetail, FITHiChIP and MACS2 documentations to analyze HiChIP data generated with Dovetail MNase-HiChIP kit.
+Dovetail, FITHiChIP and MACS2 documentation to analyze HiChIP data generated with Dovetail MNase-HiChIP kit.
 
 This is a setup and command execution guide to create the necessary working environments in conda and install the tools needed for HiChIP analysis of TCF3::HLF HiChIP data generated from the HAL-01 cell line.
+May be used for analysis of othere dataset with carefull adaptation of provided scripts.
 
 The repository will guide through:
 
 - Generation of a Linux operating Virtual Machine with the necessary base to proceed with installation of all needed tools, as well as directory architecture.
 
-- Installation of Dovetail HiChIP pipeline and and setup of Docker to call docker image for FitHiChIP execution with necessary adaptation for TCF3::HLF HiChIP analysis.
+- Installation of Dovetail HiChIP pipeline and and setup of Docker to pull docker image for FitHiChIP.  execution with necessary adaptation for TCF3::HLF HiChIP analysis.
 
-- Installation of tools for downstream analysis and vizualization of data such as HOMER and coolbox.
+- Installation of MACS2 and IDR for peak calling and validation.
+
+- Installation of tools for downstream analysis and vizualization of data such as deepTools, HOMER and coolbox.
 
 ## Original Documentations
 
@@ -35,12 +38,12 @@ https://deeptools.readthedocs.io/en/develop/index.html
 Homer
 http://homer.ucsd.edu/homer/index.html
 
-[!NOTE]
-If issues during isntallation occure or running any of the tools refere to these documents for eventual troubleshooting.
+>[!NOTE]
+>If issues during installation occure or during execution of any of the tools refere to these documents for eventual troubleshooting.
 
 ## General Setup of Virtual Machine
 
-Initial setup of a new instance, running on Science Cloud UZH (https://cloud.s3it.uzh.ch/auth/login/?next=/). Example was done in an Ubuntu 18.04.6 image from scratch. VM with 32 core CPU and 128GB RAM was created for data processing.
+Initial setup of a new instance, running on Science Cloud UZH (https://cloud.s3it.uzh.ch/auth/login/?next=/). Example was done in an Ubuntu 20.04 image from scratch. VM with 32 core CPU and 128GB RAM was created for data processing.
 
 Access via the Ubuntu terminal on your working platform. Download Ubuntu application for your laptop to connect to the instance. Instructions for launching an instance and connecting is not covered here. Go to https://docs.s3it.uzh.ch/cloud/training/training_handout/ for details. For basic setup procedure proceed with below instructions.
 
