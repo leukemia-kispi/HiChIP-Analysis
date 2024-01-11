@@ -12,10 +12,10 @@ git clone https://github.com/ay-lab/FitHiChIP.git
 sudo chmod 777 -R FithHiChIP
 ```
 
-With the Outputs from above you will need:
+The inputs for FitHiChIP:
 
-- The Pairs files converted to HiC-Pro format.
-- MACS2 called peaks from relevant ChIP-seq data or do MACS2 call peaks from primary algimnents in HiChIP data
+- The Pairs files generated during HiChIP aligment converted to HiC-Pro format (See instructions below)
+- MACS2 called peaks from relevant ChIP-seq data or D1 MACS2 called peaks from primary algimnents created from HiChIP aligment data
 - Config file(example provided in this repository) specefying file locations and parameters
 
 ## HiC-Pro Installation
@@ -44,7 +44,7 @@ Make sure unzip is installed in /home/ubuntu/HiCPro_ENV/
 sudo apt install unzip
 ```
 
-Complete installation by going to the HiC-Pro directory and add the "[/home/ubuntu/HiCPro_ENV/]" path PREFIX in config-install.txt file. This will be the installation location for HiC-Pro and some of the dependecies
+Complete installation by entering the HiC-Pro directory and add the "[/home/ubuntu/HiCPro_ENV/]" path to PREFIX in config-install.txt file. This will be the installation location for HiC-Pro and some of the dependecies
 
 ```
 cd /home/ubuntu/HiC-Pro

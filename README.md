@@ -43,9 +43,9 @@ http://homer.ucsd.edu/homer/index.html
 
 ## General Setup of Virtual Machine
 
-Original work was done by running Virtual Machines on Science Cloud UZH (https://cloud.s3it.uzh.ch/auth/login/?next=/). Examples were done in an VM of a Ubuntu 20.04 system. The VM was created with 32 core CPU and 128GB RAM for data processing.
+Original work was done by running Virtual Machines on [Science Cloud UZH](https://cloud.s3it.uzh.ch/auth/login/?next=/). Examples were done in an VM of a Ubuntu 20.04 system. The VM was created with 32 core CPU and 128GB RAM for data processing.
 
-Instructions for launching an instance and connecting is not covered here. Go to https://docs.s3it.uzh.ch/cloud/training/training_handout/ for details. For basic setup procedure proceed with below instructions.
+Instructions for launching an instance and connecting is not covered here. Go to [training handouts](https://docs.s3it.uzh.ch/cloud/training/training_handout/) for details. For basic setup procedure proceed with below instructions.
 
 **Virtual machine update**
 
