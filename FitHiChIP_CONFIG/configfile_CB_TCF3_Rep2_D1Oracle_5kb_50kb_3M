@@ -27,7 +27,7 @@ Bed=
 
 # File containing reference ChIP-seq / HiChIP peaks (in .bed format)
 # mandatory parameter
-PeakFile=/mnt/5.MACS2/BLF_JoinedRep_TCF3_HLF_Oracle.macs2_peaks.narrowPeak
+PeakFile=/mnt/5.MACS2/BLF_Rep2_TCF3_HLF_OracleSet.macs2_peaks.narrowPeak
 
 # Output base directory under which all results will be stored
 OutDir=/mnt/6.FitHiChIP_Output/TCF3-HLF_Rep2_1DOracle_HAL01_5kb_MAIN
