@@ -27,20 +27,18 @@ if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefi
 fi
 
 # Set path to input FASTQ files using wildcard pattern
-READ1="$FASTQ_DIR/*_R1.fastq.gz"
-READ2="$FASTQ_DIR/*_R2.fastq.gz"
+#READ1="$FASTQ_DIR/*_R1.fastq.gz"
+#READ2="$FASTQ_DIR/*_R2.fastq.gz"
 
 # Trim samples and generate new FastQC files for all replicates
-trim_galore --fastqc --phred33 --length 50 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
+#trim_galore --fastqc --phred33 --length 50 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
 
-echo "Trimming for sample H3K27ac completed."
+#echo "Trimming for sample H3K27ac completed."
 
 # Alignment Output directory
 cd $OUTPUT_HICHIP_ALIGN
 
-# Loop through each pair of FASTQ files if working with paired-end read files for SingleRep HiChIP alignment
-
- # Set path to input FASTQ files using wildcard pattern
+# Set path to input FASTQ files using wildcard pattern
 HICHIP_R1="$OUTPUT_DIR_TRIM/*_R1_val_1.fq.gz"
 HICHIP_R2="$OUTPUT_DIR_TRIM/*_R2_val_2.fq.gz"
 MAPPED_PAIRS="_H3K27ac_hg38_dd_mapped.pairs"
@@ -50,12 +48,12 @@ MAPPED_BLF_BAM="BLF_H3K27ac_hg38_dd_mapped.PT.bam"
 bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
 pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
 pairtools sort --tmpdir=$TEMP --nproc $cores | \
-pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats H3K27ac_stats.txt | \
+pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --output-stats H3K27ac_stats.txt | \
 pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
 samtools view -bS -@$cores | \
 samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
 
-echo "HiCHIP Aligmnent Complete for rep${num}"
+echo "HiCHIP Aligmnent Complete for H3K27ac"
 
 cd /home/ubuntu
 
