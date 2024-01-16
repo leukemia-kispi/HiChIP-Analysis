@@ -65,13 +65,14 @@ for num in "${NUMBERS[@]}"; do
     # Set path to input FASTQ files using wildcard pattern
     HICHIP_R1="$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz"
     HICHIP_R2="$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz"
-    MAPPED_PAIRS="Rep${num}_TCF3_HLF_hg38_nodd_mapped.pairs"
-    MAPPED_BAM="Rep${num}_TCF3_HLF_hg38_nodd_mapped.PT.bam"
-    MAPPED_BLF_BAM="BLF_Rep${num}_TCF3_HLF_hg38_nodd_mapped.PT.bam"
+    MAPPED_PAIRS="Rep${num}_H3K27ac_hg38_dd_mapped.pairs"
+    MAPPED_BAM="Rep${num}_H3K27ac_hg38_dd_mapped.PT.bam"
+    MAPPED_BLF_BAM="BLF_Rep${num}_H3K27ac_hg38_dd_mapped.PT.bam"
 
     bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
     pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
     pairtools sort --tmpdir=$TEMP --nproc $cores | \
+    pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats H3K27ac_stats.txt | \
     pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
     samtools view -bS -@$cores | \
     samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
@@ -84,20 +85,20 @@ for num in "${NUMBERS[@]}"; do
     bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
 
     #QC compare ChIP-seq TCF3-HLF_FLAG
-    bash ./HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p ./HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIP_rep${num}_TCF3HLF_bw175
+    bash ./HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p ./HiChIP_Analysis/ChIP-Seq/ChIP_Seq_HAL01_H3K27ac_merged_cle_dd_q0.01macs2_peaks.narrowPeak.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIP_rep${num}_H3K27ac
 
     #QC Plot ChIP-seq TCF3-HLF_FLAG
-    python3 ./HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks ./HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -output $OUTPUT_HICHIP_SUB/HiChIP_rep${num}_TCF3HLF_ChIP_FLAG_bw175_enrichment.png
+    python3 ./HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks ./HiChIP_Analysis/ChIP-Seq/ChIP_Seq_HAL01_H3K27ac_merged_cle_dd_q0.01macs2_peaks.narrowPeak.bed -output $OUTPUT_HICHIP_SUB/HiChIP_rep${num}_H3K27ac_enrichment.png
 
     echo "HiCHIP Aligmnent QC Complete for rep${num}"
 
     #Enrichment for IGV
-    bamCoverage -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -o $OUTPUT_HICHIP_SUB/BLF_rep${num}_TCF3HLF_hg38_nodd_mapped.bw --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
+    bamCoverage -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -o $OUTPUT_HICHIP_SUB/BLF_rep${num}_H3K27ac_hg38_dd_mapped.bw --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
 
     echo "Generated Bigwig file Complete for rep${num}"
 
     #ContacMaps
-    java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads $cores $OUTPUT_HICHIP_ALIGN/$MAPPED_PAIRS $OUTPUT_HICHIP_SUB/rep${num}_TCF3HLF_HAL01_hg38_nodd_contact_map.hic $REF_GENOME
+    java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads $cores $OUTPUT_HICHIP_ALIGN/$MAPPED_PAIRS $OUTPUT_HICHIP_SUB/rep${num}_H3K27ac_HAL01_hg38_dd_contact_map.hic $REF_GENOME
 
     echo "Generated .hic file Complete rep${num}"
 done
