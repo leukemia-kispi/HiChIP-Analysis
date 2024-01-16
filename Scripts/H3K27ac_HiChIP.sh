@@ -26,36 +26,16 @@ if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefi
     conda activate $CONDA_ENV
 fi
 
-# Array containing replicate numbers found in filenames generated with TrimGalore.
-NUMBERS=("1" "2") # Replace with your actual replicate numbers
-
-# Flag to check if trimming needs to be performed initially set to false
-perform_trimming=false
-
-# Loop through each pair of FASTQ files if working with paired-end read files
-for num in "${NUMBERS[@]}"; do
-    # Check if trimmed files already exist for the current replicate
-    if [ ! -f "$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz" ] || [ ! -f "$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz" ]; then
-        perform_trimming=true
-        break  # No need to check other replicates once one is found missing
-    fi
-done
-
 # Perform trimming only if the flag is set to true
-if [ "$perform_trimming" = true ]; then
-    for num in "${NUMBERS[@]}"; do
-        # Set path to input FASTQ files using wildcard pattern
-        READ1="$FASTQ_DIR/*_rep${num}_R1.fastq.gz"
-        READ2="$FASTQ_DIR/*_rep${num}_R2.fastq.gz"
+num in "${NUMBERS[@]}"; do
+# Set path to input FASTQ files using wildcard pattern
+READ1="$FASTQ_DIR/*_R1.fastq.gz"
+READ2="$FASTQ_DIR/*_R2.fastq.gz"
 
-        # Trim samples and generate new FastQC files for all replicates
-        trim_galore --fastqc --phred33 --length 50 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
+# Trim samples and generate new FastQC files for all replicates
+trim_galore --fastqc --phred33 --length 50 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
 
-        echo "Trimming for sample $num completed."
-    done
-else
-    echo "Trimming not needed as output files already exist."
-fi
+echo "Trimming for sample H3K27ac completed."
 
 # Alignment Output directory
 cd $OUTPUT_HICHIP_ALIGN
