@@ -84,10 +84,10 @@ for num in "${NUMBERS[@]}"; do
     bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
 
     #QC compare ChIP-seq TCF3-HLF_FLAG
-    bash ./HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p ./HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIP_rep${num}_TCF3HLF_bw175
+    bash /home/ubuntu/HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p /home/ubuntu/HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIP_rep${num}_TCF3HLF_bw175
 
     #QC Plot ChIP-seq TCF3-HLF_FLAG
-    python3 ./HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks ./HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -output $OUTPUT_HICHIP_SUB/HiChIP_rep${num}_TCF3HLF_ChIP_FLAG_bw175_enrichment.png
+    python3 /home/ubuntu/HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks /home/ubuntu/HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -output $OUTPUT_HICHIP_SUB/HiChIP_rep${num}_TCF3HLF_ChIP_FLAG_bw175_enrichment.png
 
     echo "HiCHIP Aligmnent QC Complete for rep${num}"
 
