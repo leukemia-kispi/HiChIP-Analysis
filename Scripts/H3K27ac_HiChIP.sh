@@ -41,8 +41,8 @@ cd $OUTPUT_HICHIP_ALIGN
 # Set path to input FASTQ files using wildcard pattern
 HICHIP_R1="$OUTPUT_DIR_TRIM/*_R1_val_1.fq.gz"
 HICHIP_R2="$OUTPUT_DIR_TRIM/*_R2_val_2.fq.gz"
-MAPPED_PAIRS="_H3K27ac_hg38_dd_mapped.pairs"
-MAPPED_BAM="_H3K27ac_hg38_dd_mapped.PT.bam"
+MAPPED_PAIRS="H3K27ac_hg38_dd_mapped.pairs"
+MAPPED_BAM="H3K27ac_hg38_dd_mapped.PT.bam"
 MAPPED_BLF_BAM="BLF_H3K27ac_hg38_dd_mapped.PT.bam"
 
 bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
@@ -59,12 +59,13 @@ cd /home/ubuntu
 
 #Remove black list
 bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
+samtools index $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
 
 #QC compare ChIP-seq TCF3-HLF_FLAG
 bash /home/ubuntu/HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p /home/ubuntu/HiChIP_Analysis/ChIP-Seq/ChIP_Seq_HAL01_H3K27ac_merged_cle_dd_q0.01macs2_peaks.narrowPeak.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIP_H3K27ac
 
 #QC Plot ChIP-seq TCF3-HLF_FLAG
-python3 /home/ubuntu/HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks /home/ubuntu/HiChIP_Analysis/ChIP-Seq/ChIP_Seq_HAL01_H3K27ac_merged_cle_dd_q0.01macs2_peaks.narrowPeak.bed -output $OUTPUT_HICHIP_SUB/HiChIP_H3K27ac_enrichment.png
+python3 /home/ubuntu/HiChiP/plot_chip_enrichment.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks /home/ubuntu/HiChIP_Analysis/ChIP-Seq/ChIP_Seq_HAL01_H3K27ac_merged_cle_dd_q0.01macs2_peaks.narrowPeak.bed -output $OUTPUT_HICHIP_SUB/HiChIP_H3K27ac_enrichment.png
 
 echo "HiCHIP Aligmnent QC Complete for H3K27ac"
 

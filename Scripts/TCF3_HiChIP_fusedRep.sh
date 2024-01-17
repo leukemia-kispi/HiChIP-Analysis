@@ -95,6 +95,7 @@ cd /home/ubuntu
 
 #Remove black list
 bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
+samtools index $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
 
 #QC compare ChIP-seq TCF3-HLF_FLAG
 bash /home/ubuntu/HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p /home/ubuntu/HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq-TCF3HLF_bw175
