@@ -8,7 +8,7 @@
 
 # File containing the valid pairs from HiCPro pipeline 
 # Can be either a text file, or a gzipped text file 
-ValidPairs=/mnt/4.HiChIP_Alignment/H3K27ac/H3K27ac_dd_hicpro_mapped.filtered.pairs.gz
+ValidPairs=/mnt/4.HiChIP_Alignment/H3K27ac/H3K27ac_hg38_dd_hicpro_mapped.filtered.pairs.gz
 # File containing the bin intervals (according to a specified bin size)
 # which is an output of HiC-pro pipeline
 # If not provided, this is computed from the parameter 1
