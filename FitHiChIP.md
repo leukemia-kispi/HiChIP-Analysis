@@ -97,7 +97,7 @@ grep -v '#' Rep1_TCF3_HLF_hg38_nodd_mapped.filtered.pairs| awk -F"\t" '{print $1
 
 **MACS2 D1 Peak calling**
 
-As we do not have good ChIPseq data for TCF3::HLF in HAL-01 that lets us define primary peaks within our HiChIP data using FitHiChIP. We instead have to you the HiChIP data itself to generate primary aligment.
+The published ChIPseq data for TCF3::HLF in HAL-01 did not provide clear and abundant peaks to lets us define primary peaks within our HiChIP data using FitHiChIP. We instead used the TCF3::HLF HiChIP data itself to generate primary aligment.
 
 Assuming you run both the TCF3_HiChIP_fusedrep.sh and TCF3_HiChIP_singleRep.sh scripts. We can take it a step further and adjust the MACS2 settings to improve MACS2 peak calling and improve our confidence in the peaks.
 
