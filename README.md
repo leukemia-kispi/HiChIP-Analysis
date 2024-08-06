@@ -1,13 +1,13 @@
 # HiChIP-Analysis
 
-Documentation to analyze HiChIP data generated with Dovetail MNase-HiChIP kit.
+This project describes the setup and approach to analyze HiChIP data generated with Dovetail MNase-HiChIP kit.
 
 This is a setup and execution guide to create working environments in conda and install the tools needed for analysis of TCF3::HLF HiChIP data generated from the HAL-01 cell line.
 May be used for analysis of othere dataset with carefull adaptation of provided scripts.
 
 This guide will take you through:
 
-- Generation of a Linux operating Virtual Machine with the necessary base to proceed with installation of all needed tools, as well as directory architecture.
+- Setup of Linux operating system with the necessary base to proceed with installation of all needed tools, as well as directory architecture.
 
 - Installation of Dovetail HiChIP pipeline and setup of Docker to pull docker image for FitHiChIP.
 
@@ -43,9 +43,9 @@ http://homer.ucsd.edu/homer/index.html
 
 ## General Setup of Virtual Machine
 
-Original work was done by running Virtual Machines on [Science Cloud UZH](https://cloud.s3it.uzh.ch/auth/login/?next=/). Examples were done in an VM of a Ubuntu 20.04 system. The VM was created with 32 core CPU and 128GB RAM for data processing.
+The described setup was done in Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
 
-Instructions for launching an instance and connecting is not covered here. Go to [training handouts](https://docs.s3it.uzh.ch/cloud/training/training_handout/) for details. For basic setup procedure proceed with below instructions.
+For basic setup procedure proceed with below instructions.
 
 **Virtual machine update**
 

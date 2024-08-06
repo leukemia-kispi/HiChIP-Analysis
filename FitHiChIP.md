@@ -2,7 +2,7 @@
 
 ## FitHiChIP setup
 
-FitHiChIP will be run from Docker image. If instructions in the [README.md](https://github.com/ValdemarP267/HiChIP-Analysis) will guide you through docker installation. This ensure to run FitHiChIP without having to install all dependecies from scratch.
+FitHiChIP will be run from Docker image. The instructions in the [README.md](https://github.com/ValdemarP267/HiChIP-Analysis) will guide you through docker installation. This ensure to run FitHiChIP without having to install all dependecies from scratch.
 
 Select the directory to contain the FitHiChIP source code, and clone it
 
