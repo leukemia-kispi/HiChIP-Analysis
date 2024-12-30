@@ -1,8 +1,6 @@
 # HiChIP-Analysis
 
-This project describes the setup and approach to analyze HiChIP data generated with Dovetail MNase-HiChIP kit.
-
-This is a setup and execution guide to create working environments in conda and install the tools needed for analysis of TCF3::HLF HiChIP data generated from the HAL-01 cell line.
+This is a beginner friendly setup and execution guide for analysis of TCF3::HLF HiChIP data, generated from the HAL-01 cell line using the Dovetail MNase-HiChIP kit.
 May be used for analysis of othere dataset with carefull adaptation of provided scripts.
 
 This guide will take you through:
@@ -39,15 +37,15 @@ Homer
 http://homer.ucsd.edu/homer/index.html
 
 >[!NOTE]
->If issues during installation occure or during execution of any of the tools refere to these documents for eventual troubleshooting.
+>If issues occure during installation or during execution of any of the tools, refere to above documents for eventual troubleshooting.
 
-## General Setup of Virtual Machine
+## General Setup
 
-The described setup was done in Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
+Examples described were done on a virtual machine running Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
 
 For basic setup procedure proceed with below instructions.
 
-**Virtual machine update**
+**Update**
 
 Ensure the new virtual machine/instance is up to date and upgraded. Confirm with defaults when prompted. This may take few mininutes. 
 
@@ -58,7 +56,7 @@ sudo apt upgrade -y
 
 **Install Anaconda3 to set up conda environments and access conda archives**
 
-Esure curl is installed for transferring data from or to a server using URLs. Download the bash file for installation of Anaconda3. Verify the checksum of selected install version
+Ensure curl is installed for transferring data from or to a server using URLs. Download the bash file for installation of Anaconda3. Verify the checksum of selected install version
 
 ```
 sudo apt install curl -y 
@@ -71,7 +69,7 @@ The expected checksum for above example is:
 
 Other version available at https://repo.anaconda.com/archive/.
 
-Execute the bash file
+**Execute the bash file**
 
 ```
 bash Anaconda3-2023.09-0-Linux-x86_64.sh
@@ -119,7 +117,7 @@ conda config --add channels defaults
 conda config --add channels conda-forge
 ```
 
-## Setup of directory architecture and conda environments
+## Setup of directory architecture and DovetailHiChIP and MACS2 conda environments
 
 With conda installed we are ready to setup the directory architecture we will use for our analsysis. In addition we create conda environments were our software will be installed. This is needed as some dependecies required may need to be of a certain versions for the tools to work without conflicts.
 
@@ -138,6 +136,9 @@ sudo chmod 777 -R ./HiChIP-Analysis
 ```
 
 To avoid memory issues, some of the pipeline steps require writing temporary files into a temp folder. Running the DirectoryArchitecture.sh will create this folder. Temporary files may take up to x3 of the space that the fastq.gz files are taking, make sure the working volume is big enough.
+
+>[!NOTE]
+>Running the script should create two conda environments, DovetailHiChIP (installed; trim-galore, fastqc, multiqc) and MACS2 (isntalled; MACS2, IDR).
 
 ## Install Docker Engine needed for FitHiChIP tool
 

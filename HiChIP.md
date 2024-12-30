@@ -1,6 +1,6 @@
 # Dovetail HiChIP
 
-Example presented here are based on data generated with the adapted Dovetail MNase-HiChIP kit. The TCF3::HLF fusion protein was targeted with [TCF3 antibody from Cell signaling](https://www.cellsignal.com/products/primary-antibodies/e2a-d2b1-rabbit-mab/12258?site-search-type=Products&N=4294956287&Ntt=e2a&fromPage=plp). Chromatin originated from the HAL-01 TCF3::HLF positive leukemia cell line CRISPR engineered to knockout wild type TCF3 expression and prevent interference with fusion protein targeted pulldown.
+Example presented here are based on data generated with the adapted Dovetail MNase-HiChIP kit. The TCF3::HLF fusion protein was targeted with [TCF3 antibody from Cell signaling](https://www.cellsignal.com/products/primary-antibodies/e2a-d2b1-rabbit-mab/12258?site-search-type=Products&N=4294956287&Ntt=e2a&fromPage=plp). Chromatin originated from the HAL-01 TCF3::HLF positive leukemia cell line, CRISPR engineered to knockout wild type TCF3 expression and prevent interference with fusion protein targeted pulldown.
 
 Initial input files needed: 
 - Reference genome fasta file (can be downloaded from [GCA_000001405.15_GRCh38_no_alt_analysis_set](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/))
@@ -50,14 +50,14 @@ Use the installDep.sh script from the Dovetail-Genomics source repository to ens
 - pyBigWig 
 
 >[!NOTE]
->Numpy and pysam have to be installed in that order and before pairtools. The original installDep.sh script may need modefications before executing.
+>Numpy and pysam have to be installed in that order and before pairtools. The original installDep.sh script may need modefications before executing. For this use one can use the nano editing tool.
 
 ```
 nano ./HiChiP/installDep.sh
 ```
 
 >[!NOTE]
->Perform the installation in the DovetailHiChIP conda environment
+>Perform the installation while in the DovetailHiChIP conda environment, created if the bash script DirectoryArchitecture.sh was executed as described in [README.md].
 
 ```
 conda activate DovetailHiChIP
@@ -123,7 +123,7 @@ The script will:
 - Initiate DovetailHiChIP conda environment
 - Trim adapters and short reads 
 - Fuse trimmed replicate reads for alignment
-- Perfomre paired alignment using bwa-mem, pairtools and samtools
+- Perform paired alignment using bwa-mem, pairtools and samtools
 - QC stats and plots if deduplication is done and TCF3::HLF ChIPseq files are included
 - Generate bigwig files for IGV browsing
 - Generate .hic files for Juicebox tool browsing
