@@ -2,7 +2,7 @@
 
 ## FitHiChIP setup
 
-FitHiChIP will be run from Docker image. The instructions in the [README.md](https://github.com/ValdemarP267/HiChIP-Analysis) will guide you through docker installation. This ensure to run FitHiChIP without having to install all dependecies from scratch.
+FitHiChIP will be run from Docker image. The instructions in the [README.md](https://github.com/ValdemarP267/HiChIP-Analysis) will guide you through docker installation. This simplefies FitHiChIP installation as dependecies dont need to be installed from scratch.
 
 Select the directory to contain the FitHiChIP source code, and clone it
 
@@ -12,9 +12,9 @@ git clone https://github.com/ay-lab/FitHiChIP.git
 sudo chmod 777 -R FithHiChIP
 ```
 
-The inputs for FitHiChIP:
+The inputs needed to run FitHiChIP:
 
-- The Pairs files generated during HiChIP aligment converted to HiC-Pro format (See instructions below)
+- Pairs files generated during HiChIP aligment converted to HiC-Pro format (See below)
 - MACS2 called peaks from relevant ChIP-seq data or D1 MACS2 called peaks from primary algimnents created from HiChIP aligment data
 - Config file(example provided in this repository) specefying file locations and parameters
 

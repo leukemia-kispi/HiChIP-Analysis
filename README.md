@@ -138,7 +138,9 @@ sudo chmod 777 -R ./HiChIP-Analysis
 To avoid memory issues, some of the pipeline steps require writing temporary files into a temp folder. Running the DirectoryArchitecture.sh will create this folder. Temporary files may take up to x3 of the space that the fastq.gz files are taking, make sure the working volume is big enough.
 
 >[!NOTE]
->Running the script should create two conda environments, DovetailHiChIP (installed; trim-galore, fastqc, multiqc) and MACS2 (isntalled; MACS2, IDR).
+>Running the script should create two conda environments:
+> -DovetailHiChIP with trim-galore, fastqc and multiqc installed
+> -MACS2 with MACS2, IDR installed
 
 ## Install Docker Engine needed for FitHiChIP tool
 
