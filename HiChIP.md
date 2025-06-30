@@ -4,7 +4,7 @@ Example presented here are based on data generated with the adapted Dovetail MNa
 
 Initial input files needed: 
 - Reference genome fasta file (can be downloaded from [GCA_000001405.15_GRCh38_no_alt_analysis_set](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/))
-- Black list for known artifact regions (Provided in the 0.BlackList source code directory) 
+- Black list for known artifact regions [BlackList](https://github.com/ValdemarP267/HiChIP-Analysis/0.BlackList)
 - HiChIP sequencing files 
 
 >[!Note]
@@ -33,7 +33,7 @@ chmod +x ./HiChiP/enrichment_stats.sh
 chmod +x ./HiChiP/installDep.sh
 ```
 
-Use the installDep.sh script from the Dovetail-Genomics source repository to ensure all dependecies are installed in the conda Dovetail conda environment, generated if the instructions in README.md were followed. In addition to installing GCC make, python and pip, it will include following dependencies:
+Use the installDep.sh script from the Dovetail-Genomics source repository to ensure all dependecies are installed in the DovetailHiChIP conda environment, generated if the instructions for General Setup were followed. In addition to installing GCC make, python and pip, it will include following dependencies:
 
 - numpy
 - pysam
@@ -57,7 +57,7 @@ nano ./HiChiP/installDep.sh
 ```
 
 >[!NOTE]
->Perform the installation while in the DovetailHiChIP conda environment, created if the bash script DirectoryArchitecture.sh was executed as described in [README.md].
+>Perform the installation while in the DovetailHiChIP conda environment, created if the bash script DirectoryArchitecture.sh was executed as described in [README.md](https://github.com/ValdemarP267/HiChIP-Analysis/README.md).
 
 ```
 conda activate DovetailHiChIP
@@ -85,7 +85,7 @@ Once the installation is completed, sign off and then sign back to your instance
 
 ## Generation of genome file
 
-A genome file is needed for downstream steps. It is a tab delimited file with chromosome names and their respective sizes. Follow these steps to generate it:
+First o generate a genome file. It is a tab delimited file with chromosome names and their respective sizes needed for downstream steps:
 
 Generate an index file for your reference, a reference file with only the main chromosomes should be used (e.g. without alternative or unplaced chromosomes). For the analsysis of TCF3::HLF HiChIP the reference genome GCA_000001405.15_GRCh38_no_alt_analysis_set.fna was downloaded from https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/
 
@@ -124,7 +124,6 @@ The script will:
 - Trim adapters and short reads 
 - Fuse trimmed replicate reads for alignment
 - Perform paired alignment using bwa-mem, pairtools and samtools
-- QC stats and plots if deduplication is done and TCF3::HLF ChIPseq files are included
 - Generate bigwig files for IGV browsing
 - Generate .hic files for Juicebox tool browsing
 

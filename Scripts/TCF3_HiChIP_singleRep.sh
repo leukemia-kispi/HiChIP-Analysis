@@ -91,7 +91,7 @@ for num in "${NUMBERS[@]}"; do
     python3 /home/ubuntu/HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks /home/ubuntu/HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3-HLF_FLAG_bw175_cle-idr.bed -output $OUTPUT_HICHIP_SUB/HiChIP_rep${num}_TCF3HLF_ChIP_FLAG_bw175_enrichment.png
 
     echo "HiCHIP Aligmnent QC Complete for rep${num}"
-
+    
     #Enrichment for IGV
     bamCoverage -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -o $OUTPUT_HICHIP_SUB/BLF_rep${num}_TCF3HLF_hg38_nodd_mapped.bw --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Set path to blacklist.
-BLACKLIST="/mnt/DeepTool/Target_Region/Q1cutoff_3197_BlackList.bed"
+BLACKLIST="/mnt/DeepTool/Target_Region/Q1cutoff_3196_BlackList.bed"
 # Set output directories
 OUTPUT_DEEPTOOL="/mnt/7.Deeptool_Matrix/Outputs"
 OUTPUT_DEEPTOOL_GRAPHS="/mnt/7.Deeptool_Matrix/Graphs"
@@ -14,7 +14,7 @@ BW_H3K4ME3="/mnt/7.Deeptool_Matrix/Coverage/ChIP_HAL01_H3K4me3_merged_cle_dd_ext
 BW_H3K27ME3="/mnt/7.Deeptool_Matrix/Coverage/ChIP_HAL01_H3K27me3_merged_cle_dd_extended_RPKM.bw"
 BW_ATACSEQ="/mnt/7.Deeptool_Matrix/Coverage/GSM5663910_05_HAL01_ATAC-Seq.hg38.bw"
 BED_INPUT_WHOLE="/mnt/7.Deeptool_Matrix/Target_Regions/BLF_JoinedRep_TCF3_HLF_gs_hg38_nood_kdp9_500bp_summit.bed"
-BED_INPUT_MOTIF="/mnt/7.Deeptool_Matrix/Target_Regions/Anchor_UniqueHLF_motifs_3197.bed"
+BED_INPUT_MOTIF="/mnt/7.Deeptool_Matrix/Target_Regions/Anchor_UniqueHLF_motifs_3196.bed"
 BED_INPUT_CLUSTER_1_2="/mnt/7.Deeptool_Matrix/Target_Regions/Cluster_1-2.bed"
 BED_INPUT_CLUSTER_3="/mnt/7.Deeptool_Matrix/Target_Regions/Cluster_3.bed"
 BED_INPUT_CLUSTER_4="/mnt/7.Deeptool_Matrix/Target_Regions/Cluster_4.bed"
@@ -39,7 +39,7 @@ $BW_ATACSEQ \
 --referencePoint center -b 5000 -a 5000 -bs 10 -p "max" -out $OUTPUT_DEEPTOOL/TCF3-HLF_JoinedRep_nood_p9_500bp_summit_bs10_marks.mat \
 --missingDataAsZero --skipZeros
 
-#HiChIP 3197 HLF motif Peaks. Using MEME-suite filtered out to only inlcude the 3197 peaks with HLF motif
+#HiChIP 3196 HLF motif Peaks. Using MEME-suite filtered out to only inlcude the 3196 peaks with HLF motif
 computeMatrix reference-point -S $BW_HICHIP \ 
 $BW_H3K27AC \
 $BW_H3K4M1 \
@@ -47,10 +47,10 @@ $BW_H3K4ME3 \
 $BW_H3K27ME3 \
 $BW_ATACSEQ \
 -R $BED_INPUT_MOTIF \
---referencePoint center -b 5000 -a 5000 -bs 10 -p "max" -out $OUTPUT_DEEPTOOL/TCF3HLF_HLF_motifs_3197_marks.mat \
+--referencePoint center -b 5000 -a 5000 -bs 10 -p "max" -out $OUTPUT_DEEPTOOL/TCF3HLF_HLF_motifs_3196_marks.mat \
 --missingDataAsZero --skipZeros
 
-#HiChIP 3197 HLF motif Peaks with 1Quartile cutoff. Using R to see data in TCF3HLF_HLF_motifs_3197_marks.mat and remove the 1st Quartile of data (low TCF3::HLF signal) by setting them as black list regions
+#HiChIP 3196 HLF motif Peaks with 1Quartile cutoff. Using R to see data in TCF3HLF_HLF_motifs_3196_marks.mat and remove the 1st Quartile of data (low TCF3::HLF signal) by setting them as black list regions
 computeMatrix reference-point -S $BW_HICHIP \ 
 $BW_H3K27AC \
 $BW_H3K4M1 \
@@ -61,7 +61,7 @@ $BW_ATACSEQ \
 --referencePoint center -b 5000 -a 5000 -bs 10 -p "max" -out $OUTPUT_DEEPTOOL/TCF3HLF_JoinedRep_kdp9Oracle_Q1cutoff_marks.mat \
 --missingDataAsZero --skipZeros
 
-#HiChIP 3197 HLF motif Peaks with 1Quartile cutoff and ClusterSorted .bed files from --outFileSortedRegions generated in Heatmaps.
+#HiChIP 3196 HLF motif Peaks with 1Quartile cutoff and ClusterSorted .bed files from --outFileSortedRegions generated in Heatmaps.
 computeMatrix reference-point -S $BW_HICHIP \ 
 $BW_H3K27AC \
 $BW_H3K4M1 \
@@ -86,7 +86,7 @@ plotHeatmap -m $OUTPUT_DEEPTOOL/TCF3HLF_ClusterSorted_marks.mat \
 --heatmapHeight 60 --heatmapWidth 15 \
 --yAxisLabel RPKM --xAxisLabel "distance (bp)" --dpi 600 --outFileSortedRegions $OUTPUT_DEEPTOOL_SORTED/ClusterSorted.bed
 
-#
+#Heatmap for remaining regions after excluding HLF motif regions.
 plotHeatmap -m $OUTPUT_DEEPTOOL/NoHLFmotif_TCF3-HLF_JoinedRep_nood_p9_500bp_summit_bs10_marks.mat \
 -o $OUTPUT_DEEPTOOL_GRAPHS/NoHLFmotif_TCF3-HLF_JoinedRep_1des_HiChIP.png \
 --colorList "white,darkgreen" "white,darkblue" "white,purple" "white,red" \
