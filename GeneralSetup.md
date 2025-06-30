@@ -79,9 +79,9 @@ conda config --add channels conda-forge
 
 ## Setup of directory architecture and DovetailHiChIP and MACS2 conda environments
 
-With conda installed we are ready to setup the directory architecture we will use for our analsysis. In addition we create conda environments where our software will be installed. This is needed because dependecies required may need to be of a certain versions for the tools to work without conflicts.
+With Conda installed, we are now ready to set up the directory structure for our analysis. Additionally, we will create Conda environments where the required software will be installed. This step is important because different tools may require specific versions of their dependencies in order to function properly without conflicts.
 
-Clone source code of this repository into selected directory. 
+Clone the source code of the HiChIP-Analysis repository into a selected directory. 
 
 ```
 cd /home/ubuntu/
@@ -151,7 +151,7 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 
 **Verify that the Docker Engine installation is successful by running the hello-world image**
 
-This command downloads a test image and runs it in a container. When the container runs, it prints a confirmation message and exits.
+This command downloads a test image and runs it in a container. It will prints a confirmation message and exits.
 
 ```
 sudo docker run hello-world
@@ -167,6 +167,6 @@ docker run hello-world
 
 With above steps done you are ready to proceed with:
 
-[HiChIP.md](https://github.com/ValdemarP267/HiChIP-Analysis/HiChIP.md) - Setup instructions for the Dovetail pipleline for aligments and pre-processing of HiChIP output.
-[FitHiChIP.md](https://github.com/ValdemarP267/HiChIP-Analysis/FitHiChIP.md) - Setup instructions for FitHiChIP for loop calling.
-[Coolbox.md](https://github.com/ValdemarP267/HiChIP-Analysis/Coolbox.md) - Setup of Coolbox visualization toolkit for genomic data imported to Jupyter Notebook for creating visuals and browse.
+>[HiChIP.md](https://vscode.dev/github/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md) - Setup instructions for the Dovetail pipleline for aligments and pre-processing of HiChIP output.
+>[FitHiChIP.md](https://vscode.dev/github/leukemia-kispi/HiChIP-Analysis/blob/main/FitHiChIP.md) - Setup instructions for FitHiChIP for loop calling.
+>[Coolbox.md](https://vscode.dev/github/leukemia-kispi/HiChIP-Analysis/blob/main/Coolbox.md) - Setup of Coolbox visualization toolkit for genomic data imported to Jupyter Notebook for creating visuals and browse.

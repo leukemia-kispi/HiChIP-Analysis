@@ -39,4 +39,4 @@ http://homer.ucsd.edu/homer/index.html
 >[!NOTE]
 >If issues occure during installation or during execution of any of the tools, refere to above documents for eventual troubleshooting.
 
-To start of with general setup follow this link [GeneralSetup.md]https://github.com/ValdemarP267/HiChIP-Analysis/GeneralSetup.md and proceed from there to the specific pipelines.
+To start of with general setup follow this link [GeneralSetup.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/GeneralSetup.md) and proceed from there to the specific pipelines. 
