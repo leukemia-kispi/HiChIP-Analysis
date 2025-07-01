@@ -167,6 +167,6 @@ docker run hello-world
 
 With above steps done you are ready to proceed with:
 
->[HiChIP.md](https://vscode.dev/github/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md) - Setup instructions for the Dovetail pipleline for aligments and pre-processing of HiChIP output.
->[FitHiChIP.md](https://vscode.dev/github/leukemia-kispi/HiChIP-Analysis/blob/main/FitHiChIP.md) - Setup instructions for FitHiChIP for loop calling.
->[Coolbox.md](https://vscode.dev/github/leukemia-kispi/HiChIP-Analysis/blob/main/Coolbox.md) - Setup of Coolbox visualization toolkit for genomic data imported to Jupyter Notebook for creating visuals and browse.
+>[HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md) - Setup instructions for the Dovetail pipleline for aligments and pre-processing of HiChIP output.
+>[FitHiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/FitHiChIP.md) - Setup instructions for FitHiChIP for loop calling.
+>[Coolbox.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/Coolbox.md) - Setup of Coolbox visualization toolkit for genomic data imported to Jupyter Notebook for creating visuals and browse. 
