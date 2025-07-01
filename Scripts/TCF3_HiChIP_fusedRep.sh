@@ -75,8 +75,8 @@ cd $OUTPUT_HICHIP_ALIGN
 
 # Input/Output files for alignment
 # BLF referse to black list filtered file
-HICHIP_R1="/mnt/3.TRIM/JoinedFastq_R1.fq.gz"
-HICHIP_R2="/mnt/3.TRIM/JoinedFastq_R2.fq.gz"
+HICHIP_R1="$OUTPUT_DIR_TRIM/JoinedFastq_R1.fq.gz"
+HICHIP_R2="$OUTPUT_DIR_TRIM/JoinedFastq_R2.fq.gz"
 MAPPED_PAIRS="JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs"
 MAPPED_BAM="JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 MAPPED_BLF_BAM="BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"

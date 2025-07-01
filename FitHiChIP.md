@@ -14,8 +14,8 @@ sudo chmod 777 -R FithHiChIP
 
 Data inputs needed to run FitHiChIP:
 
-- Pairs files generated during HiChIP aligment converted to HiC-Pro format (See below)
-- MACS2 called peaks from relevant ChIP-seq data or D1 MACS2 called peaks from primary algimnents created from HiChIP aligment data
+- Pairs files generated during HiChIP aligment [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md) converted to HiC-Pro format (See below)
+- MACS2 called peaks from relevant ChIP-seq data or D1 MACS2 called peaks from primary algimnents created from HiChIP aligment data by following instructions in [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md)
 - Config file(example provided in this repository) specefying file locations and parameters
 
 ## HiC-Pro Installation

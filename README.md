@@ -27,6 +27,9 @@ https://github.com/lh3/bwa
 HiC-Pro
 https://github.com/nservant/HiC-Pro
 
+MACS2
+https://github.com/macs3-project/MACS
+
 coolbox
 https://gangcaolab.github.io/CoolBox/index.html
 
