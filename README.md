@@ -9,7 +9,7 @@ This guide will take you through:
 
 - Installation of Dovetail HiChIP pipeline and setup of Docker to pull docker image for FitHiChIP.
 
-- Installation of MACS2 and IDR for peak calling and validation.
+- Installation of Picard, MACS2 and IDR for deduplication, peak calling and validation respectivly.
 
 - Installation of tools for downstream analysis and vizualization of data such as deepTools, HOMER and coolbox.
 
@@ -26,6 +26,9 @@ https://github.com/lh3/bwa
 
 HiC-Pro
 https://github.com/nservant/HiC-Pro
+
+Picard
+https://github.com/broadinstitute/picard
 
 MACS2
 https://github.com/macs3-project/MACS

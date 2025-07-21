@@ -76,6 +76,20 @@ conda update -n base -c defaults conda
 conda config --add channels defaults
 conda config --add channels conda-forge
 ```
+##Install Picard tool for deduplication of ChIP-seq BAM files
+
+**Create a separate conda environment for Picard**
+```
+conda create -y -n Picard
+```
+Follow setup instructions found at https://broadinstitute.github.io/picard/
+
+**Make sure Java >= 11 is installed**
+```
+java --version
+sudo apt install openjdk-17-jre-headless -y
+```
+Confirm any prompts with defaults.
 
 ## Setup of directory architecture and DovetailHiChIP and MACS2 conda environments
 
@@ -99,8 +113,8 @@ To avoid memory issues, some of the pipeline steps require writing temporary fil
 
 >[!NOTE]
 >Running the script should create two conda environments:
-> -DovetailHiChIP with trim-galore, fastqc and multiqc installed
-> -MACS2 with MACS2, IDR installed
+> - DovetailHiChIP with trim-galore, fastqc and multiqc installed
+> - MACS2 with MACS2, IDR installed
 
 ## Install Docker Engine needed for FitHiChIP tool
 
