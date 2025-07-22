@@ -1,4 +1,6 @@
-# Coolbox in JupyterNotebook
+# Coolbox
+
+## Setup of Coolbox and running it with JupyterNotebook
 
 To install coolbox and use it with the Jupyter Notebook web application, clone the source code https://github.com/GangCaoLab/CoolBox.git. Enter the Coolbox directory and follow instruction for installation in conda environment.
 
@@ -16,10 +18,10 @@ After installation, you should enable ipywidgets to use the browser in Jupyter n
 jupyter nbextension enable --py widgetsnbextension
 ```
 
-Make sure you are in the coolbox conda environment and enter the directory of where you put the working directory is. Called Jypyterlab in example.
+Make sure you are in the coolbox conda environment and enter the directory of where you put the working directory is. Called JypyterLab in example.
 
 ```
-cd directoryPATH/Jupyterlab
+cd directoryPATH/JupyterLab
 jupyter lab --nobrowser --port 8585
 ```
 
@@ -39,3 +41,5 @@ Replace username with your remote server username.
 Replace remote_server_ip with the actual IP address of your remote server.
 
 Input http://localhost:8585 in web browser and respond to the password request. The password will corespond to instance password.
+
+Commands and features to visualize genomic data with coolbox API can be found at https://gangcaolab.github.io/CoolBox/quick_start_API.html

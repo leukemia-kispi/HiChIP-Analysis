@@ -32,7 +32,6 @@ create_directory "$MAIN_DIR"
 # Define subdirectories relative to the main folder
 SUBDIRS=("logs" "data" "output/reports" "tmp/cache")
 
-
 # Loop through and create each subdirectory
 for dir in "${SUBDIRS[@]}"; do
     full_path="$MAIN_DIR/$dir"
@@ -49,11 +48,13 @@ SUBDIRS=(
     "2.FASTAQC"
     "2.FASTAQC/HiChIP"
     "2.FASTAQC/ChIP"
+    "3.TRIM"
     "3.TRIM/HiChIP"
     "3.TRIM/ChIP"
     "4.ChIP_Alignment"
     "4.HiChIP_Alignment"
     "4.HiChIP_Alignment/Outputs"
+    "4.ChIP_Alignment/Outputs"
     "5.MACS2"
     "5.MACS2/SORT"
     "5.MACS2/Permissive"
