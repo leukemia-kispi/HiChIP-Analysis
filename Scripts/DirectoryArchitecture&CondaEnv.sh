@@ -29,15 +29,6 @@ fi
 # Ensure the main directory itself exists
 create_directory "$MAIN_DIR"
 
-# Define subdirectories relative to the main folder
-SUBDIRS=("logs" "data" "output/reports" "tmp/cache")
-
-# Loop through and create each subdirectory
-for dir in "${SUBDIRS[@]}"; do
-    full_path="$MAIN_DIR/$dir"
-    create_directory "$full_path"
-done
-
 # List of subdirectories relative to MAIN_DIR
 SUBDIRS=(
     "0.BlackList"
