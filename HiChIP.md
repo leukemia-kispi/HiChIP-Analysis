@@ -50,7 +50,7 @@ Use the installDep.sh script from the Dovetail-Genomics source repository to ens
 - pyBigWig 
 
 >[!NOTE]
->Numpy and pysam have to be installed in that order and before pairtools. The original installDep.sh script may need modefications before executing. For this use one can use the nano editing tool.
+>Numpy and pysam have to be installed in that order and before pairtools. The original installDep.sh script may need modefications before executing. For this use the nano editing tool.
 
 ```
 nano ./HiChiP/installDep.sh
@@ -85,7 +85,7 @@ Once the installation is completed, sign off and then sign back to your instance
 
 ## Generation of genome file
 
-First o generate a genome file. It is a tab delimited file with chromosome names and their respective sizes needed for downstream steps:
+First thing to do is to generate a genome file. It is a tab delimited file with chromosome names and their respective sizes needed for downstream steps:
 
 Generate an index file for your reference, a reference file with only the main chromosomes should be used (e.g. without alternative or unplaced chromosomes). For the analsysis of TCF3::HLF HiChIP the reference genome GCA_000001405.15_GRCh38_no_alt_analysis_set.fna was downloaded from https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/
 

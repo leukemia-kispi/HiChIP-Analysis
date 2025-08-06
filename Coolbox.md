@@ -12,13 +12,13 @@ conda activate coolbox
 python setup.py install
 ```
 
-After installation, you should enable ipywidgets to use the browser in Jupyter notebook:
+After installation, you should enable ipywidgets to use the browser in Jupyter notebook (depending on version this may be already enabled):
 
 ```
 jupyter nbextension enable --py widgetsnbextension
 ```
 
-Make sure you are in the coolbox conda environment and enter the directory of where you put the working directory is. Called JypyterLab in example.
+Make sure you are in the coolbox conda environment and enter the directory of where you put the working directory. Called JypyterLab in example. (here you put all bigwig files or other data needed for generating visuals) 
 
 ```
 cd directoryPATH/JupyterLab
@@ -28,7 +28,7 @@ jupyter lab --nobrowser --port 8585
 If working on local machine when the server is initiated,  a link with the token for access is made available. 
 Copy the link and input it in a internet browser to begin using coolbox in JupyterNotebook.
 
-If you run Jypyter from instance on cloud you need to SSH Tunnel from Your Local Machine first
+If you run Jypyter from a virtual machine instance on a cloud you need to SSH Tunnel from Your Local Machine first
 to later open it in the internet browser.
 
 On your local machine, open a PowerShell or Command terminal and create an SSH tunnel:
