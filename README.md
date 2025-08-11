@@ -42,6 +42,10 @@ https://deeptools.readthedocs.io/en/develop/index.html
 Homer
 http://homer.ucsd.edu/homer/index.html
 
+ROSE
+https://github.com/younglab/ROSE
+https://github.com/stjude/ROSE
+
 >[!NOTE]
 >If issues occure during installation or during execution of any of the tools, refere to above documents for eventual troubleshooting.
 

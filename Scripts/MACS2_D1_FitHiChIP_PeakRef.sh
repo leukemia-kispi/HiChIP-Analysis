@@ -1,4 +1,4 @@
-#!/bin/bash
+#!usr/bin/bash
 
 #Set path to reference genome index and blacklist. Genome index has to be generated first if not done. 
 REF_FASTA="/mnt/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna" 

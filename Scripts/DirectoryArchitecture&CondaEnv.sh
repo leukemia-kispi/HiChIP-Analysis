@@ -1,7 +1,7 @@
-#!/bin/bash
+#!usr/bin/bash
 set -e
 
-#Script will create all directories needed for HiChIP and ChIP analysis and different conda enviorments with the necessary tools installed
+#Script will create all directories needed for HiChIP and ChIP analysis and different conda enviorments with some of the necessary tools installed
 
 # Initialize Conda
 eval "$(conda shell.bash hook)"
@@ -50,6 +50,7 @@ SUBDIRS=(
     "5.MACS2/SORT"
     "5.MACS2/Permissive"
     "5.MACS2/IDR"
+    "5.MACS2/D1"
     "6.FitHiChIP_Output"
     "7.Deeptool_Matrix"
     "7.Deeptool_Matrix/Coverage"
@@ -60,6 +61,7 @@ SUBDIRS=(
     "8.JupyterLab"
     "9.HOMER"
     "9.HOMER/Outputs"
+    "10.ROSE"
     "tmp"
 )
 
