@@ -17,7 +17,7 @@ BIGWIG_Coverage="/mnt/7.Deeptool_Matrix/Coverage/"
 eval "$(conda shell.bash hook)"
 
 # Activate Conda Environment named DovetailHiChIP
-CONDA_ENV="ChIP"
+CONDA_ENV="DovetailHiChIP"
 if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
     conda activate $CONDA_ENV
 fi

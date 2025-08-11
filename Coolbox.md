@@ -25,7 +25,7 @@ cd directoryPATH/JupyterLab
 jupyter lab --nobrowser --port 8585
 ```
 
-If working on local machine when the server is initiated,  a link with the token for access is made available. 
+If working on local machine when the server is initiated, a link with the token for access is made available. 
 Copy the link and input it in a internet browser to begin using coolbox in JupyterNotebook.
 
 If you run Jypyter from a virtual machine instance on a cloud you need to SSH Tunnel from Your Local Machine first
