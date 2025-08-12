@@ -83,8 +83,10 @@ create_conda_env() {
 }
     
 # Create and set up Conda environments
-create_conda_env "DovetailHiChIP" "trim-galore fastqc multiqc"
+create_conda_env "DovetailHiChIP" "trim-galore fastqc multiqc"  #Additional tools will be installed by following the Dovetail HiChIP setup described in HiChIP.md. Including bwa-mem, samtools, pairtools, bedtools, deeptools,
 create_conda_env "MACS2" "macs2 idr homer bedtools"
+create_conda_env "Picard" "picard"
+
 
 echo "Setup of conda enviroments complete."
 

@@ -28,7 +28,7 @@ MAPPING_FILE="$MAIN_DIR/1.RawData/Histone_ChIP_IDs.txt"
 OUTPUT_DIR_TRIM="$MAIN_DIR/3.TRIM/ChIP"
 OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.ChIP_Alignment"
 OUTPUT_CHIP_SUB="$MAIN_DIR/4.ChIP_Alignment/Outputs"
-BIGWIG_Coverage="$MAIN_DIR/7.Deeptool_Matrix/Coverage/"
+BIGWIG_Coverage="$MAIN_DIR/7.Deeptool_Matrix/Coverage"
 
 #############################
 ### MAPPING NEW IDs #########
@@ -38,7 +38,7 @@ BIGWIG_Coverage="$MAIN_DIR/7.Deeptool_Matrix/Coverage/"
 # Accession IDs = acc
 # Paired_Read = read_num
 # True sample name = newname
-# Assumes MAPPING_FILES is a .txt wile with mapping_file format (acc newname):
+# Assumes MAPPING_FILES is a .txt file with mapping_file format (acc newname):
 #     ERR2618839  ChIP_HAL01_H3K27ac_Rep1
 #     ERR2618840  ChIP_HAL01_H3K27ac_Rep2
 
@@ -96,12 +96,6 @@ fi
 
 # Initialize Conda
 eval "$(conda shell.bash hook)"
-
-# Activate Conda Environment named DovetailHiChIP to use trim-galore
-#CONDA_ENV="DovetailHiChIP"
-#if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
-#    conda activate $CONDA_ENV
-#fi
 
 # Echo current Conda environment
 echo "Current Conda environment: $CONDA_DEFAULT_ENV"
@@ -184,63 +178,81 @@ done
 ### INITIALIZE PICARD CONDA ENVIORONMENT #################
 ##########################################################
 
-# Activate Conda Environment named Picard
+# Echo current Conda environment
+echo "Current Conda environment: $CONDA_DEFAULT_ENV"
+
+# Only activate if not already in the target environment
 CONDA_ENV="Picard"
-if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
-    conda activate $CONDA_ENV
+if [[ "$CONDA_DEFAULT_ENV" != "$CONDA_ENV" ]]; then
+    echo "Activating Conda environment: $CONDA_ENV"
+    conda activate "$CONDA_ENV"
+else
+    echo "Already in the target Conda environment."
 fi
 
 ###################################
 ### DEDUPLICATION: PICARD #########
 ###################################
-
-for num in "${NUMBERS[@]}"; do
-    # Set output file name for dedup files.
-    MAPPED_BLF_BAM_DUPFLAG="BLF_*_rep${num}_cle_sort_dupsflag.bam"
-    MAPPED_BLF_TXT_DUP="BLF_*_rep${num}_cle_sort_dups.txt"
+for cond in "${conditions[@]}"; do
+    for num in "${NUMBERS[@]}"; do
+        # Set output file name for dedup files.
+        MAPPED_BLF_BAM_DUPFLAG="BLF_ChIP_${cond}_rep${num}_cle_sort_dupsflag.bam"
+        MAPPED_BLF_TXT_DUP="BLF_ChIP_${cond}_rep${num}_cle_sort_dups.txt"
    
-    #Picard MarkDuplicates and Remove
-    java -jar /home/ubuntu/miniconda3/envs/Picard/share/picard-2.25.7-0/picard.jar MarkDuplicates -I $OUTPUT_CHIP_ALIGN/$MAPPED_BLF_BAM -O $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DUPFLAG -M $OUTPUT_CHIP_SUB/$MAPPED_BLF_TXT_DUP --REMOVE_DUPLICATES false
-
+        #Picard MarkDuplicates with universal pathing for the picard.jar
+        java -jar "$(conda run -n Picard bash -c 'echo $CONDA_PREFIX')/share/$(ls "$(conda run -n Picard bash -c 'echo $CONDA_PREFIX')/share" | grep picard | sort -V | tail -n 1)/picard.jar" MarkDuplicates -I $OUTPUT_CHIP_ALIGN/$MAPPED_BLF_BAM -O $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DUPFLAG -M $OUTPUT_CHIP_SUB/$MAPPED_BLF_TXT_DUP --REMOVE_DUPLICATES false
+    
+        echo "Flagging duplicates in $MAPPED_BLF_BAM_DUPFLAG  done"
+    done
 done
 
 #################################################################
 ### INITIALIZE DOVETAILHICHIP CONDA ENVIORONMENT ################
 #################################################################
 
-# Activate Conda Environment named DovetailHiChIP
+# Echo current Conda environment
+echo "Current Conda environment: $CONDA_DEFAULT_ENV"
+
+# Only activate if not already in the target environment
 CONDA_ENV="DovetailHiChIP"
-if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
-    conda activate $CONDA_ENV
+if [[ "$CONDA_DEFAULT_ENV" != "$CONDA_ENV" ]]; then
+    echo "Activating Conda environment: $CONDA_ENV"
+    conda activate "$CONDA_ENV"
+else
+    echo "Already in the target Conda environment."
 fi
 
 ###########################################
 ### DEDUPLICATION: DOVETAILHICHIP #########
 ###########################################
+for cond in "${conditions[@]}"; do
+    for num in "${NUMBERS[@]}"; do
+        # Set output file name for dedup files.
+        MAPPED_BLF_BAM_DD="BLF_ChIP_${cond}_Rep${num}_cle_sort_dd.bam"
 
-for num in "${NUMBERS[@]}"; do
-    # Set output file name for dedup files.
-    MAPPED_BLF_BAM_DD="BLF_*_rep${num}_cle_sort_dd.bam"
+        # Generate final deduplicated BAM files (remove flagged duplicates) and indexing
+        samtools view -b -F 1024 $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DUPFLAG > $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD
+        samtools index $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD
 
-    # Generate final deduplicated BAM files (remove flagged duplicates) and indexing
-    samtools view -b -F 1024 $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DUPFLAG > $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD
-    samtools index $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD
+        echo "Duplicates removed in $MAPPED_BLF_BAM_DD done"
+    done    
 done
-
-conditions=("control_Input" "H3K27ac" "H3K27me3" "H3K4me1" "H3K4me3") #For merging the replicates associated with each conditions and generating the final merged BAM files
 
 # Set output file name for dedup merged files.
 for cond in "${conditions[@]}"; do
     # Set file name for black list filterd, cleaned, sorted and deduplicated replicate BAM files
-    MAPPED_BLF_BAM_DD_REP1="BLF_*_${cond}_rep1_cle_sort_dd.bam" 
-    MAPPED_BLF_BAM_DD_REP2="BLF_*_${cond}_rep2_cle_sort_dd.bam" 
+    MAPPED_BLF_BAM_DD_REP1="BLF_ChIP_${cond}_Rep1_cle_sort_dd.bam" 
+    MAPPED_BLF_BAM_DD_REP2="BLF_ChIP_${cond}_Rep2_cle_sort_dd.bam" 
 
     # Set output file name for merged  BAM files
-    MAPPED_MERGED_BLF_BAM_DD="BLF_*_${cond}_merged_cle_sort_dd.bam"
+    MAPPED_MERGED_BLF_BAM_DD="BLF_ChIP_${cond}_merged_cle_sort_dd.bam"
 
     # MERGE Replicate File and index
-    samtools merge -f $OUTPUT_CHIP_ALIGN/$MAPPED_MERGED_BLF_BAM_DD $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD_REP1 $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD_REP2   ####have to update file annotations 
+    samtools merge -f $OUTPUT_CHIP_ALIGN/$MAPPED_MERGED_BLF_BAM_DD $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD_REP1 $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD_REP2
     samtools index $OUTPUT_CHIP_ALIGN/$MAPPED_MERGED_BLF_BAM_DD
+
+    echo "Merged files $MAPPED_MERGED_BLF_BAM_DD created"
+
 done
 
 
@@ -248,57 +260,22 @@ done
 ### GENOMIC COVERAGE #########
 ##############################
 
-BIGWIG_BLF_DD="BLF_*_rep${num}_cle_sort_dd.bw"
-BIGWIG_MERGED_BLF_DD="BLF_*_merged_cle_sort_dd.bw"
+for cond in "${conditions[@]}"; do
+    for num in "${NUMBERS[@]}"; do
+        #Set output file name for bigwig file
+        BIGWIG_BLF_DD="BLF_ChIP_${cond}_Rep${num}_cle_sort_dd.bw"
 
-for num in "${NUMBERS[@]}"; do
-# Generate Enrichment coverage files for IGV visualization for each replicate
-bamCoverage -b $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD -o $BIGWIG_Coverage/$BIGWIG_BLF_DD --effectiveGenomeSize 2913022398 -bl $BLACKLIST--normalizeUsing RPKM -p max -bs 10 \
---extendReads --ignoreForNormalization M
+        # Generate Enrichment coverage files for IGV visualization for each replicate
+        bamCoverage -b $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD -o $BIGWIG_Coverage/$BIGWIG_BLF_DD --effectiveGenomeSize 2913022398 -bl $BLACKLIST--normalizeUsing RPKM -p max -bs 10 \
+        --extendReads --ignoreForNormalization M
+    done    
+done
 
 for cond in "${conditions[@]}"; do
-# Generate Enrichment coverage files for IGV visualization for merged files
-bamCoverage -b  $OUTPUT_CHIP_ALIGN/$MAPPED_MERGED_BLF_BAM_DD -o $BIGWIG_Coverage/$BIGWIG_MERGED_BLF_DD --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 \
---extendReads --ignoreForNormalization M
+    #Set output file name for bigwig file
+    BIGWIG_MERGED_BLF_DD="BLF_ChIP_${cond}_merged_cle_sort_dd.bw"
 
-################################
-### MACS2 PEAK CALLING #########
-################################
-
-# Activate Conda Environment named macs2
-CONDA_ENV="macs2"
-if [[ "$(conda info --base)" != "$(conda info --base --json | jq -r .conda_prefix)" ]]; then
-    conda activate $CONDA_ENV
-fi
-
-#Call Peaks with permissive settings to be used for IDR.
-macs2 callpeak -t BLF_ChIP_HAL01_H3K27ac_Rep1_cle_sort_dd.bam -c BLF_ChIP_HAL01_control_Input_Rep1_cle_sort_dd.bam -f BAMPE -g hs -p 0.05 -B --outdir /mnt/RawChIP_Histon/MACS2 -n BLF_HAL01_H3K27ac_Rep1_cle_sort_dd_p0.05macs2
-
-
-macs2 callpeak -t BLF_ChIP_HAL01_H3K27ac_Rep2_cle_sort_dd.bam -c BLF_ChIP_HAL01_control_Input_Rep2_cle_sort_dd.bam -f BAMPE -g hs -p 0.05 -B --outdir /mnt/RawChIP_Histon/MACS2 -n BLF_HAL01_H3K27ac_Rep2_cle_sort_dd_p0.05macs2
-
-
-#Enter Merged Folder
-macs2 callpeak -t  $OUTPUT_CHIP_ALIGN/$MAPPED_MERGED_BLF_BAM_DD -c  $OUTPUT_CHIP_ALIGN/$MAPPED_MERGED_BLF_BAM_DD_INPUT -f BAMPE -g hs -p 0.000000001 -B --outdir /mnt/RawChIP_Histon/MACS2 -n HAL01_H3K27ac_merged_cle_sort_dd_p9macs2
-
-macs2 callpeak -t $OUTPUT_HICHIP_SUB/$PRIMARY_ALN --keep-dup 10 --min-length 300 -p 0.000000001 -g 2913022398 --bw 300 --mfold 5 50 -n $OUTPUT_MACS2/$MACS2_JoinedRep_Oracle
-
-
-#Sort Peak files
-
-sort -k8,8nr BLF_HAL01_H3K27ac_Rep1_cle_sort_dd_p0.05macs2_peaks.narrowPeak > /mnt/RawChIP_Histon/IDR/Sort_HAL01_H3K27ac_Rep1_cle_sort_dd_p0.05macs2_peaks.narrowPeak
-
-####################################
-### IDR ANALYSIS: OPTIONAL #########
-####################################
-
-#IDR without Oracle Peak file
-idr --samples Sort_HAL01_H3K27ac_Rep1_cle_sort_dd_p0.05macs2_peaks.narrowPeak Sort_HAL01_H3K27ac_Rep2_cle_sort_dd_p0.05macs2_peaks.narrowPeak --input-file-type narrowPeak --rank p.value --output-file HAL-01_H3K27ac_cle-idr --plot --log-output-file HAL-01_H3K27ac_cle.idr.log
-
-idr --samples Sort_HAL01_H3K27ac_Rep1_cle_sort_dd_p0.05bmacs2_peaks.broadPeak Sort_HAL01_H3K27ac_Rep2_cle_sort_dd_p0.05bmacs2_peaks.broadPeak  --input-file-type broadPeak --rank p.value --output-file HAL-01_H3K27ac_cle_broad-idr --plot --log-output-file HAL-01_H3K27ac_cle_broad.idr.log
-	                                                                     
-
-#IDR with Oracle Peak file
-idr --samples Sort_HAL01_H3K27ac_Rep1_cle_sort_dd_p0.05macs2_peaks.narrowPeak Sort_HAL01_H3K27ac_Rep2_cle_sort_dd_p0.05macs2_peaks.narrowPeak --peak-list Sort_HAL01_H3K27ac_merged_cle_sort_dd_p9macs2_peaks.narrowPeak  --input-file-type narrowPeak --rank p.value --output-file Oracle_HAL-01_H3K27ac_cle-idr --plot --log-output-file Oracle_HAL-01_H3K27ac_cle.idr.log
-
-idr --samples Sort_HAL01_H3K27ac_Rep1_cle_sort_dd_p0.05bmacs2_peaks.broadPeak Sort_HAL01_H3K27ac_Rep2_cle_sort_dd_p0.05bmacs2_peaks.broadPeak --peak-list Sort_HAL01_H3K27ac_merged_cle_sort_dd_p9bmacs2_peaks.broadPeak  --input-file-type broadPeak --rank p.value --output-file Oracle_HAL-01_H3K27ac_cle_broad-idr --plot --log-output-file Oracle_HAL-01_H3K27ac_cle_broad.idr.log
+    # Generate Enrichment coverage files for IGV visualization for merged files
+    bamCoverage -b  $OUTPUT_CHIP_ALIGN/$MAPPED_MERGED_BLF_BAM_DD -o $BIGWIG_Coverage/$BIGWIG_MERGED_BLF_DD --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 \
+    --extendReads --ignoreForNormalization M
+done
