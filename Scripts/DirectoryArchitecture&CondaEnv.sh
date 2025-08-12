@@ -11,7 +11,7 @@ create_directory() {
     if [ ! -d "$1" ]; then
         echo "Creating directory: $1"
         sudo mkdir -m 777 -p "$1"
-        sudo chown ubuntu:ubuntu "$1"
+        sudo chown ubuntu:ubuntu "$1" #set for correct user
     else
         echo "Directory already exists: $1"
     fi
