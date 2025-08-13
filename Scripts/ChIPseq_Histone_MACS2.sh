@@ -1,4 +1,4 @@
-#!usr/bin/env bash
+#!/usr/bin/env bash
 set -e
 shopt -s nullglob # make globbing return empty array if no match
 
@@ -27,11 +27,14 @@ OUTPUT_MACS2_IDR="$MAIN_DIR/5.MACS2/IDR"
 
 # Array containing replicate numbers and conditions found in filenames generated with trim-galore.
 NUMBERS=("1" "2") # Replace with your actual replicate numbers
-conditions=("H3K27ac" "H3K27me3" "H3K4me1" "H3K4me3") #For merging the replicates associated with each conditions and generating the final merged BAM files
+conditions=("H3K27ac" "H3K27me3" "H3K4me1" "H3K4me3") #Replace with your actual conditions
 
 #################################################################
-### INITIALIZE MACS2 CONDA ENVIORONMENT #########################
+### INITIALIZE MACS2 CONDA ENVIRONMENT #########################
 #################################################################
+
+# Initialize Conda
+eval "$(conda shell.bash hook)"
 
 # Echo current Conda environment
 echo "Current Conda environment: $CONDA_DEFAULT_ENV"
@@ -60,7 +63,7 @@ for cond in "${conditions[@]}"; do
     MACS2_PEAK_R1="HAL01_${cond}_Rep1_cle_sort_dd_p0.05macs2"
     MACS2_PEAK_R2="HAL01_${cond}_Rep2_cle_sort_dd_p0.05macs2"
         
-    #Call Peaks with permissive settings to be used for IDR.
+    #Call Peaks with permissive settings <p 0.05> to be used for IDR.
     macs2 callpeak -t $OUTPUT_CHIP_SUB/$MACS2_INPUT_R1 -c $OUTPUT_CHIP_SUB/$CONTROL_R1 -f BAMPE  -g 2913022398 -p 0.05 -B --outdir $OUTPUT_MACS2_PERMISSIVE -n $MACS2_PEAK_R1
     macs2 callpeak -t $OUTPUT_CHIP_SUB/$MACS2_INPUT_R1 -c $OUTPUT_CHIP_SUB/$CONTROL_R1 -f BAMPE  -g 2913022398 -p 0.05 --broad -B --outdir $OUTPUT_MACS2_PERMISSIVE -n $MACS2_PEAK_R1
     macs2 callpeak -t $OUTPUT_CHIP_SUB/$MACS2_INPUT_R2 -c $OUTPUT_CHIP_SUB/$CONTROL_R2 -f BAMPE  -g 2913022398 -p 0.05 -B --outdir $OUTPUT_MACS2_PERMISSIVE -n $MACS2_PEAK_R2

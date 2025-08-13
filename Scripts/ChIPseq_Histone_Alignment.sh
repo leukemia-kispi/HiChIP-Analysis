@@ -30,6 +30,12 @@ OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.ChIP_Alignment"
 OUTPUT_CHIP_SUB="$MAIN_DIR/4.ChIP_Alignment/Outputs"
 BIGWIG_Coverage="$MAIN_DIR/7.Deeptool_Matrix/Coverage"
 
+# Array containing replicate numbers and conditions found in filenames and defining samples.
+# Expected Sample nomenclature follows this pattern ChIP_<Cell Line>_<condition>_Rep<replicate>_
+CellLine=("HAL01")
+conditions=("control_Input" "H3K27ac" "H3K27me3" "H3K4me1" "H3K4me3") #Replace with your actual conditions
+NUMBERS=("1" "2") # Replace with your actual replicate numbers
+
 #############################
 ### MAPPING NEW IDs #########
 #############################
@@ -49,6 +55,7 @@ while read -r acc newname; do
     [[ -z "$acc" || "$acc" == \#* ]] && continue
 
     for read_num in 1 2; do
+        #Variable for old and new file names
         old_file="$FASTQ_DIR/${acc}_${read_num}.fastq.gz"
         new_file="$FASTQ_DIR/${newname}_R${read_num}.fastq.gz"
         # Check if old file exists and if renamed file exists does not overwrite.
@@ -89,7 +96,7 @@ else
 fi
 
 ##########################################################
-### INITIALIZE DOVETAILHICHIP CONDA ENVIORONMENT #########
+### INITIALIZE DOVETAILHICHIP CONDA ENVIRONMENT #########
 ##########################################################
 
 #Environment should have following installed: bwa-mem, samtools, pairtools, fastqc, bedtools, multiqc, trim-galore, deeptools
@@ -109,10 +116,6 @@ else
     echo "Already in the target Conda environment."
 fi
 
-# Array containing replicate numbers and conditions found in filenames generated with trim-galore.
-NUMBERS=("1" "2") # Replace with your actual replicate numbers
-conditions=("control_Input" "H3K27ac" "H3K27me3" "H3K4me1" "H3K4me3") #For merging the replicates associated with each conditions and generating the final merged BAM files
-
 ######################
 ### TRIMMING #########
 ######################
@@ -121,28 +124,32 @@ conditions=("control_Input" "H3K27ac" "H3K27me3" "H3K4me1" "H3K4me3") #For mergi
 perform_trimming=false
 
 # Loop through each pair of FASTQ files if working with paired-end read files
-for num in "${NUMBERS[@]}"; do
-    # Check if trimmed files already exist for the current replicate
-    if [ ! -f "$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz" ] || [ ! -f "$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz" ]; then
-        perform_trimming=true
-        break  # No need to check other replicates once one is found missing
-    fi
+for cond in "${conditions[@]}"; do
+    for num in "${NUMBERS[@]}"; do
+        # Check if trimmed files already exist for the current replicate
+        if [ ! -f "$OUTPUT_DIR_TRIM/ChIP_HAL01_${cond}_Rep${num}_R1_val_1.fq.gz" ] || [ ! -f "$OUTPUT_DIR_TRIM/ChIP_HAL01_${cond}_Rep${num}_R2_val_2.fq.gz" ]; then
+            perform_trimming=true
+            break  # No need to check other replicates once one is found missing
+        fi
+    done
 done
 
 # Perform trimming only if the flag is set to true
 if [ "$perform_trimming" = true ]; then
-    for num in "${NUMBERS[@]}"; do
-        # Set path to input FASTQ files using wildcard pattern
-        READ1="$FASTQ_DIR/*rep${num}_R1.fastq.gz"
-        READ2="$FASTQ_DIR/*rep${num}_R2.fastq.gz"
+    for cond in "${conditions[@]}"; do
+        for num in "${NUMBERS[@]}"; do
+            # Set path to input FASTQ files using wildcard pattern
+            READ1="$FASTQ_DIR/ChIP_HAL01_${cond}_Rep${num}_R1.fastq.gz"
+            READ2="$FASTQ_DIR/ChIP_HAL01_${cond}_Rep${num}_R2.fastq.gz"
        
-        echo "Trimming pair $READ1 and $Read2"
+            echo "Trimming pair $READ1 and $READ2"
         
-        # Trim samples and generate new FastQC files for all replicates
-        trim_galore --fastqc --phred33 --length 30 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
+            # Trim samples and generate new FastQC files for all replicates
+            trim_galore --fastqc --phred33 --length 30 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
 
-        echo "Trimming for sample $num completed."
-    done
+            echo "Trimming for sample $num completed."
+        done
+    done    
 else
     echo "Trimming not needed as output files already exist."
 fi
@@ -155,16 +162,16 @@ fi
 for cond in "${conditions[@]}"; do
     for num in "${NUMBERS[@]}"; do
         # Set path to trimmed FASTQ files usign wildcard pattern
-        TRIMMED_R1_FILES="$OUTPUT_DIR_TRIM/*rep${num}_R1_val_1.fq.gz"
-        TRIMMED_R2_FILES="$OUTPUT_DIR_TRIM/*rep${num}_R2_val_2.fq.gz"
+        TRIMMED_R1_FILES="$OUTPUT_DIR_TRIM/ChIP_HAL01_${cond}_Rep${num}_R1_val_1.fq.gz"
+        TRIMMED_R2_FILES="$OUTPUT_DIR_TRIM/ChIP_HAL01_${cond}_Rep${num}_R2_val_2.fq.gz"
         # Set output file name for BAM files.
-        MAPPED_BAM="ChIP_${cond}_rep${num}_cle_sort.bam"
+        MAPPED_BAM="ChIP_${cond}_Rep${num}_cle_sort.bam"
   
         #Create sorted BAM files with grep to remove alignments to alternative contigs, unlocalized sequence, or unplaced sequence.#####################
         bwa mem -5 -T25 -t32 $REF_FASTA $TRIMMED_R1_FILES $TRIMMED_R2_FILES | samtools view -hS | grep -v chrUn | grep -v random | grep -v _alt | samtools view -bS -@32 | samtools sort -@32 -o $OUTPUT_CHIP_ALIGN/$MAPPED_BAM 
 
-        # Set output file name for BAM files. BLF referse to black list filtered file
-        MAPPED_BLF_BAM="BLF_ChIP_${cond}_rep${num}_cle_sort.bam"
+        # Set output file name for filtered BAM files. BLF referse to black list filtered file
+        MAPPED_BLF_BAM="BLF_ChIP_${cond}_Rep${num}_cle_sort.bam"
 
         #Remove BlackList region & index
         bedtools intersect -v -abam $OUTPUT_CHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_CHIP_ALIGN/$MAPPED_BLF_BAM
@@ -175,7 +182,7 @@ for cond in "${conditions[@]}"; do
 done
 
 ##########################################################
-### INITIALIZE PICARD CONDA ENVIORONMENT #################
+### INITIALIZE PICARD CONDA ENVIRONMENT #################
 ##########################################################
 
 # Echo current Conda environment
@@ -195,9 +202,12 @@ fi
 ###################################
 for cond in "${conditions[@]}"; do
     for num in "${NUMBERS[@]}"; do
+        # Set input file names
+        MAPPED_BLF_BAM="BLF_ChIP_${cond}_Rep${num}_cle_sort.bam"
+
         # Set output file name for dedup files.
-        MAPPED_BLF_BAM_DUPFLAG="BLF_ChIP_${cond}_rep${num}_cle_sort_dupsflag.bam"
-        MAPPED_BLF_TXT_DUP="BLF_ChIP_${cond}_rep${num}_cle_sort_dups.txt"
+        MAPPED_BLF_BAM_DUPFLAG="BLF_ChIP_${cond}_Rep${num}_cle_sort_dupsflag.bam"
+        MAPPED_BLF_TXT_DUP="BLF_ChIP_${cond}_Rep${num}_cle_sort_dups.txt"
    
         #Picard MarkDuplicates with universal pathing for the picard.jar
         java -jar "$(conda run -n Picard bash -c 'echo $CONDA_PREFIX')/share/$(ls "$(conda run -n Picard bash -c 'echo $CONDA_PREFIX')/share" | grep picard | sort -V | tail -n 1)/picard.jar" MarkDuplicates -I $OUTPUT_CHIP_ALIGN/$MAPPED_BLF_BAM -O $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DUPFLAG -M $OUTPUT_CHIP_SUB/$MAPPED_BLF_TXT_DUP --REMOVE_DUPLICATES false
@@ -207,7 +217,7 @@ for cond in "${conditions[@]}"; do
 done
 
 #################################################################
-### INITIALIZE DOVETAILHICHIP CONDA ENVIORONMENT ################
+### INITIALIZE DOVETAILHICHIP CONDA ENVIRONMENT ################
 #################################################################
 
 # Echo current Conda environment
@@ -227,6 +237,9 @@ fi
 ###########################################
 for cond in "${conditions[@]}"; do
     for num in "${NUMBERS[@]}"; do
+        # Set input file names
+        MAPPED_BLF_BAM_DUPFLAG="BLF_ChIP_${cond}_Rep${num}_cle_sort_dupsflag.bam"
+
         # Set output file name for dedup files.
         MAPPED_BLF_BAM_DD="BLF_ChIP_${cond}_Rep${num}_cle_sort_dd.bam"
 
@@ -262,16 +275,22 @@ done
 
 for cond in "${conditions[@]}"; do
     for num in "${NUMBERS[@]}"; do
-        #Set output file name for bigwig file
+        # Set input file name
+        MAPPED_BLF_BAM_DD="BLF_ChIP_${cond}_Rep${num}_cle_sort_dd.bam"
+
+        # Set output file name for bigwig file
         BIGWIG_BLF_DD="BLF_ChIP_${cond}_Rep${num}_cle_sort_dd.bw"
 
         # Generate Enrichment coverage files for IGV visualization for each replicate
-        bamCoverage -b $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD -o $BIGWIG_Coverage/$BIGWIG_BLF_DD --effectiveGenomeSize 2913022398 -bl $BLACKLIST--normalizeUsing RPKM -p max -bs 10 \
+        bamCoverage -b $OUTPUT_CHIP_SUB/$MAPPED_BLF_BAM_DD -o $BIGWIG_Coverage/$BIGWIG_BLF_DD --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 \
         --extendReads --ignoreForNormalization M
     done    
 done
 
 for cond in "${conditions[@]}"; do
+    # Set input file name
+    MAPPED_MERGED_BLF_BAM_DD="BLF_ChIP_${cond}_merged_cle_sort_dd.bam"
+
     #Set output file name for bigwig file
     BIGWIG_MERGED_BLF_DD="BLF_ChIP_${cond}_merged_cle_sort_dd.bw"
 
