@@ -1,4 +1,4 @@
-#!usr/bin/bash
+#!/usr/bin/bash
 set -e
 
 #Script will create all directories needed for HiChIP and ChIP analysis and different conda enviorments with some of the necessary tools installed
@@ -88,5 +88,5 @@ create_conda_env "MACS2" "macs2 idr homer bedtools"
 create_conda_env "Picard" "picard"
 
 
-echo "Setup of conda enviroments complete."
+echo "Setup of conda environments complete."
 

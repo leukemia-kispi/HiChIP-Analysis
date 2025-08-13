@@ -25,7 +25,9 @@ OUTPUT_MACS2_SORT="$MAIN_DIR/5.MACS2/SORT"
 OUTPUT_MACS2_PERMISSIVE="$MAIN_DIR/5.MACS2/Permissive"
 OUTPUT_MACS2_IDR="$MAIN_DIR/5.MACS2/IDR"
 
-# Array containing replicate numbers and conditions found in filenames generated with trim-galore.
+# Array containing Cell lines, replicate numbers and conditions found in filenames and defining samples.
+# Expected Sample nomenclature follows this pattern ChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix.
+CellLine=("HAL01") #Replace with your actual Cell Line 
 NUMBERS=("1" "2") # Replace with your actual replicate numbers
 conditions=("H3K27ac" "H3K27me3" "H3K4me1" "H3K4me3") #Replace with your actual conditions
 
@@ -51,67 +53,89 @@ fi
 ################################
 ### MACS2 PEAK CALLING #########
 ################################
-for cond in "${conditions[@]}"; do
-    # Set inpute files
-    MACS2_INPUT_R1="BLF_ChIP_HAL01_${cond}_Rep1_cle_sort_dd.bam"
-    MACS2_INPUT_R2="BLF_ChIP_HAL01_${cond}_Rep2_cle_sort_dd.bam"
-    CONTROL_R1="BLF_ChIP_HAL01_control_Input_Rep1_cle_sort_dd.bam"
-    CONTROL_R2="BLF_ChIP_HAL01_control_Input_Rep2_cle_sort_dd.bam"
-    CONTROL_MERGED="BLF_ChIP_HAL01_control_Input_merged_cle_sort_dd.bam"
 
-    # Set output file name for peak files. MACS2 adds its own suffix   
-    MACS2_PEAK_R1="HAL01_${cond}_Rep1_cle_sort_dd_p0.05macs2"
-    MACS2_PEAK_R2="HAL01_${cond}_Rep2_cle_sort_dd_p0.05macs2"
-        
-    #Call Peaks with permissive settings <p 0.05> to be used for IDR.
-    macs2 callpeak -t $OUTPUT_CHIP_SUB/$MACS2_INPUT_R1 -c $OUTPUT_CHIP_SUB/$CONTROL_R1 -f BAMPE  -g 2913022398 -p 0.05 -B --outdir $OUTPUT_MACS2_PERMISSIVE -n $MACS2_PEAK_R1
-    macs2 callpeak -t $OUTPUT_CHIP_SUB/$MACS2_INPUT_R1 -c $OUTPUT_CHIP_SUB/$CONTROL_R1 -f BAMPE  -g 2913022398 -p 0.05 --broad -B --outdir $OUTPUT_MACS2_PERMISSIVE -n $MACS2_PEAK_R1
-    macs2 callpeak -t $OUTPUT_CHIP_SUB/$MACS2_INPUT_R2 -c $OUTPUT_CHIP_SUB/$CONTROL_R2 -f BAMPE  -g 2913022398 -p 0.05 -B --outdir $OUTPUT_MACS2_PERMISSIVE -n $MACS2_PEAK_R2
-    macs2 callpeak -t $OUTPUT_CHIP_SUB/$MACS2_INPUT_R2 -c $OUTPUT_CHIP_SUB/$CONTROL_R2 -f BAMPE  -g 2913022398 -p 0.05 --broad -B --outdir $OUTPUT_MACS2_PERMISSIVE -n $MACS2_PEAK_R2
+echo
+echo "Permissive MACS2 for later IDR Analysis"
+# Promt to procceed or skip Permissive MACS2
+read -rp "Do you want to proceed with Permissive MACS2 for later IDR Analysis (y/n): " confirm
+if [[ "$confirm" == "y" ]]; then   
+    for cell in "${CellLine[@]}"; do 
+        for cond in "${conditions[@]}"; do
+            # Set inpute files
+            MACS2_INPUT_R1="BLF_ChIP_${cell}_${cond}_Rep1_cle_sort_dd.bam"
+            MACS2_INPUT_R2="BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd.bam"
+            CONTROL_R1="BLF_ChIP_${cell}_control_Input_Rep1_cle_sort_dd.bam"
+            CONTROL_R2="BLF_ChIP_${cell}_control_Input_Rep2_cle_sort_dd.bam"
+            CONTROL_MERGED="BLF_ChIP_${cell}_control_Input_merged_cle_sort_dd.bam"
 
-    #Sort Peak files
-    sort -k8,8nr $OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R1}_peaks.narrowPeak > $OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.narrowPeak
-    sort -k8,8nr $OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R1}_peaks.broadPeak > $OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.broadPeak
-    sort -k8,8nr $OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R2}_peaks.narrowPeak > $OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.narrowPeak
-    sort -k8,8nr $OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R2}_peaks.broadPeak > $OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.broadPeak
-done
+            # Set output file name for peak files. MACS2 adds its own suffix   
+            MACS2_PEAK_R1="${cell}_${cond}_Rep1_cle_sort_dd_p0.05macs2"
+            MACS2_PEAK_R2="${cell}_${cond}_Rep2_cle_sort_dd_p0.05macs2"
+                
+            #Call Peaks with permissive settings <p 0.05> to be used for IDR.
+            macs2 callpeak -t "$OUTPUT_CHIP_SUB/$MACS2_INPUT_R1" -c "$OUTPUT_CHIP_SUB/$CONTROL_R1" -f BAMPE  -g 2913022398 -p 0.05 -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK_R1"
+            macs2 callpeak -t "$OUTPUT_CHIP_SUB/$MACS2_INPUT_R1" -c "$OUTPUT_CHIP_SUB/$CONTROL_R1" -f BAMPE  -g 2913022398 -p 0.05 --broad -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK_R1"
+            macs2 callpeak -t "$OUTPUT_CHIP_SUB/$MACS2_INPUT_R2" -c "$OUTPUT_CHIP_SUB/$CONTROL_R2" -f BAMPE  -g 2913022398 -p 0.05 -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK_R2"
+            macs2 callpeak -t "$OUTPUT_CHIP_SUB/$MACS2_INPUT_R2" -c "$OUTPUT_CHIP_SUB/$CONTROL_R2" -f BAMPE  -g 2913022398 -p 0.05 --broad -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK_R2"
 
-for cond in "${conditions[@]}"; do
-    # Set inpute files
-    MACS2_INPUT="BLF_ChIP_HAL01_${cond}_merged_cle_sort_dd.bam"
-    CONTROL_MERGED="BLF_ChIP_HAL01_control_Input_merged_cle_sort_dd.bam"
+            #Sort Peak files
+            sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R1}_peaks.narrowPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.narrowPeak"
+            sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R1}_peaks.broadPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.broadPeak"
+            sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R2}_peaks.narrowPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.narrowPeak"
+            sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R2}_peaks.broadPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.broadPeak"
+        done
+    done
+else
+    echo "Skip Permissive MACS2 run"
+fi
 
-    # Set output file name for peak files. MACS2 adds its own suffix   
-    MACS2_PEAK="HAL01_${cond}_merged_cle_sort_dd_p0.05macs2"
+for cell in "${CellLine[@]}"; do 
+    for cond in "${conditions[@]}"; do
+        # Set inpute files
+        MACS2_INPUT="BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
+        CONTROL_MERGED="BLF_ChIP_${cell}_control_Input_merged_cle_sort_dd.bam"
 
-    #Enter Merged Folder
-    macs2 callpeak -t  $OUTPUT_CHIP_ALIGN/$MACS2_INPUT -c  $OUTPUT_CHIP_ALIGN/$CONTROL_MERGED -f BAMPE -g 2913022398  -p 0.000000001 -B --outdir $OUTPUT_MACS2_PERMISSIVE -n $MACS2_PEAK
-    macs2 callpeak -t  $OUTPUT_CHIP_ALIGN/$MACS2_INPUT -c  $OUTPUT_CHIP_ALIGN/$CONTROL_MERGED -f BAMPE -g 2913022398  -p 0.000000001 --broad -B --outdir $OUTPUT_MACS2_PERMISSIVE -n $MACS2_PEAK
+        # Set output file name for peak files. MACS2 adds its own suffix   
+        MACS2_PEAK="${cell}_${cond}_merged_cle_sort_dd_p0.05macs2"
 
-    #Sort Peak files
-    sort -k8,8nr $OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK}_peaks.narrowPeak > $OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK}_peaks.narrowPeak
-    sort -k8,8nr $OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK}_peaks.broadPeak > $OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK}_peaks.broadPeak
+        #Enter Merged Folder
+        macs2 callpeak -t  "$OUTPUT_CHIP_ALIGN/$MACS2_INPUT" -c  "$OUTPUT_CHIP_ALIGN/$CONTROL_MERGED" -f BAMPE -g 2913022398  -p 0.000000001 -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK"
+        macs2 callpeak -t  "$OUTPUT_CHIP_ALIGN/$MACS2_INPUT" -c  "$OUTPUT_CHIP_ALIGN/$CONTROL_MERGED" -f BAMPE -g 2913022398  -p 0.000000001 --broad -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK"
 
+        #Sort Peak files
+        sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK}_peaks.narrowPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK}_peaks.narrowPeak"
+        sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK}_peaks.broadPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK}_peaks.broadPeak"
+
+    done
 done
 
 ####################################
 ### IDR ANALYSIS: OPTIONAL #########
 ####################################
+echo
+echo "IDR Analysis"
+# Promt to procceed or skip IDR
+read -rp "Do you want to proceed IDR Analysis (y/n): " confirm
+if [[ "$confirm" == "y" ]]; then  
+    for cell in "${CellLine[@]}"; do 
+        for cond in "${conditions[@]}"; do
+            # Set input file names
+            MACS2_PEAK_R1="${cell}_${cond}_Rep1_cle_sort_dd_p0.05macs2"
+            MACS2_PEAK_R2="${cell}_${cond}_Rep2_cle_sort_dd_p0.05macs2"
+            MACS2_PEAK_ORACLE="${cell}_${cond}_merged_cle_sort_dd_p0.05macs2"
 
-for cond in "${conditions[@]}"; do
-    # Set input file names
-    MACS2_PEAK_R1="HAL01_${cond}_Rep1_cle_sort_dd_p0.05macs2"
-    MACS2_PEAK_R2="HAL01_${cond}_Rep2_cle_sort_dd_p0.05macs2"
-    MACS2_PEAK="HAL01_${cond}_merged_cle_sort_dd_p0.05macs2"
+            # Set output file name for IDR files
+            IDR_OUTPUT="${cell}_${cond}"
 
-    # Set output file name for IDR files
-    IDR_OUTPUT="HAL01_${cond}"
-
-    for peaktype in "narrowPeak" "broadPeak"; do
-        # IDR without Oracle Peak file
-        idr --samples $OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.${peaktype} $OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.${peaktype} --input-file-type $peaktype --rank p.value --output-file $OUTPUT_MACS2_IDR/${IDR_OUTPUT}_cle_broad-idr --plot --log-output-file $OUTPUT_MACS2_IDR/${IDR_OUTPUT}_cle_${peaktype}.idr.log
-	                                                                     
-        # IDR with Oracle Peak file
-        idr --samples $OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.${peaktype} $OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.${peaktype} --peak-list $OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK}_peaks.${peaktype} --input-file-type ${peaktype} --rank p.value --output-file $OUTPUT_MACS2_IDR/Oracle_${IDR_OUTPUT}_cle_${peaktype}-idr --plot --log-output-file $OUTPUT_MACS2_IDR/Oracle_${IDR_OUTPUT}_cle_${peaktype}.idr.log
+            for peaktype in "narrowPeak" "broadPeak"; do
+                # IDR without Oracle Peak file
+                idr --samples "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.${peaktype}" "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.${peaktype}" --input-file-type "$peaktype" --rank p.value --output-file "$OUTPUT_MACS2_IDR/${IDR_OUTPUT}_cle_${peaktype}-idr" --plot --log-output-file "$OUTPUT_MACS2_IDR/${IDR_OUTPUT}_cle_${peaktype}.idr.log"
+                                                                                
+                # IDR with Oracle Peak file
+                idr --samples "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.${peaktype}" "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.${peaktype}" --peak-list "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_ORACLE}_peaks.${peaktype}" --input-file-type "$peaktype" --rank p.value --output-file "$OUTPUT_MACS2_IDR/Oracle_${IDR_OUTPUT}_cle_${peaktype}-idr" --plot --log-output-file "$OUTPUT_MACS2_IDR/Oracle_${IDR_OUTPUT}_cle_${peaktype}.idr.log"
+            done
+        done
     done
-done
+else
+    echo "Skip IDR"
+fi
