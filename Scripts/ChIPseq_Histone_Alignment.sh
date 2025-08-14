@@ -1,4 +1,4 @@
-#!usr/bin/env bash
+#!/usr/bin/env bash
 set -e
 shopt -s nullglob # make globbing return empty array if no match
 

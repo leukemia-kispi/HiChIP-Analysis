@@ -50,3 +50,5 @@ https://github.com/stjude/ROSE
 >If issues occure during installation or during execution of any of the tools, refere to above documents for eventual troubleshooting.
 
 To start of with general setup follow this link [GeneralSetup.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/GeneralSetup.md) and proceed from there to the specific pipelines. 
+
+Reference: to be added
