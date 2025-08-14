@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+set -e
+shopt -s nullglob # make globbing return empty array if no match
+
+#Using this script assumes the script DirectoryArchitecture&CondaEnv.sh was run beforhand to create the DirectoryArchitecture and generate conda environments with needed tools.
 
 #############################
 ### MAIN FILE PATHS #########
@@ -14,21 +18,21 @@ if [ -z "$MAIN_DIR" ]; then
 fi
 
 #Set path to reference genome index and blacklist. Genome index has to be generated first if not done. 
-REF_FASTA="/mnt/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna" 
-REF_GENOME="/mnt/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
-BLACKLIST="/mnt/0.BlackList/hg38-blacklist.v2.bed"
+REF_FASTA="$MAIN_DIR/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna" 
+REF_GENOME="$MAIN_DIR/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
+BLACKLIST="$MAIN_DIR/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for reads *fg.gz files
-FASTQ_DIR="/mnt/1.RawData"
+FASTQ_DIR="$MAIN_DIR/1.RawData"
 # Set output directories
-OUTPUT_DIR_TRIM="/mnt/3.TRIM"
-OUTPUT_HICHIP_ALIGN="/mnt/4.HiChIP_Alignment"
-OUTPUT_HICHIP_SUB="/mnt/4.HiChIP_Alignment/Outputs"
+OUTPUT_DIR_TRIM="$MAIN_DIR/3.TRIM"
+OUTPUT_HICHIP_ALIGN="$MAIN_DIR/4.HiChIP_Alignment"
+OUTPUT_HICHIP_SUB="$MAIN_DIR/4.HiChIP_Alignment/Outputs"
 # Thread usage
 cores=32
 #Thread usage for pairtools dedup and split processes
 cores2=16
 # Set Path to temporary directory
-TEMP="/mnt/tmp"
+TEMP="$MAIN_DIR/tmp"
 
 
 
@@ -39,7 +43,7 @@ TEMP="/mnt/tmp"
 # Array containing Cell lines, replicate numbers and conditions found in filenames and defining samples.
 # Expected Sample nomenclature follows this pattern HiChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix.
 CellLine=("HAL01") #Replace with your actual Cell Line 
-conditions=("TCF3") #Replace with your actual conditions
+conditions=("TCF3HLF") #Replace with your actual conditions
 NUMBERS=("1" "2") # Replace with your actual replicate numbers
 
 
@@ -63,9 +67,6 @@ if [[ "$CONDA_DEFAULT_ENV" != "$CONDA_ENV" ]]; then
 else
     echo "Already in the target Conda environment."
 fi
-
-
-
 
 ######################
 ### TRIMMING #########
@@ -109,14 +110,25 @@ else
     echo "Trimming not needed as output files already exist."
 fi
 
+#############################
+### FASTAQC&MULITQC #########
+#############################
+
 #NOTE FOR VALIDIP Consider adding MULTIQc step after Trimming with promt to possibly skip this step#######
+
+
+####################################
+### MERGING OF FASTQ FILES #########
+####################################
+
+#Fastq fiels merged before aligment. Improve depth and downstream analysis.
 
 #Fuse Fasta files
 # Concatenate R1 fastq files
-cat $OUTPUT_DIR_TRIM/*rep1_R1_val_1.fq.gz $OUTPUT_DIR_TRIM/*rep2_R1_val_1.fq.gz > JoinedFastq_R1.fq.gz
+cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R1_val_1.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R1_val_1.fq.gz > JoinedFastq_R1.fq.gz
 
 # Concatenate R2 fastq files
-cat $OUTPUT_DIR_TRIM/*rep1_R2_val_2.fq.gz $OUTPUT_DIR_TRIM/*rep2_R2_val_2.fq.gz > JoinedFastq_R2.fq.gz
+cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R2_val_2.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R2_val_2.fq.gz > JoinedFastq_R2.fq.gz
 
 #Give permission to new files
 sudo chmod 777 $OUTPUT_DIR_TRIM/JoinedFastq_R1.fq.gz
@@ -124,13 +136,19 @@ sudo chmod 777 $OUTPUT_DIR_TRIM/JoinedFastq_R2.fq.gz
 
 echo "Fusion of FASTA replicates done"
 
+####################################
+### DOVETAIL ALIGNMENT #############
+####################################
+
 # Alignment Output directory
 cd $OUTPUT_HICHIP_ALIGN
 
-# Input/Output files for alignment
-# BLF referse to black list filtered file
+# Input files for alignment
 HICHIP_R1="$OUTPUT_DIR_TRIM/JoinedFastq_R1.fq.gz"
 HICHIP_R2="$OUTPUT_DIR_TRIM/JoinedFastq_R2.fq.gz"
+
+# Input/Output files for alignment
+# BLF referse to black list filtered file
 MAPPED_PAIRS="JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs"
 MAPPED_BAM="JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
 MAPPED_BLF_BAM="BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
@@ -152,6 +170,10 @@ cd /home/ubuntu
 bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
 samtools index $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
 
+####################################
+### DOVETAIL QC ####################
+####################################
+
 #QC compare ChIP-seq TCF3-HLF_FLAG
 bash /home/ubuntu/HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p /home/ubuntu/HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq-TCF3HLF_bw175
 
@@ -160,12 +182,21 @@ python3 /home/ubuntu/HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIG
 
 echo "HiCHIP Aligmnent QC Complete"
 
+####################
+### COVERAGE #######
+####################
+
 #Enrichment for IGV
 bamCoverage -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -o $OUTPUT_HICHIP_SUB/BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.bw --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
 
 echo "Generated Bigwig file Complete"
 
+
+#########################
+### CONTACT FILES #######
+#########################
+
 #ContacMaps
-java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads $cores $OUTPUT_HICHIP_ALIGN/$MAPPED_PAIRS $OUTPUT_HICHIP_SUB/JoinedRep_TCF3HLF_HAL01_hg38_nodd_contact_map.hic $REF_GENOME
+java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads "$cores" "$OUTPUT_HICHIP_ALIGN/$MAPPED_PAIRS $OUTPUT_HICHIP_SUB/JoinedRep_TCF3HLF_HAL01_hg38_nodd_contact_map.hic" "$REF_GENOME"
 
 echo "Generated .hic file Complete"

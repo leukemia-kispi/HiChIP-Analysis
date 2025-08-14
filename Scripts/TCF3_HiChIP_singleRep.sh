@@ -1,4 +1,8 @@
-#!usr/bin/bash
+#!/usr/bin/env bash
+set -e
+shopt -s nullglob # make globbing return empty array if no match
+
+#Using this script assumes the script DirectoryArchitecture&CondaEnv.sh was run beforhand to create the DirectoryArchitecture and generate conda environments with needed tools.
 
 #Set path to reference genome index and blacklist. Genome index has to be generated first if not done. 
 REF_FASTA="/mnt/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna" 
