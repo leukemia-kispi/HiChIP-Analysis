@@ -23,6 +23,7 @@ REF_GENOME="$MAIN_DIR/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="$MAIN_DIR/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for reads *fg.gz files
 FASTQ_DIR="$MAIN_DIR/1.RawData"
+FASTQC="$MAIN_DIR/2.FASTQC/HiChIP"
 # Set output directories
 OUTPUT_DIR_TRIM="$MAIN_DIR/3.TRIM"
 OUTPUT_HICHIP_ALIGN="$MAIN_DIR/4.HiChIP_Alignment"
@@ -111,11 +112,20 @@ else
 fi
 
 #############################
-### FASTAQC&MULITQC #########
+### FASTQC&MULITQC #########
 #############################
+echo
+echo "FASTQC Analysis"
+# Promt to procceed or skip IDR
+read -rp "Do you want to proceed IDR Analysis (y/n): " confirm
+if [[ "$confirm" == "y" ]]; then  
+    fastqc $OUTPUT_DIR_TRIM -o $FASTQC
+    multiqc $FASTQC
+    echo "FASTQC done"
 
-#NOTE FOR VALIDIP Consider adding MULTIQc step after Trimming with promt to possibly skip this step#######
-
+else    
+    echo " FASTQC skipped"
+fi
 
 ####################################
 ### MERGING OF FASTQ FILES #########
@@ -170,6 +180,8 @@ cd /home/ubuntu
 bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
 samtools index $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
 
+echo "HiCHIP Aligmnent Complete"
+
 ####################################
 ### DOVETAIL QC ####################
 ####################################
@@ -190,7 +202,6 @@ echo "HiCHIP Aligmnent QC Complete"
 bamCoverage -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -o $OUTPUT_HICHIP_SUB/BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.bw --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
 
 echo "Generated Bigwig file Complete"
-
 
 #########################
 ### CONTACT FILES #######

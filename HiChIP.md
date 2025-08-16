@@ -5,17 +5,16 @@ Example presented here are based on data generated with the adapted Dovetail MNa
 Initial input files needed: 
 - Reference genome fasta file (can be downloaded from [GCA_000001405.15_GRCh38_no_alt_analysis_set](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/))
 - Black list for known artifact regions [BlackList](https://github.com/ValdemarP267/HiChIP-Analysis/0.BlackList)
-- HiChIP sequencing files 
+- HiChIP sequencing files GSE...  TO BE ADDED
 
 >[!Note]
 >Intermediery files will be generated that are required inputs for dowstream procedures.
 
 ## Install dependecies for Dovetail-Genomics pipeline
 
-Clone source code from dovetail-genomics and pull juicertools.jar (can be moved into dovetails-genomics HiChIP directory):
+Clone source code from dovetail-genomics and pull juicertools.jar (can be moved into dovetails-genomics HiChIP directory) to your user directories:
 
 ```
-cd /home/ubuntu/
 git clone https://github.com/dovetail-genomics/HiChiP.git
 wget https://s3.amazonaws.com/hicfiles.tc4ga.com/public/juicer/juicer_tools_1.22.01.jar
 mv juicer_tools_1.22.01.jar ./HiChiP/

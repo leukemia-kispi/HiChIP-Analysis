@@ -3,10 +3,11 @@
 ## Setup of Coolbox and running it with JupyterNotebook
 
 To install coolbox and use it with the Jupyter Notebook web application, clone the source code https://github.com/GangCaoLab/CoolBox.git. Enter the Coolbox directory and follow instruction for installation in conda environment.
+The command lines used for creating the visuals in the paper ...  are documented in the file ....
 
 ```
 git clone https://github.com/GangCaoLab/CoolBox.git
-cd CoolBox
+cd ./CoolBox
 conda env create --file environment.yml
 conda activate coolbox
 python setup.py install
