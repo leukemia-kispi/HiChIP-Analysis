@@ -9,7 +9,7 @@ This guide will take you through:
 
 - Installation of Dovetail HiChIP pipeline and setup of Docker to pull docker image for FitHiChIP.
 
-- Installation of Picard, MACS2 and IDR for deduplication, peak calling and validation respectivly.
+- Installation of Picard, MACS2 and IDR for deduplication, peak calling and validation of reproducible peaks across replicates, respectivly.
 
 - Installation of tools for downstream analysis and vizualization of data such as deepTools, HOMER and coolbox.
 
@@ -45,10 +45,11 @@ http://homer.ucsd.edu/homer/index.html
 ROSE
 https://github.com/younglab/ROSE
 https://github.com/stjude/ROSE
+http://younglab.wi.mit.edu/super_enhancer_code.html
 
 >[!NOTE]
 >If issues occure during installation or during execution of any of the tools, refere to above documents for eventual troubleshooting.
 
 To start of with general setup follow this link [GeneralSetup.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/GeneralSetup.md) and proceed from there to the specific pipelines. 
 
-Reference: to be added
+######Reference: to be added
