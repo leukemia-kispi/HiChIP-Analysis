@@ -1,6 +1,6 @@
 # HiChIP-Analysis
 
-This is a beginner friendly setup and execution guide for analysis of TCF3::HLF HiChIP data, generated from the HAL-01 cell line using the Dovetail MNase-HiChIP kit.
+This is a setup and execution guide for analysis of TCF3::HLF HiChIP data, generated from the HAL-01 cell line using the Dovetail MNase-HiChIP kit.
 May be used for analysis of othere dataset with carefull adaptation of provided scripts.
 
 This guide will take you through:
@@ -49,6 +49,8 @@ http://younglab.wi.mit.edu/super_enhancer_code.html
 
 >[!NOTE]
 >If issues occure during installation or during execution of any of the tools, refere to above documents for eventual troubleshooting.
+
+![Summary of whole HiChIP-Analysis workflow](/images/Workflow.png)
 
 To start of with general setup follow this link [GeneralSetup.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/GeneralSetup.md) and proceed from there to the specific pipelines. 
 
