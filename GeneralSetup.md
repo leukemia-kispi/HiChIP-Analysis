@@ -1,8 +1,8 @@
 ## General Setup
 
-Examples described were done on a virtual machine running Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
+Original analysis were done on a virtual machine running Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
 
-For basic setup procedure proceed with below instructions.
+For basic setup procedure proceed with below instructions. (Beginner in Bioinformatics)
 
 **Update**
 
