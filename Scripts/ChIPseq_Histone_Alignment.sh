@@ -33,7 +33,12 @@ BIGWIG_COVERAGE="$MAIN_DIR/7.Deeptool_Matrix/Coverage"
 ################################################
 ### ADJUST THESE TO MATCH SAMPLE NAMES #########
 ################################################
-
+#Promt to fill out sample names.
+echo " Respond to following to run the ChIPseq pipeline"
+echo "Sample name should follow following structure ChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix"
+read -rp "what are the Cell lines/Cell types"
+read -rp "what are the conditions (control_Input is expected do not write)"
+read -rp "what are the Cell lines/Cell types"
 # Array containing Cell lines, replicate numbers and conditions found in filenames and defining samples.
 # Expected Sample nomenclature follows this pattern ChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix.
 CellLine=("HAL01") #Replace with your actual Cell Line 
