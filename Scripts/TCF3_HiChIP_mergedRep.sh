@@ -117,7 +117,7 @@ fi
 echo
 echo "FASTQC Analysis"
 # Promt to procceed or skip IDR
-read -rp "Do you want to proceed IDR Analysis (y/n): " confirm
+read -rp "Do you want to proceed FASTQC Analysis (y/n): " confirm
 if [[ "$confirm" == "y" ]]; then  
     fastqc $OUTPUT_DIR_TRIM -o $FASTQC
     multiqc $FASTQC
@@ -133,18 +133,30 @@ fi
 
 #Fastq fiels merged before aligment. Improve depth and downstream analysis.
 
-#Fuse Fasta files
+#Fuse Fastq files
 # Concatenate R1 fastq files
-cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R1_val_1.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R1_val_1.fq.gz > JoinedFastq_R1.fq.gz
+for cell in "${CellLine[@]}"; do    
+    for cond in "${conditions[@]}"; do
+        cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R1_val_1.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R1_val_1.fq.gz > JoinedFastq_${cell}_${cond}_R1.fq.gz
+    done
+done
 
 # Concatenate R2 fastq files
-cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R2_val_2.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R2_val_2.fq.gz > JoinedFastq_R2.fq.gz
+for cell in "${CellLine[@]}"; do    
+    for cond in "${conditions[@]}"; do
+        cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R2_val_2.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R2_val_2.fq.gz > JoinedFastq_${cell}_${cond}_R2.fq.gz
+    done        
+done
 
 #Give permission to new files
-sudo chmod 777 $OUTPUT_DIR_TRIM/JoinedFastq_R1.fq.gz
-sudo chmod 777 $OUTPUT_DIR_TRIM/JoinedFastq_R2.fq.gz
+for cell in "${CellLine[@]}"; do    
+    for cond in "${conditions[@]}"; do
+        sudo chmod 777 $OUTPUT_DIR_TRIM/JoinedFastq_${cell}_${cond}_R1.fq.gz
+        sudo chmod 777 $OUTPUT_DIR_TRIM/JoinedFastq_${cell}_${cond}_R2.fq.gz
+    done    
+done
 
-echo "Fusion of FASTA replicates done"
+echo "Fusion of fastq replicate files done"
 
 ####################################
 ### DOVETAIL ALIGNMENT #############
