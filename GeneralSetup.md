@@ -37,11 +37,10 @@ bash Anaconda3-2023.09-0-Linux-x86_64.sh
 Follow the license agreement, type "yes" when prompted. Press Enter to confirm the installation location "[/home/<USERNAME>/anaconda3]". Type 'no' for initialization prompt.
 
 Make sure the PATH to anaconda3 is added
-USERNAME is ubuntu in examples that follow
 
 ```
 echo $PATH #check current PATH
-export PATH=$PATH:/home/ubuntu/anaconda3/bin
+export PATH=$PATH:/home/<USERNAME>/anaconda3/bin
 echo $PATH #check new PATH
 ```
 
