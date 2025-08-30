@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 set -e
 
-#Script will create all directories needed for HiChIP and ChIP analysis and different conda enviorments with some of the necessary tools installed
+#Script will create all directories needed for HiChIP and ChIP analysis.
 
 # Initialize Conda
 eval "$(conda shell.bash hook)"
@@ -71,22 +71,3 @@ for sub in "${SUBDIRS[@]}"; do
 done
 
 echo "All required directories created under: $MAIN_DIR"
-
-# Function to check if a Conda environment exists and create it if not with respective applications installed
-create_conda_env() {
-    if ! conda env list | grep -q "$1"; then
-        conda create -y -n "$1"
-    fi
-    conda activate "$1"
-    conda install -y -c bioconda "$2"
-    conda deactivate
-}
-    
-# Create and set up Conda environments
-create_conda_env "DovetailHiChIP" "trim-galore fastqc multiqc"  #Additional tools will be installed by following the Dovetail HiChIP setup described in HiChIP.md. Including bwa-mem, samtools, pairtools, bedtools, deeptools,
-create_conda_env "MACS2" "macs2 idr homer bedtools"
-create_conda_env "Picard" "picard"
-
-
-echo "Setup of conda environments complete."
-
