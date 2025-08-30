@@ -2,7 +2,7 @@
 
 Original analysis were done on a virtual machine running Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
 
-For basic setup procedure proceed with below instructions. (Beginner in Bioinformatics)
+For basic setup procedure proceed with below instructions.
 
 **Update**
 
@@ -75,49 +75,42 @@ conda update -n base -c defaults conda
 conda config --add channels defaults
 conda config --add channels conda-forge
 ```
-##Install Picard tool for deduplication of ChIP-seq BAM files
+## Setup of directory architecture and DovetailHiChIP, MACS2, PICARD conda environments
 
-**Create a separate conda environment for Picard**
-```
-conda create -y -n Picard
-```
-Follow setup instructions found at https://broadinstitute.github.io/picard/
-
-**Make sure Java >= 11 is installed**
-```
-java --version
-sudo apt install openjdk-17-jre-headless -y
-```
-Confirm any prompts with defaults.
-
-## Setup of directory architecture and DovetailHiChIP and MACS2 conda environments
-
-With Conda installed, we are now ready to set up the directory structure for our analysis. Additionally, we will create Conda environments where the required software will be installed. This step is important because different tools may require specific versions of their dependencies in order to function properly without conflicts.
+With Conda installed, we are now ready to set up the directory structure for our analysis. Additionally, we will create Conda environments where the required software will be installed. Different tools may require specific versions of their dependencies in order to function properly without conflicts.
 
 Clone the source code of the HiChIP-Analysis repository into a selected directory. 
 
 ```
-cd /home/ubuntu/
+cd /home/<USERNAME>/
 git clone https://github.com/ValdemarP267/HiChIP-Analysis.git
 ```
-Make sure whole folder has permission and run script DirectoryArchitecture.sh
-The script assumes work is to be saved into a mounted volume called "/mnt".
+Make sure whole folder has permission. Run script DirectoryArchitecture.sh. Specefiy the main working directory when promted.
 
 ```
 sudo chmod 777 -R ./HiChIP-Analysis
-./HiChIP-Analysis/DirectoryArchitecture.sh
+bash ./HiChIP-Analysis/DirectoryArchitecture.sh
 ```
 
-To avoid memory issues, some of the pipeline steps require writing temporary files into a temp folder. Running the DirectoryArchitecture.sh will create this folder. Temporary files may take up to x3 of the space that the fastq.gz files are taking, make sure the working volume is big enough.
+To avoid memory issues, some of the pipeline steps require writing temporary files into a temp folder. Running the DirectoryArchitecture.sh will create this folder in addition to other directories that will be used during the workflow. Temporary files may take up to x3 of the space that fastq.gz files do, make sure the working volume is sufficient.
+
+Next execute the CondaEnv.sh
+
+```
+bash ./HiChIP-Analysis/CondaEnv.sh
+```
+
+Confirm any prompts with defaults.
 
 >[!NOTE]
->Running the script should create two conda environments:
+>Running the script CondaEnv.sh should create three conda environments:
 > - DovetailHiChIP with trim-galore, fastqc and multiqc installed
-> - MACS2 with MACS2, IDR installed
+> - MACS2 with macs2, idr installed
+> - Picard with picard isntalled
 
 ## Install Docker Engine needed for FitHiChIP tool
 
-Docker is a platform designed to help developers build, share, and run container applications.  
+Docker is a platform designed to help developers build, share, and run container applications.  Follow instructions below or visit offical site for [Docker](https://docs.docker.com/engine/install/ubuntu/).
 
 **Uninstall old versions, conflicting packages**
 

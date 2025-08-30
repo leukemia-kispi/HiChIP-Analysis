@@ -1,7 +1,13 @@
 #!/usr/bin/bash
 set -e
 
-#Script will create different conda enviorments with some of the necessary tools installed
+#To create the different conda enviorments used during HiChIP analsyis with some of the necessary tools installed
+
+## Make sure Java >= 11 is installed**
+echo "Installing Java."
+
+sudo apt install openjdk-17-jre-headless -y
+
 
 # Initialize Conda
 eval "$(conda shell.bash hook)"
@@ -21,6 +27,7 @@ create_conda_env "DovetailHiChIP" "trim-galore fastqc multiqc"  #Additional tool
 create_conda_env "MACS2" "macs2 idr homer bedtools"
 create_conda_env "Picard" "picard"
 
-
 echo "Setup of conda environments complete."
+
+# Setup instructions for Picard found at https://broadinstitute.github.io/picard/
 

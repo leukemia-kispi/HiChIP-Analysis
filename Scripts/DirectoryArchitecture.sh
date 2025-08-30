@@ -7,14 +7,22 @@ set -e
 eval "$(conda shell.bash hook)"
 
 # Function to check if a directory exists and create if it does not. Grants directories all permissions and ubuntu group ownership
+
 create_directory() {
+
+    user="${SUDO_USER:-$USER}"
+    group="$(id -gn "$user")"
+
     if [ ! -d "$1" ]; then
         echo "Creating directory: $1"
         sudo mkdir -m 777 -p "$1"
-        sudo chown ubuntu:ubuntu "$1" #set for correct user
     else
         echo "Directory already exists: $1"
     fi
+
+    #Enforce ownership and permission
+    sudo chown "$user:$group" "$1" 
+    sudo mkdir -m 777 -p "$1"    
 }
 
 # Prompt the user for the main directory
@@ -42,15 +50,20 @@ SUBDIRS=(
     "3.TRIM"
     "3.TRIM/HiChIP"
     "3.TRIM/ChIP"
-    "4.ChIP_Alignment"
-    "4.HiChIP_Alignment"
-    "4.HiChIP_Alignment/Outputs"
-    "4.ChIP_Alignment/Outputs"
+    "4.Alignment"
+    "4.Alignment/HiChIP"
+    "4.Alignment/ChIP"
     "5.MACS2"
-    "5.MACS2/SORT"
-    "5.MACS2/Permissive"
-    "5.MACS2/IDR"
-    "5.MACS2/D1"
+    "5.MACS2/HiChIP"
+    "5.MACS2/HiChIP/D1_Peaks"
+    "5.MACS2/HiChIP/SORT"
+    "5.MACS2/HiChIP/Permissive"
+    "5.MACS2/HiChIP/IDR"
+    "5.MACS2/ChIP"
+    "5.MACS2/ChIP/Peaks"
+    "5.MACS2/ChIP/SORT"
+    "5.MACS2/ChIP/Permissive"
+    "5.MACS2/ChIP/IDR"
     "6.FitHiChIP_Output"
     "7.Deeptool_Matrix"
     "7.Deeptool_Matrix/Coverage"
