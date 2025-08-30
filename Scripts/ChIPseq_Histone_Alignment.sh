@@ -22,12 +22,12 @@ REF_FASTA="$MAIN_DIR/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_se
 REF_GENOME="$MAIN_DIR/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="$MAIN_DIR/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for read files, *fastq.gz and ID mapping file
-FASTQ_DIR="$MAIN_DIR/1.RawData"
-MAPPING_FILE="$MAIN_DIR/1.RawData/Histone_ChIP_IDs.txt"
+FASTQ_DIR="$MAIN_DIR/1.RawData/ChIP"
+MAPPING_FILE="$MAIN_DIR/1.RawData/ChIP/Histone_ChIP_IDs.txt"
 # Set output directories
 OUTPUT_DIR_TRIM="$MAIN_DIR/3.TRIM/ChIP"
-OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.ChIP_Alignment"
-OUTPUT_CHIP_SUB="$MAIN_DIR/4.ChIP_Alignment/Outputs"
+OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.Alignment/ChIP"
+OUTPUT_CHIP_SUB="$MAIN_DIR/4.Alignment/ChIP/Outputs"
 BIGWIG_COVERAGE="$MAIN_DIR/7.Deeptool_Matrix/Coverage"
 
 ################################################
@@ -37,8 +37,9 @@ BIGWIG_COVERAGE="$MAIN_DIR/7.Deeptool_Matrix/Coverage"
 echo " Respond to following to run the ChIPseq pipeline"
 echo "Sample name should follow following structure ChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix"
 read -rp "what are the Cell lines/Cell types"
-read -rp "what are the conditions (control_Input is expected do not write)"
+read -rp "what are the conditions (control samples are expected and included by default as control_Input)"
 read -rp "what are the Cell lines/Cell types"
+
 # Array containing Cell lines, replicate numbers and conditions found in filenames and defining samples.
 # Expected Sample nomenclature follows this pattern ChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix.
 CellLine=("HAL01") #Replace with your actual Cell Line 
@@ -172,8 +173,6 @@ if [ "$perform_trimming" = true ]; then
 else
     echo "Trimming not needed as output files already exist."
 fi
-
-#NOTE FOR VALIDIP Consider adding MULTIQc step after Trimming with promt to possibly skip this step#######
 
 #######################
 ### ALIGNMENT #########

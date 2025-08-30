@@ -2,20 +2,20 @@
 
 ## FitHiChIP setup
 
-FitHiChIP will be run from Docker image. The instructions in the [README.md](https://github.com/ValdemarP267/HiChIP-Analysis) will guide you through docker installation. This simplefies FitHiChIP installation as dependecies dont need to be installed from scratch.
+FitHiChIP will be run from Docker image. The instructions in the [GeneralSetup.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/GeneralSetup.md) will guide you through docker installation. This simplefies FitHiChIP installation as dependecies dont need to be installed from scratch.
 
 Select the directory to contain the FitHiChIP source code, and clone it.
 
 ```
-cd /home/ubuntu
+cd /home/<USER>
 git clone https://github.com/ay-lab/FitHiChIP.git
 sudo chmod 777 -R FithHiChIP
 ```
 
 Data inputs needed to run FitHiChIP:
 
-- Pairs files generated during HiChIP aligment [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md) converted to HiC-Pro format (See below)
-- MACS2 called peaks from relevant ChIP-seq data or D1 MACS2 called peaks from primary algimnents created from HiChIP aligment data by following instructions in [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md)
+- Pairs files generated during HiChIP aligment as described in [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md) and converted to HiC-Pro format (See below)
+- MACS2 called peaks from relevant ChIP-seq data or D1 MACS2 called peaks from primary algimnents file generated from HiChIP aligment data. Described in [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md)
 - Config file(example provided in this repository) specefying file locations and parameters
 
 ## HiC-Pro Installation

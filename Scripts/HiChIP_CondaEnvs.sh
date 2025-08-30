@@ -29,5 +29,3 @@ create_conda_env "Picard" "picard"
 
 echo "Setup of conda environments complete."
 
-# Setup instructions for Picard found at https://broadinstitute.github.io/picard/
-

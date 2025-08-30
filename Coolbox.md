@@ -20,7 +20,7 @@ jupyter nbextension enable --py widgetsnbextension
 ```
 
 Make sure you are in the coolbox conda environment and enter the directory of where you put the working directory. Called JypyterLab in example. (here you put all bigwig files or other data needed for generating visuals) 
-
+Run jypeter lab and setup a 4 digit network endpoint (8585 in example)
 ```
 cd directoryPATH/JupyterLab
 jupyter lab --nobrowser --port 8585
@@ -29,10 +29,9 @@ jupyter lab --nobrowser --port 8585
 If working on local machine when the server is initiated, a link with the token for access is made available. 
 Copy the link and input it in a internet browser to begin using coolbox in JupyterNotebook.
 
-If you run Jypyter from a virtual machine instance on a cloud you need to SSH Tunnel from Your Local Machine first
-to later open it in the internet browser.
+If you run Jypyter from a remote server you need to tunnel the port with SSH first
 
-On your local machine, open a PowerShell or Command terminal and create an SSH tunnel:
+On your local machine, open a PowerShell or Command terminal and create a tunnel with SSH:
 
 ```
 ssh -L 8585:localhost:8585 username@remote_server_ip
@@ -43,4 +42,5 @@ Replace remote_server_ip with the actual IP address of your remote server.
 
 Input http://localhost:8585 in web browser and respond to the password request. The password will corespond to instance password.
 
-Commands and features to visualize genomic data with coolbox API can be found at https://gangcaolab.github.io/CoolBox/quick_start_API.html
+>[!NOTE]
+>Commands and features to visualize genomic data with coolbox API can be found at https://gangcaolab.github.io/CoolBox/quick_start_API.html

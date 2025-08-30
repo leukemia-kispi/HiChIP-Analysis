@@ -103,10 +103,10 @@ bash ./HiChIP-Analysis/CondaEnv.sh
 Confirm any prompts with defaults.
 
 >[!NOTE]
->Running the script CondaEnv.sh should create three conda environments:
-> - DovetailHiChIP with trim-galore, fastqc and multiqc installed
-> - MACS2 with macs2, idr installed
-> - Picard with picard isntalled
+>Running the script HiChIP_CondaEnvs.sh should create three conda environments:
+> - DovetailHiChIP with trim-galore, fastqc and multiqc installed. Additional tools will be installed following [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md)
+> - MACS2 with macs2, idr homer installed
+> - Picard with picard installed
 
 ## Install Docker Engine needed for FitHiChIP tool
 
@@ -173,6 +173,7 @@ docker run hello-world
 
 With above steps done you are ready to proceed with:
 
->[HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md) - Setup instructions for the Dovetail pipleline for aligments and pre-processing of HiChIP output.
->[FitHiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/FitHiChIP.md) - Setup instructions for FitHiChIP for loop calling.
->[Coolbox.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/Coolbox.md) - Setup of Coolbox visualization toolkit for genomic data imported to Jupyter Notebook for creating visuals and browse. 
+- [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md) - Setup instructions for the Dovetail pipleline for aligments and pre-processing of HiChIP output.
+- [FitHiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/FitHiChIP.md) - Setup instructions for FitHiChIP for loop calling.
+- [Coolbox.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/Coolbox.md) - Setup of Coolbox visualization toolkit for genomic data imported to Jupyter Notebook for creating visuals and browse.
+- [Rose.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/Rose.md) - Setup of Rose and running it on H3K27ac ChIP-seq data for HAL-01 to annotate enhancers.   

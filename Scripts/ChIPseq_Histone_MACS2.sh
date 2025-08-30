@@ -18,12 +18,12 @@ if [ -z "$MAIN_DIR" ]; then
 fi
 
 # Set output directories
-OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.ChIP_Alignment"
-OUTPUT_CHIP_SUB="$MAIN_DIR/4.ChIP_Alignment/Outputs"
-OUTPUT_MACS2="$MAIN_DIR/5.MACS2"
-OUTPUT_MACS2_SORT="$MAIN_DIR/5.MACS2/SORT"
-OUTPUT_MACS2_PERMISSIVE="$MAIN_DIR/5.MACS2/Permissive"
-OUTPUT_MACS2_IDR="$MAIN_DIR/5.MACS2/IDR"
+OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.Alignment/ChIP"
+OUTPUT_CHIP_SUB="$MAIN_DIR/4.Alignment/ChIP/Outputs"
+OUTPUT_MACS2="$MAIN_DIR/5.MACS2/ChIP"
+OUTPUT_MACS2_SORT="$MAIN_DIR/5.MACS2/ChIP/SORT"
+OUTPUT_MACS2_PERMISSIVE="$MAIN_DIR/5.MACS2/ChIP/Permissive"
+OUTPUT_MACS2_IDR="$MAIN_DIR/5.MACS2/ChIP/IDR"
 
 # Array containing Cell lines, replicate numbers and conditions found in filenames and defining samples.
 # Expected Sample nomenclature follows this pattern ChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix.
