@@ -178,13 +178,59 @@ for cell in "${CellLine[@]}"; do
         samtools view -bS -@$cores | \
         samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
         
+        echo "HiChIP Alignment Complete for $MAPPED_BAM "
+
         #Remove black listed regions
         bedtools intersect -v -abam $MAPPED_BAM -b $BLACKLIST > $MAPPED_BLF_BAM
         samtools index $MAPPED_BLF_BAM
+
+        echo "Blacklist filter Complete for $MAPPED_BLF_BAM "
+
     done  
 done
 
-echo "HiChIP Alignment Complete"
+
+####################
+### FILTER PAIRS ###
+####################
+
+# The "paritools select" command in the DovtailHiChIP conda environment will filter
+# and include unique and rescue mapped read pairs.
+
+for cell in "${CellLine[@]}"; do    
+    for cond in "${conditions[@]}"; do
+
+        # Input files
+        MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.pairs"
+
+        # Output files
+        MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.filtered.pairs"
+
+        pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' "$MAPPED_PAIRS" -o "$MAPPED_PAIRS_FILTERED"
+    done
+done
+
+################################
+### HICPRO VALID PAIRS FILES ### 
+################################
+
+# The paired files generated during aligment needs to be converted
+# into valid HiC-Pro files to proceed with FitHiChIP.
+
+for cell in "${CellLine[@]}"; do    
+    for cond in "${conditions[@]}"; do
+
+        # Input files
+        MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.filtered.pairs"
+
+        # Output files
+        MAPPED_PAIRS_HICPRO="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_hicpro_mapped.filtered.pairs.gz"
+
+        grep -v '#' "$MAPPED_PAIRS"| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > "$MAPPED_PAIRS_HICPRO"
+        
+        echo "Converted $MAPPED_PAIRS into HiC-Pro format"
+   done
+done
 
 ####################
 ### COVERAGE #######

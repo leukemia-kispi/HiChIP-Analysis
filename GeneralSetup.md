@@ -1,6 +1,6 @@
 ## General Setup
 
-Original analysis were done on a virtual machine running Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
+Original analysis were done on a virtual machine (VM) running Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
 
 For basic setup procedure proceed with below instructions.
 
@@ -9,8 +9,7 @@ For basic setup procedure proceed with below instructions.
 Ensure the new virtual machine/instance is up to date and upgraded. Confirm with defaults when prompted. This may take few mininutes. 
 
 ```
-sudo apt update
-sudo apt upgrade -y  
+sudo apt update && apt upgrade -y  
 ```
 
 **Install Anaconda3 to set up conda environments and access conda archives**
@@ -82,7 +81,7 @@ With Conda installed, we are now ready to set up the directory structure for our
 Clone the source code of the HiChIP-Analysis repository into a selected directory. 
 
 ```
-cd /home/<USERNAME>/
+cd /home/<USER>/
 git clone https://github.com/ValdemarP267/HiChIP-Analysis.git
 ```
 Make sure whole folder has permission. Run script DirectoryArchitecture.sh. Specefiy the main working directory when promted.
@@ -92,19 +91,19 @@ sudo chmod 777 -R ./HiChIP-Analysis
 bash ./HiChIP-Analysis/DirectoryArchitecture.sh
 ```
 
-To avoid memory issues, some of the pipeline steps require writing temporary files into a temp folder. Running the DirectoryArchitecture.sh will create this folder in addition to other directories that will be used during the workflow. Temporary files may take up to x3 of the space that fastq.gz files do, make sure the working volume is sufficient.
+To avoid memory issues, some of the pipeline steps require writing of temporary files into a temp folder. Running the DirectoryArchitecture.sh will create this folder in addition to other directories that will be used during the workflow. Temporary files may take up to x3 of the space that fastq.gz files do, make sure the working volume is sufficient.
 
-Next execute the CondaEnv.sh
+Next execute the HiChIPTools_install.sh
 
 ```
-bash ./HiChIP-Analysis/CondaEnv.sh
+bash ./HiChIP-Analysis/HiChIPTools_install.sh
 ```
 
 Confirm any prompts with defaults.
 
 >[!NOTE]
->Running the script HiChIP_CondaEnvs.sh should create three conda environments:
-> - DovetailHiChIP with trim-galore, fastqc and multiqc installed. Additional tools will be installed following [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md)
+>Running the script HiChIPTools_install.sh should create three conda environments:
+> - DovetailHiChIP with trim-galore, fastqc and multiqc installed. Additional tools will be installed here following [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md)
 > - MACS2 with macs2, idr homer installed
 > - Picard with picard installed
 
