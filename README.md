@@ -76,10 +76,10 @@ Citation for integrated datasets:
 TCF3::HLF Histone ChIP-seq and TCF3::HLF KO RNA-seq
 
 >Y. Huang, B. Mouttet, H.-J. Warnatz, T. Risch, F. Rietmann, F. Frommelt, Q. A. Ngo, M. P. Dobay, B. Marovca, S. Jenni, Y.-C. Tsai, S. Matzk, V. Amstislavskiy, M. Schrappe, M. Stanulla, M. Gstaiger, B. Bornhauser, M.-L. Yaspo, J.-P. Bourquin, The Leukemogenic TCF3-HLF Complex Rewires Enhancers Driving Cellular Identity and Self-Renewal Conferring EP300 Vulnerability. Cancer Cell 36, 630-644.e9 (2019).\
->doi: [10.1016/j.ccell.2019.10.004](https://doi.org/10.1016/j.ccell.2019.10.004)\ 
+>doi: [10.1016/j.ccell.2019.10.004](https://doi.org/10.1016/j.ccell.2019.10.004)\
 >PMID: []()\
 
->R. Kodgule, J. W. Goldman, A. C. Monovich, T. Saari, A. R. Aguilar, C. N. Hall, N. Rajesh, J. Gupta, S.-C. A. Chu, L. Ye, A. Gurumurthy, A. Iyer, N. A. Brown, M. Y. Chiang, M. P. Cieslik, R. J. H. Ryan, ETV6 Deficiency Unlocks ERG-Dependent Microsatellite Enhancers to Drive Aberrant Gene Activation in B-Lymphoblastic Leukemia. Blood Cancer Discovery 4, 34–53 (2023).\ 
+>R. Kodgule, J. W. Goldman, A. C. Monovich, T. Saari, A. R. Aguilar, C. N. Hall, N. Rajesh, J. Gupta, S.-C. A. Chu, L. Ye, A. Gurumurthy, A. Iyer, N. A. Brown, M. Y. Chiang, M. P. Cieslik, R. J. H. Ryan, ETV6 Deficiency Unlocks ERG-Dependent Microsatellite Enhancers to Drive Aberrant Gene Activation in B-Lymphoblastic Leukemia. Blood Cancer Discovery 4, 34–53 (2023).\
 >doi: [10.1158/2643-3230.BCD-21-0224](https://doi.org/10.1158/2643-3230.BCD-21-0224)\
 >PMID: []()\
 
@@ -94,39 +94,41 @@ FitHiChIP
 BWA mem
 
 >Li H. (2013) Aligning sequence reads, clone sequences and assembly contigs with BWA-MEM.\
->arXiv: [1303.3997v2](https://arxiv.org/abs/1303.3997).\ 
+>arXiv: [1303.3997v2](https://arxiv.org/abs/1303.3997).\
 
 HiC-Pro
 
->Servant N., Varoquaux N., Lajoie BR., Viara E., Chen CJ., Vert JP., Dekker J., Heard E., Barillot E. HiC-Pro: An optimized and flexible pipeline for Hi-C processing. Genome Biology, 16:259, 2015.\ 
+>Servant N., Varoquaux N., Lajoie BR., Viara E., Chen CJ., Vert JP., Dekker J., Heard E., Barillot E. HiC-Pro: An optimized and flexible pipeline for Hi-C processing. Genome Biology, 16:259, 2015.\
 >doi: [10.1186/s13059-015-0831-x](https://doi.org/10.1186/s13059-015-0831-x)\
 >PMID: []()\
 
 MACS2
 
 >Zhang, Y., Liu, T., Meyer, C.A. et al. Model-based Analysis of ChIP-Seq (MACS). Genome Biol 9, R137 (2008).\
->doi:[0.1186/gb-2008-9-9-r137](https://doi.org/10.1186/gb-2008-9-9-r137)
+>doi:[0.1186/gb-2008-9-9-r137](https://doi.org/10.1186/gb-2008-9-9-r137)\
 >PMID: []()\
 
 deepTools
 
 >F. Ramírez, D. P. Ryan, B. Grüning, V. Bhardwaj, F. Kilpert, A. S. Richter, S. Heyne, F. Dündar, T. Manke, deepTools2: a next generation web server for deep-sequencing data analysis. Nucleic Acids Res 44, W160–W165 (2016).\
 >doi: [10.1093/nar/gkw257](https://doi.org/10.1093/nar/gkw257)\
->PMID: [27079975](https://pubmed.ncbi.nlm.nih.gov/27079975/)\ 
+>PMID: [27079975](https://pubmed.ncbi.nlm.nih.gov/27079975/)\
 
 HOMER
 
 >S. Heinz, C. Benner, N. Spann, E. Bertolino, Y. C. Lin, P. Laslo, J. X. Cheng, C. Murre, H. Singh, C. K. Glass, Simple Combinations of Lineage-Determining Transcription Factors Prime cis-Regulatory Elements Required for Macrophage and B Cell Identities. Molecular Cell 38, 576–589 (2010)
+>doi: []()\
 >PMID: []()\
-
 ROSE
 
 >Warren A. Whyte, David A. Orlando, Denes Hnisz, Brian J. Abraham, Charles Y. Lin, Michael H. Kagey, Peter B. Rahl, Tong Ihn Lee and Richard A. Young
 Cell 153, 307-319, April 11, 2013.\
+>doi: []()\
 >PMID: []()\
 
 >Jakob Lovén, Heather A. Hoke, Charles Y. Lin, Ashley Lau, David A. Orlando, Christopher R. Vakoc, James E. Bradner, Tong Ihn Lee, and Richard A. Young
 Cell 153, 320-334, April 11, 2013.\
+>doi: []()\
 >PMID: []()\
 
 
