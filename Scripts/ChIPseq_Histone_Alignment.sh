@@ -2,7 +2,7 @@
 set -e
 shopt -s nullglob # make globbing return empty array if no match
 
-#Using this script assumes the script DirectoryArchitecture&CondaEnv.sh was run beforhand to create the DirectoryArchitecture and generate conda environments with needed tools.
+# Using this script assumes DirectoryArchitecture.sh was execute beforhand
 
 #############################
 ### MAIN FILE PATHS #########

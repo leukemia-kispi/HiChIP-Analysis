@@ -2,7 +2,7 @@
 set -e
 shopt -s nullglob # make globbing return empty array if no match
 
-#Using this script assumes the script DirectoryArchitecture&CondaEnv.sh was run beforhand to create the DirectoryArchitecture and generate conda environments with needed tools.
+# Using this script assumes DirectoryArchitecture.sh was execute beforhand
 
 #############################
 ### MAIN FILE PATHS #########
@@ -16,10 +16,10 @@ if [ -z "$MAIN_DIR" ]; then
     echo "Error: No directory path entered."
     exit 1
 fi
-
-# Set output directories
+# Set input directories
 OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.Alignment/ChIP"
 OUTPUT_CHIP_SUB="$MAIN_DIR/4.Alignment/ChIP/Outputs"
+# Set output directories
 OUTPUT_MACS2="$MAIN_DIR/5.MACS2/ChIP"
 OUTPUT_MACS2_SORT="$MAIN_DIR/5.MACS2/ChIP/SORT"
 OUTPUT_MACS2_PERMISSIVE="$MAIN_DIR/5.MACS2/ChIP/Permissive"
@@ -66,7 +66,7 @@ if [[ "$confirm" == "y" ]]; then
             MACS2_INPUT_R2="BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd.bam"
             CONTROL_R1="BLF_ChIP_${cell}_control_Input_Rep1_cle_sort_dd.bam"
             CONTROL_R2="BLF_ChIP_${cell}_control_Input_Rep2_cle_sort_dd.bam"
-            CONTROL_MERGED="BLF_ChIP_${cell}_control_Input_merged_cle_sort_dd.bam"
+            CONTROL_MERGED="BLF_ChIP_${cell}_control_Input_merge_cle_sort_dd.bam"
 
             # Set output file name for peak files. MACS2 adds its own suffix   
             MACS2_PEAK_R1="${cell}_${cond}_Rep1_cle_sort_dd_p0.05macs2"
@@ -83,6 +83,8 @@ if [[ "$confirm" == "y" ]]; then
             sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R1}_peaks.broadPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.broadPeak"
             sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R2}_peaks.narrowPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.narrowPeak"
             sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R2}_peaks.broadPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.broadPeak"
+
+            echo "Completed Permissive MACS2 for ${cell} ${cond} "
         done
     done
 else
@@ -92,7 +94,7 @@ fi
 for cell in "${CellLine[@]}"; do 
     for cond in "${conditions[@]}"; do
         # Set inpute files
-        MACS2_INPUT="BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
+        MACS2_INPUT="BLF_ChIP_${cell}_${cond}_merge_cle_sort_dd.bam"
         CONTROL_MERGED="BLF_ChIP_${cell}_control_Input_merged_cle_sort_dd.bam"
 
         # Set output file name for peak files. MACS2 adds its own suffix   
