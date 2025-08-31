@@ -16,7 +16,7 @@ This guide will take you through:
 Additonal datasets integrated during donwstream analysis inlcude: 
 
 - RNA-seq of HAL-01 CRIPSR edited with TCF3::HLF-KO and HAL-01 Histone (H3K27ac, H3K4me1, H3K4m3, H3K27me3) ChIP-seq found in the European Nucleotide archive under accession number [ERP109232](https://www.ebi.ac.uk/ena/browser/view/ERP109232). 
-- The ATACseq data for HAL-01 cells found under the GEO series accession number GSE186942, [GSM5663910](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM5663910).
+- The ATAC-seq data for HAL-01 cells found under the GEO series accession number GSE186942, [GSM5663910](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM5663910).
 
 To get started follow this link [GeneralSetup.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/GeneralSetup.md) and proceed from there to the specific pipeline steps. 
 
@@ -73,11 +73,13 @@ If using the TCF3::HLF HiChIP data please cite
 
 Citation for integrated datasets:
 
-TCF3::HLF Histone ChIP-seq and TCF3::HLF KO RNA-seq
+TCF3::HLF Histone ChIP-seq and TCF3::HLF KO RNA-seq in HAL-01
 
 >Y. Huang, B. Mouttet, H.-J. Warnatz, T. Risch, F. Rietmann, F. Frommelt, Q. A. Ngo, M. P. Dobay, B. Marovca, S. Jenni, Y.-C. Tsai, S. Matzk, V. Amstislavskiy, M. Schrappe, M. Stanulla, M. Gstaiger, B. Bornhauser, M.-L. Yaspo, J.-P. Bourquin, The Leukemogenic TCF3-HLF Complex Rewires Enhancers Driving Cellular Identity and Self-Renewal Conferring EP300 Vulnerability. Cancer Cell 36, 630-644.e9 (2019).\
 >doi: [10.1016/j.ccell.2019.10.004](https://doi.org/10.1016/j.ccell.2019.10.004)\
 >PMID: [31735627](https://pubmed.ncbi.nlm.nih.gov/31735627/)
+
+HAL-01 ATAC-seq
 
 >R. Kodgule, J. W. Goldman, A. C. Monovich, T. Saari, A. R. Aguilar, C. N. Hall, N. Rajesh, J. Gupta, S.-C. A. Chu, L. Ye, A. Gurumurthy, A. Iyer, N. A. Brown, M. Y. Chiang, M. P. Cieslik, R. J. H. Ryan, ETV6 Deficiency Unlocks ERG-Dependent Microsatellite Enhancers to Drive Aberrant Gene Activation in B-Lymphoblastic Leukemia. Blood Cancer Discovery 4, 34–53 (2023).\
 >doi: [10.1158/2643-3230.BCD-21-0224](https://doi.org/10.1158/2643-3230.BCD-21-0224)\
