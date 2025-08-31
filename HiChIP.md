@@ -86,7 +86,7 @@ Generate an index file for your reference, a reference file with only the main c
 Faidx will index the reference file and create GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai on the reference directory (0.GenomeAssembly directory).
 
 ```
-cd 0.GenomeAssembly
+cd ./0.GenomeAssembly
 wget https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz
 gunzip GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz
 samtools faidx GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
@@ -107,21 +107,31 @@ bwa index GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 
 ## Execute the Aligment Script
 
-Run the TCF3_HiChIP_fusedRep.sh script
+Run the HiChIP_mergedRep.sh script
 
 ```
-bash TCF3_HiChIP_fusedRep.sh
+bash HiChIP_meredRep.sh
 ```
 
 The script will:
 - Initiate DovetailHiChIP conda environment
 - Trim adapters and short reads 
-- Fuse trimmed replicate reads for alignment
+- Merge trimmed replicate reads for alignment
 - Perform paired alignment using bwa-mem, pairtools and samtools
 - Generate bigwig files for IGV browsing
 - Generate .hic files for Juicebox tool browsing
 
 **Good Practice**
-It is also recommended to run the script TCF3_HiChIP_singleRep.sh. This one omits the fuse step and aligns each replicate seperatly. Comparing these output to the fused data outputs can ensure higher confidence in the called interactions from running FitHiChIP.
+It is also recommended to run the script HiChIP_singleRep.sh. This one omits the merging step and aligns each replicate seperatly. Comparing these output to the fused data outputs can ensure higher confidence in the called interactions from running FitHiChIP.
 
+## Dovetail QC Analysis
 
+Executing enrichment_stats.sh from Dovetail
+
+#QC compare ChIP-seq TCF3-HLF_FLAG
+bash /home/ubuntu/HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p /home/ubuntu/HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq-TCF3HLF_bw175
+
+#QC Plot ChIP-seq TCF3-HLF_FLAG
+python3 /home/ubuntu/HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks /home/ubuntu/HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3HLF_FLAG_bw175_cle-idr.bed -output $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq_TCF3HLF_ChIP_FLAG_bw175_enrichment.png
+
+echo "HiCHIP Aligmnent QC Complete"

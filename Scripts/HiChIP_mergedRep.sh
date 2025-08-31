@@ -22,20 +22,18 @@ REF_FASTA="$MAIN_DIR/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_se
 REF_GENOME="$MAIN_DIR/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="$MAIN_DIR/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for reads *fg.gz files
-FASTQ_DIR="$MAIN_DIR/1.RawData"
+FASTQ_DIR="$MAIN_DIR/1.RawData/HiChIP"
 FASTQC="$MAIN_DIR/2.FASTQC/HiChIP"
 # Set output directories
-OUTPUT_DIR_TRIM="$MAIN_DIR/3.TRIM"
-OUTPUT_HICHIP_ALIGN="$MAIN_DIR/4.HiChIP_Alignment"
-OUTPUT_HICHIP_SUB="$MAIN_DIR/4.HiChIP_Alignment/Outputs"
+OUTPUT_DIR_TRIM="$MAIN_DIR/3.TRIM/HiChIP"
+OUTPUT_HICHIP_ALIGN="$MAIN_DIR/4.Alignment/HiChIP"
+OUTPUT_HICHIP_SUB="$MAIN_DIR/4.Alignment/HiChIP/Outputs"
 # Thread usage
 cores=32
 #Thread usage for pairtools dedup and split processes
 cores2=16
 # Set Path to temporary directory
 TEMP="$MAIN_DIR/tmp"
-
-
 
 ################################################
 ### ADJUST THESE TO MATCH SAMPLE NAMES #########
@@ -112,114 +110,115 @@ else
 fi
 
 #############################
-### FASTQC&MULITQC #########
+### MULITQC #################
 #############################
 echo
-echo "FASTQC Analysis"
+echo "Start MULTIQC summary of FASTQC output for trimmed fastq files"
 # Promt to procceed or skip IDR
-read -rp "Do you want to proceed FASTQC Analysis (y/n): " confirm
+read -rp "Do you want to proceed MULTIQC Analysis (y/n): " confirm
 if [[ "$confirm" == "y" ]]; then  
-    fastqc $OUTPUT_DIR_TRIM -o $FASTQC
-    multiqc $FASTQC
-    echo "FASTQC done"
-
+    multiqc $OUTPUT_DIR_TRIM
+    echo "MULTIQC done"
 else    
-    echo " FASTQC skipped"
+    echo " MULTIQC skipped"
 fi
 
 ####################################
 ### MERGING OF FASTQ FILES #########
 ####################################
 
-#Fastq fiels merged before aligment. Improve depth and downstream analysis.
+#Fastq files merged before alignment. Improve depth and downstream analysis.
 
-#Fuse Fastq files
 # Concatenate R1 fastq files
 for cell in "${CellLine[@]}"; do    
     for cond in "${conditions[@]}"; do
-        cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R1_val_1.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R1_val_1.fq.gz > JoinedFastq_${cell}_${cond}_R1.fq.gz
+        cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R1_val_1.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R1_val_1.fq.gz > $OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R1.fq.gz
     done
 done
 
 # Concatenate R2 fastq files
 for cell in "${CellLine[@]}"; do    
     for cond in "${conditions[@]}"; do
-        cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R2_val_2.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R2_val_2.fq.gz > JoinedFastq_${cell}_${cond}_R2.fq.gz
+        cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R2_val_2.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R2_val_2.fq.gz > $OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R2.fq.gz
     done        
 done
 
 #Give permission to new files
 for cell in "${CellLine[@]}"; do    
     for cond in "${conditions[@]}"; do
-        sudo chmod 777 $OUTPUT_DIR_TRIM/JoinedFastq_${cell}_${cond}_R1.fq.gz
-        sudo chmod 777 $OUTPUT_DIR_TRIM/JoinedFastq_${cell}_${cond}_R2.fq.gz
+        sudo chmod 777 $OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R1.fq.gz
+        sudo chmod 777 $OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R2.fq.gz
     done    
 done
 
-echo "Fusion of fastq replicate files done"
+echo "Merging of fastq replicate files done"
 
 ####################################
 ### DOVETAIL ALIGNMENT #############
 ####################################
 
-# Alignment Output directory
-cd $OUTPUT_HICHIP_ALIGN
+for cell in "${CellLine[@]}"; do    
+    for cond in "${conditions[@]}"; do
+        # Input files for alignment
+        HICHIP_R1="$OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R1.fq.gz"
+        HICHIP_R2="$OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R2.fq.gz"
 
-# Input files for alignment
-HICHIP_R1="$OUTPUT_DIR_TRIM/JoinedFastq_R1.fq.gz"
-HICHIP_R2="$OUTPUT_DIR_TRIM/JoinedFastq_R2.fq.gz"
+        # Output files
+        # BLF referse to black list filtered files
+        MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.pairs"
+        MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.PT.bam"
+        MAPPED_BLF_BAM="$OUTPUT_HICHIP_ALIGN/BLF_Merge_${cell}_${cond}_hg38_nodd_mapped.PT.bam"
 
-# Input/Output files for alignment
-# BLF referse to black list filtered file
-MAPPED_PAIRS="JoinedRep_TCF3_HLF_hg38_nodd_mapped.pairs"
-MAPPED_BAM="JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
-MAPPED_BLF_BAM="BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.PT.bam"
+        # Alignment, dedup skipped. Can be included by removing comment mark.
+        bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
+        pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
+        pairtools sort --tmpdir=$TEMP --nproc $cores | \
+        #pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats Merge_${cell}_${cond}_stats.txt | \
+        pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
+        samtools view -bS -@$cores | \
+        samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
+        
+        #Remove black listed regions
+        bedtools intersect -v -abam $MAPPED_BAM -b $BLACKLIST > $MAPPED_BLF_BAM
+        samtools index $MAPPED_BLF_BAM
+    done  
+done
 
-# Alignment, dedup skipped
-bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
-pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
-pairtools sort --tmpdir=$TEMP --nproc $cores | \
-#pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats JoinedRep_stats.txt | \
-pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
-samtools view -bS -@$cores | \
-samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
-
-echo "HiCHIP Aligmnent Complete"
-
-cd /home/ubuntu
-
-#Remove black list
-bedtools intersect -v -abam $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -b $BLACKLIST > $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
-samtools index $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM
-
-echo "HiCHIP Aligmnent Complete"
-
-####################################
-### DOVETAIL QC ####################
-####################################
-
-#QC compare ChIP-seq TCF3-HLF_FLAG
-bash /home/ubuntu/HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p /home/ubuntu/HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq-TCF3HLF_bw175
-
-#QC Plot ChIP-seq TCF3-HLF_FLAG
-python3 /home/ubuntu/HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks /home/ubuntu/HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3HLF_FLAG_bw175_cle-idr.bed -output $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq_TCF3HLF_ChIP_FLAG_bw175_enrichment.png
-
-echo "HiCHIP Aligmnent QC Complete"
+echo "HiChIP Alignment Complete"
 
 ####################
 ### COVERAGE #######
 ####################
 
-#Enrichment for IGV
-bamCoverage -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BAM -o $OUTPUT_HICHIP_SUB/BLF_JoinedRep_TCF3_HLF_hg38_nodd_mapped.bw --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
+for cell in "${CellLine[@]}"; do    
+    for cond in "${conditions[@]}"; do
+        # Input files for generating coverage files
+        MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.PT.bam"
 
-echo "Generated Bigwig file Complete"
+        # Output file
+        BIGWIG_OUT="$OUTPUT_HICHIP_SUB/BLF_Merge_${cell}_${cond}_hg38_nodd_mapped.bw"
+
+        # Enrichment for IGV
+        bamCoverage -b $MAPPED_BAM -o $BIGWIG_OUT --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
+
+        echo "Generated Bigwig file $MAPPED_BAM "
+    done
+done
 
 #########################
 ### CONTACT FILES #######
 #########################
+for cell in "${CellLine[@]}"; do    
+    for cond in "${conditions[@]}"; do
 
-#ContacMaps
-java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads "$cores" "$OUTPUT_HICHIP_ALIGN/$MAPPED_PAIRS $OUTPUT_HICHIP_SUB/JoinedRep_TCF3HLF_HAL01_hg38_nodd_contact_map.hic" "$REF_GENOME"
+        # Input files
+        MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.pairs"
+        # Output files
+        CONTACT_MAP="$OUTPUT_HICHIP_SUB/Merge_${cell}_${cond}_hg38_nodd_contact_map.hic"
 
-echo "Generated .hic file Complete"
+        # ContacMaps
+        java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads "$cores" "$MAPPED_PAIRS" "$CONTACT_MAP" "$REF_GENOME"
+
+        echo "Generated $CONTACT_MAP"
+    done
+done

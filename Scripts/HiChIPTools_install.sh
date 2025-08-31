@@ -1,13 +1,15 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 set -e
 
-#To create the different conda enviorments used during HiChIP analsyis with some of the necessary tools installed
+###########################################################################
+## To create some of the different conda enviorments used during TCF3::HLF 
+## HiChIP analsyis, with some of the necessary tools installed
+###########################################################################
 
-## Make sure Java >= 11 is installed**
+# Make sure Java >= 11 is installed**
 echo "Installing Java."
 
 sudo apt install openjdk-17-jre-headless -y
-
 
 # Initialize Conda
 eval "$(conda shell.bash hook)"
