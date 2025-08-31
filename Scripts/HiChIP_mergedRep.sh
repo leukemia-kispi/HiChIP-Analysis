@@ -23,7 +23,6 @@ REF_GENOME="$MAIN_DIR/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="$MAIN_DIR/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for reads *fg.gz files
 FASTQ_DIR="$MAIN_DIR/1.RawData/HiChIP"
-FASTQC="$MAIN_DIR/2.FASTQC/HiChIP"
 # Set output directories
 OUTPUT_DIR_TRIM="$MAIN_DIR/3.TRIM/HiChIP"
 OUTPUT_HICHIP_ALIGN="$MAIN_DIR/4.Alignment/HiChIP"
