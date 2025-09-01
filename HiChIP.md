@@ -79,9 +79,9 @@ Once the installation is completed, sign off and then sign back to your instance
 
 ## Generation of genome file
 
-First thing to do is to generate a genome file. It is a tab delimited file with chromosome names and their respective sizes needed for downstream steps:
+First thing to do is to generate a genome file. It is a tab delimited file with chromosome names and their respective sizes used by several tools:
 
-Generate an index file for your reference, a reference file with only the main chromosomes should be used (e.g. without alternative or unplaced chromosomes). For the analsysis of TCF3::HLF HiChIP the reference genome GCA_000001405.15_GRCh38_no_alt_analysis_set.fna was downloaded from https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/
+Generate an index file for your reference, a reference file with only the main chromosomes should be used (e.g. without alternative or unplaced chromosomes). For the analsysis of TCF3::HLF HiChIP the reference genome [GCA_000001405.15_GRCh38_no_alt_analysis_set.fna](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.gz) was downloaded. 
 
 Faidx will index the reference file and create GCA_000001405.15_GRCh38_no_alt_analysis_set.fna.fai on the reference directory (0.GenomeAssembly directory).
 
@@ -107,7 +107,7 @@ bwa index GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 
 ## Execute the Aligment Script
 
-Run the HiChIP_mergedRep.sh script
+Run the HiChIP_mergedRep.sh script. You will be promted to provide the main working directory where you setup the directory architecture by executing DirectoyrArchitecture.sh. The read files that you put in the 1.Rawdata should have the expected sample nomenclature HiChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix. Fill these out when promted.
 
 ```
 bash HiChIP_meredRep.sh
