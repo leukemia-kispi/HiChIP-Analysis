@@ -16,6 +16,7 @@ if [ -z "$MAIN_DIR" ]; then
     echo "Error: No directory path entered."
     exit 1
 fi
+
 # Set input directories
 OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.Alignment/ChIP"
 OUTPUT_CHIP_SUB="$MAIN_DIR/4.Alignment/ChIP/Outputs"

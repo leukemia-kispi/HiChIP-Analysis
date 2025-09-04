@@ -136,7 +136,7 @@ for cell in "${CellLine[@]}"; do
             # BLF referse to black list filtered files
             MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.pairs"
             MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.PT.bam"
-            MAPPED_BLF_BAM="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.PT.bam"
+            MAPPED_BLF_BAM="$OUTPUT_HICHIP_ALIGN/BLF_HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.PT.bam"
 
             # Alignment, dedup skipped. Can be included by removing comment mark.
             bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
@@ -189,7 +189,7 @@ done
 for cell in "${CellLine[@]}"; do    
     for cond in "${conditions[@]}"; do
         for num in "${NUMBERS[@]}"; do
-        # Input files
+            # Input files
             MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.filtered.pairs"
 
             # Output files

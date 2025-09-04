@@ -33,13 +33,13 @@ Other version available at https://repo.anaconda.com/archive/.
 bash Anaconda3-2023.09-0-Linux-x86_64.sh
 ```
 
-Follow the license agreement, type "yes" when prompted. Press Enter to confirm the installation location "[/home/<USERNAME>/anaconda3]". Type 'no' for initialization prompt.
+Follow the license agreement, type "yes" when prompted. Press Enter to confirm the installation location "[/home/$USER/anaconda3]". Type 'no' for initialization prompt.
 
 Make sure the PATH to anaconda3 is added
 
 ```
 echo $PATH #check current PATH
-export PATH=$PATH:/home/<USERNAME>/anaconda3/bin
+export PATH=$PATH:/home/$USER/anaconda3/bin
 echo $PATH #check new PATH
 ```
 
@@ -81,7 +81,7 @@ With Conda installed, we are now ready to set up the directory structure for our
 Clone the source code of the HiChIP-Analysis repository into a selected directory. 
 
 ```
-cd /home/<USER>/
+cd /home/<$USER>/
 git clone https://github.com/ValdemarP267/HiChIP-Analysis.git
 ```
 Make sure whole folder has permission. Run script DirectoryArchitecture.sh. Specefiy the main working directory when promted.

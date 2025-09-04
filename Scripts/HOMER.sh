@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 #in HOMER env
  export PATH="$PATH:/home/ubuntu/miniconda3/envs/HOMER/bin/"
 source ~/.bash_profile

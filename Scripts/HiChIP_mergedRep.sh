@@ -131,22 +131,22 @@ fi
 # Concatenate R1 fastq files
 for cell in "${CellLine[@]}"; do    
     for cond in "${conditions[@]}"; do
-        cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R1_val_1.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R1_val_1.fq.gz > $OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R1.fq.gz
+        cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R1_val_1.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R1_val_1.fq.gz > $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Merge_R1.fq.gz
     done
 done
 
 # Concatenate R2 fastq files
 for cell in "${CellLine[@]}"; do    
     for cond in "${conditions[@]}"; do
-        cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R2_val_2.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R2_val_2.fq.gz > $OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R2.fq.gz
+        cat $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep1_R2_val_2.fq.gz $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep2_R2_val_2.fq.gz > $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Merge_R2.fq.gz
     done        
 done
 
 #Give permission to new files
 for cell in "${CellLine[@]}"; do    
     for cond in "${conditions[@]}"; do
-        sudo chmod 777 $OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R1.fq.gz
-        sudo chmod 777 $OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R2.fq.gz
+        sudo chmod 777 $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Merge_R1.fq.gz
+        sudo chmod 777 $OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Merge_R2.fq.gz
     done    
 done
 
@@ -159,14 +159,14 @@ echo "Merging of fastq replicate files done"
 for cell in "${CellLine[@]}"; do    
     for cond in "${conditions[@]}"; do
         # Input files for alignment
-        HICHIP_R1="$OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R1.fq.gz"
-        HICHIP_R2="$OUTPUT_DIR_TRIM/MergeFastq_${cell}_${cond}_R2.fq.gz"
+        HICHIP_R1="$OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Merge_R1.fq.gz"
+        HICHIP_R2="$OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Merge_R2.fq.gz"
 
         # Output files
         # BLF referse to black list filtered files
-        MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.pairs"
-        MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.PT.bam"
-        MAPPED_BLF_BAM="$OUTPUT_HICHIP_ALIGN/BLF_Merge_${cell}_${cond}_hg38_nodd_mapped.PT.bam"
+        MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Merge_hg38_nodd_mapped.pairs"
+        MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Merge_hg38_nodd_mapped.PT.bam"
+        MAPPED_BLF_BAM="$OUTPUT_HICHIP_ALIGN/BLF_HiChIP_${cell}_${cond}_Merge_hg38_nodd_mapped.PT.bam"
 
         # Alignment, dedup skipped. Can be included by removing comment mark.
         bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
@@ -200,10 +200,10 @@ for cell in "${CellLine[@]}"; do
     for cond in "${conditions[@]}"; do
 
         # Input files
-        MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.pairs"
+        MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Merge_hg38_nodd_mapped.pairs"
 
         # Output files
-        MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.filtered.pairs"
+        MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Merge_hg38_nodd_mapped.filtered.pairs"
 
         pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' "$MAPPED_PAIRS" -o "$MAPPED_PAIRS_FILTERED"
     done
@@ -220,10 +220,10 @@ for cell in "${CellLine[@]}"; do
     for cond in "${conditions[@]}"; do
 
         # Input files
-        MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.filtered.pairs"
+        MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Merge_hg38_nodd_mapped.filtered.pairs"
 
         # Output files
-        MAPPED_PAIRS_HICPRO="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_hicpro_mapped.filtered.pairs.gz"
+        MAPPED_PAIRS_HICPRO="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Merge_hg38_nodd_hicpro_mapped.filtered.pairs.gz"
 
         grep -v '#' "$MAPPED_PAIRS"| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > "$MAPPED_PAIRS_HICPRO"
         
@@ -238,10 +238,10 @@ done
 for cell in "${CellLine[@]}"; do    
     for cond in "${conditions[@]}"; do
         # Input files for generating coverage files
-        MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.PT.bam"
+        MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Merge_hg38_nodd_mapped.PT.bam"
 
         # Output file
-        BIGWIG_OUT="$OUTPUT_HICHIP_SUB/BLF_Merge_${cell}_${cond}_hg38_nodd_mapped.bw"
+        BIGWIG_OUT="$OUTPUT_HICHIP_SUB/BLF_HiChIP_${cell}_${cond}_Merge_hg38_nodd_mapped.bw"
 
         # Enrichment for IGV
         bamCoverage -b $MAPPED_BAM -o $BIGWIG_OUT --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
@@ -257,9 +257,9 @@ for cell in "${CellLine[@]}"; do
     for cond in "${conditions[@]}"; do
 
         # Input files
-        MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/Merge_${cell}_${cond}_hg38_nodd_mapped.pairs"
+        MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Merge_hg38_nodd_mapped.pairs"
         # Output files
-        CONTACT_MAP="$OUTPUT_HICHIP_SUB/Merge_${cell}_${cond}_hg38_nodd_contact_map.hic"
+        CONTACT_MAP="$OUTPUT_HICHIP_SUB/HiChIP_${cell}_${cond}_Merge_hg38_nodd_contact_map.hic"
 
         # ContacMaps
         java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads "$cores" "$MAPPED_PAIRS" "$CONTACT_MAP" "$REF_GENOME"

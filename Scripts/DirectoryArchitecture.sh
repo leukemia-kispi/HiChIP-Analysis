@@ -1,5 +1,6 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 set -e
+shopt -s nullglob # make globbing return empty array if no match
 
 #Script will create all directories needed for HiChIP and ChIP analysis.
 

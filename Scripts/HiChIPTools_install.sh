@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+shopt -s nullglob # make globbing return empty array if no match
 
 ###########################################################################
 ## To create some of the different conda enviorments used during TCF3::HLF 

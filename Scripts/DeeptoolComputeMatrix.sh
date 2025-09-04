@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 #Set path to blacklist.
 BLACKLIST="/mnt/DeepTool/Target_Region/Q1cutoff_3196_BlackList.bed"
