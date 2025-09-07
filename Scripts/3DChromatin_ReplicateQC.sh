@@ -4,17 +4,17 @@ git clone http://github.com/kundajelab/3DChromatin_ReplicateQC
 3DChromatin_ReplicateQC/install_scripts/install_3DChromatin_ReplicateQC.sh
 
 conda install r-core-base
- conda install r-base
+conda install r-base
 
- pip install scikit-learn
-
- pip install hic2cool
-
- 
+pip install scikit-learn
+####################
+pip install hic2cool
+####################
+#########################################
 cd /home/valdipnet/HiChIP-Analysis/Confidence/
 hic2cool convert --resolutions 100000 rep1_TCF3HLF_HAL01_hg38_nodd_contact_map.hic  rep1_100kb.cool
 hic2cool convert rep2_TCF3HLF_HAL01_hg38_nodd_contact_map.hic  rep2_100kb.cool --resolution 100000
-
+############################################################################################
 
  pip install hicrep
 

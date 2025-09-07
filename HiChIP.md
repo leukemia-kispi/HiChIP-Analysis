@@ -9,6 +9,7 @@ Initial input files needed:
 
 >[!Note]
 >Intermediery files will be generated that are required inputs for dowstream procedures.
+>The HiChIP_ID.txt file will be used by the HiChIP scripts to adjust the annotation of file to format used by script. Use it if working with different samples and do the same.
 
 ## Install dependecies for Dovetail-Genomics pipeline
 
