@@ -1,6 +1,6 @@
 # Dovetail HiChIP
 
-Examples presented here are based on data generated with the adapted Dovetail MNase-HiChIP kit. The TCF3::HLF fusion protein was targeted with [TCF3 antibody from Cell signaling](https://www.cellsignal.com/products/primary-antibodies/e2a-d2b1-rabbit-mab/12258?site-search-type=Products&N=4294956287&Ntt=e2a&fromPage=plp). Chromatin originated from the HAL-01 TCF3::HLF positive leukemia cell line, CRISPR engineered to knockout wild type TCF3 expression and prevent interference with fusion protein targeted pulldown.
+Examples presented here are based on data generated with the adapted [Dovetail® MNase-HiChIP kit](https://cantatabio.com/dovetail-genomics/products/hichip/). The TCF3::HLF fusion protein was targeted with [TCF3 antibody from Cell signaling](https://www.cellsignal.com/products/primary-antibodies/e2a-d2b1-rabbit-mab/12258?site-search-type=Products&N=4294956287&Ntt=e2a&fromPage=plp). Chromatin originated from the HAL-01 TCF3::HLF positive leukemia cell line, CRISPR engineered to knockout wild type TCF3 expression and prevent interference with fusion protein targeted pulldown.
 
 Initial input files needed: 
 - Reference genome fasta file (can be downloaded from [GCA_000001405.15_GRCh38_no_alt_analysis_set](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/))
@@ -9,11 +9,11 @@ Initial input files needed:
 
 >[!Note]
 >Intermediery files will be generated that are required inputs for dowstream procedures.
->The HiChIP_ID.txt file will be used by the HiChIP scripts to adjust the annotation of file to format used by script. Use it if working with different samples and do the same.
+>The HiChIP_ID.txt file will be used by the HiChIP scripts to adjust the naming of files to a format used by script. Use it as well to rename your own samples to follow the HiChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix name structure.
 
 ## Install dependecies for Dovetail-Genomics pipeline
 
-Clone source code from dovetail-genomics and pull juicertools.jar (can be moved into dovetails-genomics HiChIP directory) to your user directories:
+Clone source code from dovetail-genomics and pull juicertools.jar (can be moved into dovetails-genomics HiChIP directory) to your user directorie:
 
 ```
 git clone https://github.com/dovetail-genomics/HiChiP.git
@@ -108,16 +108,17 @@ bwa index GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 
 ## Execute the Aligment Script
 
-Run the HiChIP_mergedRep.sh script. You will be promted to provide the main working directory where you setup the directory architecture by executing DirectoyrArchitecture.sh. The read files that you put in the 1.Rawdata should have the expected sample nomenclature HiChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix. Fill these out when promted.
+Run the HiChIP_mergedRep.sh script. You will be promted to provide the main working directory, should be same for where you setup the directory architecture by executing DirectoyrArchitecture.sh. The read files for your samples should be allocated to folder 1.Rawdata should. Make sure sample name will follow stucture HiChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix, you can use the HiChIP_ID.txt file to have the script make the change.
 
 ```
-bash HiChIP_meredRep.sh
+bash HiChIP_mergedRep.sh
 ```
 
 The script will:
+- Adjust the sample names accordign to HiCHIP_ID.txt
 - Initiate DovetailHiChIP conda environment
-- Trim adapters and short reads 
-- Merge trimmed replicate reads for alignment
+- Trim adapters and short reads, generate fastqc after trimming 
+- Merge trimmed replicate reads before alignment
 - Perform paired alignment using bwa-mem, pairtools and samtools
 - Generate bigwig files for IGV browsing
 - Generate .hic files for Juicebox tool browsing
@@ -127,12 +128,11 @@ It is also recommended to run the script HiChIP_singleRep.sh. This one omits the
 
 ## Dovetail QC Analysis
 
-Executing enrichment_stats.sh from Dovetail
+Executing enrichment_stats.sh and plot_chip_enrichment_bed.py from Dovetail for quality control. This requires a ChIP-seq bed output for same pulldown target as the one used in HiChIP. 
 
 #QC compare ChIP-seq TCF3-HLF_FLAG
-bash /home/ubuntu/HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p /home/ubuntu/HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3HLF_FLAG_bw175_cle-idr.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq-TCF3HLF_bw175
+bash /home/$USER/HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p /home/$USER/HiChIP_Analysis/ChIP-Seq/ChIP.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIPvsChIP_enrichment.png
 
 #QC Plot ChIP-seq TCF3-HLF_FLAG
-python3 /home/ubuntu/HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks /home/ubuntu/HiChIP_Analysis/ChIP-Seq/Oracle2_HAL-01_TCF3HLF_FLAG_bw175_cle-idr.bed -output $OUTPUT_HICHIP_SUB/HiChIPJoinedFastq_TCF3HLF_ChIP_FLAG_bw175_enrichment.png
+python3 /home/$USER/HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks /home/$USER/HiChIP_Analysis/ChIP-Seq/ChIP.bed -output $OUTPUT_HICHIP_SUB/HiChIPvsChIP_enrichment.png
 
-echo "HiCHIP Aligmnent QC Complete"

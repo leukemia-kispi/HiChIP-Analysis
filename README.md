@@ -20,7 +20,7 @@ Additonal datasets integrated during donwstream analysis inlcude:
 
 To get started follow this link [GeneralSetup.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/GeneralSetup.md) and proceed from there to the specific pipeline steps. 
 
-Optionally use the Docker image with all tools and dependecies setup.
+Optionally use the Docker image with all tools and dependecies setup. [Still needs to be created]
 
 ## Overview
 

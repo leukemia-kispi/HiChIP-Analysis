@@ -19,15 +19,16 @@ After installation, you should enable ipywidgets to use the browser in Jupyter n
 jupyter nbextension enable --py widgetsnbextension
 ```
 
-Make sure you are in the coolbox conda environment and enter the directory of where you put the working directory. Called JypyterLab in example. (here you put all bigwig files or other data needed for generating visuals) 
+Make sure you are in the coolbox conda environment and enter the directory of where you put the working directory. Called JypyterLab in example. (here you put all bigwig, interaction bed/bedpe and contact matrices files needed for generating visuals) 
 Run jypeter lab and setup a 4 digit network endpoint (8585 in example)
+
 ```
 cd directoryPATH/JupyterLab
 jupyter lab --nobrowser --port 8585
 ```
 
-If working on local machine when the server is initiated, a link with the token for access is made available. 
-Copy the link and input it in a internet browser to begin using coolbox in JupyterNotebook.
+When the server is initiated, a link with the token for access is made available. 
+If working on local machine, copy the link and paste it in your internet browser to begin using coolbox in JupyterNotebook.
 
 If you run Jypyter from a remote server you need to tunnel the port with SSH first
 
