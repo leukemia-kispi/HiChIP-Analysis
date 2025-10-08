@@ -9,7 +9,7 @@ For basic setup procedure proceed with below instructions.
 Ensure the new virtual machine/instance is up to date and upgraded. Confirm with defaults when prompted. This may take few mininutes. 
 
 ```
-sudo apt update && apt upgrade -y  
+sudo apt update && sudo apt upgrade -y  
 ```
 
 **Install Anaconda3 to set up conda environments and access conda archives**
@@ -88,7 +88,7 @@ Make sure whole folder has permission. Run script DirectoryArchitecture.sh. Spec
 
 ```
 sudo chmod 777 -R ./HiChIP-Analysis
-bash ./HiChIP-Analysis/DirectoryArchitecture.sh
+bash ./HiChIP-Analysis/Scripts/DirectoryArchitecture.sh
 ```
 
 To avoid memory issues, some of the pipeline steps require writing of temporary files into a temp folder. Running the DirectoryArchitecture.sh will create this folder in addition to other directories that will be used during the workflow. Temporary files may take up to x3 of the space that fastq.gz files do, make sure the working volume is sufficient.

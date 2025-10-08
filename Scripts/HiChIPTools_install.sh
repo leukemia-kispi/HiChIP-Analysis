@@ -3,12 +3,12 @@ set -e
 shopt -s nullglob # make globbing return empty array if no match
 
 ###########################################################################
-## To create some of the different conda enviorments used during TCF3::HLF 
-## HiChIP analsyis, with some of the necessary tools installed
+## To create some of the different conda enviorments used during TCF3::HLF
+## HiChIP analysis, with some of the necessary tools installed
 ###########################################################################
 
 # Make sure Java >= 11 is installed**
-echo "Installing Java."
+echo "Installing Java..."
 
 sudo apt install openjdk-17-jre-headless -y
 
@@ -24,7 +24,7 @@ create_conda_env() {
     conda install -y -c bioconda "$2"
     conda deactivate
 }
-    
+
 # Create and set up Conda environments
 create_conda_env "DovetailHiChIP" "trim-galore fastqc multiqc"  #Additional tools will be installed by following the Dovetail HiChIP setup described in HiChIP.md. Including bwa-mem, samtools, pairtools, bedtools, deeptools,
 create_conda_env "MACS2" "macs2 idr homer bedtools"
