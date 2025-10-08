@@ -4,9 +4,6 @@ shopt -s nullglob # make globbing return empty array if no match
 
 #Script will create all directories needed for HiChIP and ChIP analysis.
 
-# Initialize Conda
-eval "$(conda shell.bash hook)"
-
 # Function to check if a directory exists and create if it does not. Grants directories all permissions and ubuntu group ownership
 
 create_directory() {
