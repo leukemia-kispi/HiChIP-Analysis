@@ -1,7 +1,7 @@
 # HiChIP-Analysis
 
 This is a setup and execution guide for analysis of TCF3::HLF HiChIP data ([GSE266625](addLINK)), generated from the HAL-01 cell line using the [Dovetail® MNase-HiChIP kit](https://cantatabio.com/dovetail-genomics/products/hichip/).
-May be used for analysis of othere dataset with carefull adaptation of provided scripts.
+Can be used for analysis of othere dataset with carefull adaptation of provided scripts.
 
 This guide will take you through:
 
@@ -11,7 +11,7 @@ This guide will take you through:
 
 - Installation of Picard, MACS2 and IDR for deduplication, peak calling and validation of reproducible peaks across replicates, respectivly.
 
-- Installation of tools for downstream analysis and vizualization of data such as deepTools, HOMER and coolbox.
+- Installation of tools for downstream analysis and vizualization of data such as deepTools, HOMER, ROSE and coolbox.
 
 Additonal datasets integrated during donwstream analysis inlcude: 
 

@@ -1,0 +1,47 @@
+name: TRIM
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+dependencies:
+  - _libgcc_mutex=0.1
+  - _openmp_mutex=5.1
+  - bz2file=0.98
+  - ca-certificates=2023.12.12
+  - cutadapt=1.18
+  - dbus=1.13.18
+  - expat=2.5.0
+  - fastqc=0.12.1
+  - font-ttf-dejavu-sans-mono=2.37
+  - fontconfig=2.14.1
+  - freetype=2.12.1
+  - gdbm=1.18
+  - glib=2.69.1
+  - icu=73.1
+  - ld_impl_linux-64=2.38
+  - libffi=3.4.4
+  - libgcc-ng=11.2.0
+  - libgomp=11.2.0
+  - libpng=1.6.39
+  - libstdcxx-ng=11.2.0
+  - libuuid=1.41.5
+  - libxcb=1.15
+  - libxml2=2.10.4
+  - ncurses=6.4
+  - openjdk=11.0.13
+  - openssl=1.1.1w
+  - pcre=8.45
+  - perl=5.34.0
+  - pigz=2.6
+  - pip=23.3.2
+  - python=3.7.16
+  - readline=8.2
+  - setuptools=69.0.3
+  - sqlite=3.41.2
+  - tk=8.6.12
+  - trim-galore=0.6.10
+  - wheel=0.38.4
+  - xopen=0.7.3
+  - xz=5.4.5
+  - zlib=1.2.13
+prefix: /home/ubuntu/anaconda3/envs/TRIM
