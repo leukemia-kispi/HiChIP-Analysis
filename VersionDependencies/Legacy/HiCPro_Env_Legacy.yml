@@ -1,7 +1,0 @@
-name: My_HiCPro_ENV
-channels:
-  - bioconda
-  - r
-  - conda-forge
-  - defaults
-prefix: /home/ubuntu/miniconda3/envs/My_HiCPro_ENV

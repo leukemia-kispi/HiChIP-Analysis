@@ -22,6 +22,8 @@ To get started follow this link [GeneralSetup.md](https://github.com/leukemia-ki
 
 Optionally use the Docker image with all tools and dependecies setup. [Still needs to be created]
 
+If you want to run the data using the same versions as the original was crated used this Docker images generated using the _Legacy.yml found under VersionDependecies/Legacy.
+
 ## Overview
 
 ![Summary of whole HiChIP-Analysis workflow](/Images/Workflow.png)

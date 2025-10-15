@@ -1,12 +1,15 @@
-# --------------------------------------------------------------
-# Ubuntu 18.04 + Miniconda + Legacy Bioinformatics Environments
-# --------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------
+# Ubuntu 18.04 + Miniconda + Legacy Bioinformatics Environments for HiChIP TCF3::HLF Analysis
+# --------------------------------------------------------------------------------------------------------
 FROM ubuntu:18.04
 LABEL maintainer="Valdemar Priebe <valdemarpriebe@gmail.com>"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
+# --------------------------------------------------------------
+# System dependencies
+# --------------------------------------------------------------
+
 RUN apt-get update && apt-get install -y \
     wget \
     bzip2 \
@@ -16,26 +19,26 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# --------------------------------------------------------------
 # Install Miniconda (Python 3.7)
+# --------------------------------------------------------------
+
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux-x86_64.sh -O miniconda.sh && \
     bash miniconda.sh -b -p /opt/conda && \
     rm miniconda.sh
 ENV PATH=/opt/conda/bin:$PATH
 
-# Copy all Legacy environment YAMLs
-COPY MACS2_Legacy.yml /envs/MACS2_Legacy.yml
+# --------------------------------------------------------------
+# Copy legacy YAMLs
+# --------------------------------------------------------------
+
 COPY IDR_Legacy.yml /envs/IDR_Legacy.yml
 COPY DovetailHiChIP_Legacy.yml /envs/DovetailHiChIP_Legacy.yml
 COPY coolbox_Legacy.yml /envs/coolbox_Legacy.yml
 COPY trimgalore_Legacy.yml /envs/trimgalore_Legacy.yml
 
 # --------------------------------------------------------------
-# Update conda base environment
-# --------------------------------------------------------------
-RUN conda update -n base -c defaults conda
-
-# --------------------------------------------------------------
-# Create environments one by one (MACS2 last)
+# Create environments one by one
 # --------------------------------------------------------------
 
 # IDR_Legacy environment
@@ -47,6 +50,9 @@ RUN conda env create -f /envs/DovetailHiChIP_Legacy.yml && conda clean -afy
 # coolbox_Legacy environment
 RUN conda env create -f /envs/coolbox_Legacy.yml && conda clean -afy
 
+# trimgalore_Legacy environment
+RUN conda env create -f /envs/trimgalore_Legacy.yml && conda clean -afy
+
 # --------------------------------------------------------------
 # Install Java (needed for Picard)
 # --------------------------------------------------------------
@@ -54,18 +60,30 @@ RUN apt-get update && apt-get install -y openjdk-8-jre-headless && rm -rf /var/l
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
 # --------------------------------------------------------------
-# Create Picard environment manually (stable version)
+# Create Picard environment manually
 # --------------------------------------------------------------
 RUN conda create -y -n Picard -c bioconda picard=2.25.7 && conda clean -afy
 
-# trimgalore_Legacy environment
-RUN conda env create -f /envs/trimgalore_Legacy.yml && conda clean -afy
 
-# MACS2_Legacy environment (last)
-RUN conda env create -f /envs/MACS2_Legacy.yml && conda clean -afy
+# --------------------------------------------------------------
+# Create MACS2 environment manually with pinned dependencies
+# --------------------------------------------------------------
+RUN conda create -y -n MACS2 -c bioconda \
+    macs2=2.2.6 \
+    bowtie2=2.3.5.1 \
+    samtools=1.7 \
+    bedtools=2.30.0 \
+    && conda clean -afy
+
+# --------------------------------------------------------------
+# Initialize Conda for bash shell
+# --------------------------------------------------------------
+RUN conda init bash
+RUN echo "conda activate base" >> ~/.bashrc
 
 # --------------------------------------------------------------
 # Set bash as default shell
 # --------------------------------------------------------------
 SHELL ["/bin/bash", "-c"]
 CMD ["/bin/bash"]
+

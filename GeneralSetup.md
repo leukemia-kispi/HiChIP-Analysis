@@ -1,18 +1,18 @@
 ## General Setup
 
-Original analysis were done on a virtual machine (VM) running Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
+The latest working workflow were done on a virtual machine (VM) running Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
 
 For basic setup procedure proceed with below instructions.
 
 **Update**
 
-Ensure the new virtual machine/instance is up to date and upgraded. Confirm with defaults when prompted. This may take few mininutes. 
+Ensure the new virtual machine/instance runing Linux/Ubuntu operation system is up to date and upgraded. Confirm with defaults when prompted. This may take few mininutes. 
 
 ```
 sudo apt update && sudo apt upgrade -y  
 ```
 
-**Install Anaconda3 to set up conda environments and access conda archives**
+**Install Anaconda3 to enable set up of conda environments and access conda archives**
 
 Ensure curl is installed for transferring data from or to a server using URLs. Download the bash file for installation of Anaconda3. Verify the checksum of selected install version
 
@@ -109,7 +109,7 @@ Confirm any prompts with defaults.
 
 ## Install Docker Engine needed for FitHiChIP tool
 
-Docker is a platform designed to help developers build, share, and run container applications.  Follow instructions below or visit offical site for [Docker](https://docs.docker.com/engine/install/ubuntu/).
+Docker is a platform designed to help developers build, share, and run container applications.  Follow instructions below or visit offical site for [Docker](https://docs.docker.com/engine/install/ubuntu/). You will also need to perform this step if you want to build or access the container with the older versions of all sofwares that were used during the generation of original data present in TCF3::HLF HiChIP manuscript.
 
 **Uninstall old versions, conflicting packages**
 

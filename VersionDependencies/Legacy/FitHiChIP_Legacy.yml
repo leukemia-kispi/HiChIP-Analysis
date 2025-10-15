@@ -1,7 +1,0 @@
-name: FitHiChIP
-channels:
-  - bioconda
-  - r
-  - conda-forge
-  - defaults
-prefix: /home/ubuntu/miniconda3/envs/FitHiChIP
