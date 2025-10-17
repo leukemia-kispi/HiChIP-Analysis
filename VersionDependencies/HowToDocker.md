@@ -64,4 +64,5 @@ Your legacy environments (exported .yml)
 CLI tools missing from YAML (BWA, Samtools, Bowtie2, Bedtools, Picard, MACS2 2.2.6, etc.)
 
 
-hej
+# Inside Dockerfile, after creating DovetailHiChIP env
+RUN conda install -n DovetailHiChIP -c bioconda bwa=0.7.17 && conda clean -afy
