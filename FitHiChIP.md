@@ -9,7 +9,7 @@ Select the directory to contain the FitHiChIP source code, and clone it.
 ```
 cd /home/<$USER>
 git clone https://github.com/ay-lab/FitHiChIP.git
-sudo chmod 777 -R FithHiChIP
+sudo chmod 777 -R FitHiChIP
 ```
 
 Data inputs needed to run FitHiChIP:
@@ -44,7 +44,7 @@ Make sure unzip is installed in /home/$USER/HiCPro_ENV/.
 sudo apt install unzip
 ```
 
-Complete installation by entering the HiC-Pro directory and add the "[/home/$USER/HiCPro_ENV/]" path to PREFIX in config-install.txt file using the nano editor tool. This will be the installation location for HiC-Pro and some of the dependecies.
+Complete installation by entering the HiC-Pro directory and add the "[/home/$USER/HiCPro_ENV/]" path to PREFIX in config-install.txt file using the nano editor tool. This will be the installation location for HiC-Pro and some of the dependecies. Make sure $USER is the username on the system.
 
 ```
 cd /home/$USER/HiC-Pro

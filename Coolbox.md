@@ -24,7 +24,7 @@ Run jypeter lab and setup a 4 digit network endpoint (8585 in example)
 
 ```
 cd directoryPATH/JupyterLab
-jupyter lab --nobrowser --port 8585
+jupyter lab --no-browser --port 8585
 ```
 
 When the server is initiated, a link with the token for access is made available. 
@@ -45,3 +45,6 @@ Input http://localhost:8585 in web browser and respond to the password request. 
 
 >[!NOTE]
 >Commands and features to visualize genomic data with coolbox API can be found at https://gangcaolab.github.io/CoolBox/quick_start_API.html
+
+
+ssh -i cloud.key -L 8585:localhost:8585 ubuntu@

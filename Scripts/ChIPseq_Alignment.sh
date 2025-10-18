@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -e
+set -u
 shopt -s nullglob # make globbing return empty array if no match
 
 # Using this script assumes DirectoryArchitecture.sh was execute beforhand
@@ -23,12 +24,14 @@ REF_GENOME="$MAIN_DIR/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="$MAIN_DIR/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for read files, *fastq.gz and ID mapping file
 FASTQ_DIR="$MAIN_DIR/1.RawData/ChIP" #Enusure read fiels are uploaded to this directory
-MAPPING_FILE="$MAIN_DIR/1.RawData/ChIP/Histone_ChIP_IDs.txt" #Provide your own list if running different samples
+MAPPING_FILE="$MAIN_DIR/1.RawData/ChIP/ChIP_IDs.txt" #Provide your own list if running different samples
 # Set output directories
 OUTPUT_DIR_TRIM="$MAIN_DIR/3.TRIM/ChIP"
 OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.Alignment/ChIP"
 OUTPUT_CHIP_SUB="$MAIN_DIR/4.Alignment/ChIP/Outputs"
 BIGWIG_COVERAGE="$MAIN_DIR/7.Deeptool_Matrix/Coverage"
+
+sed -i 's/\r$//' "$MAPPING_FILE"
 
 #############################
 ### MAPPING NEW IDs #########
@@ -47,7 +50,7 @@ echo "=== DRY RUN: Planned renames ==="
 # Promt to procceed or skip sample ID mapping step.
 read -rp "Do you need to map new IDs using new_ID .txt file (y/n): " confirm
 if [[ "$confirm" == "y" ]]; then
-    while read -r acc newname; do
+    while IFS=$'\t' read -r acc newname; do
         # Skip empty lines or lines starting with #
         [[ -z "$acc" || "$acc" == \#* ]] && continue
 
@@ -72,7 +75,7 @@ if [[ "$confirm" == "y" ]]; then
     echo
     read -rp "Do you want to apply these changes? (y/n): " confirm
     if [[ "$confirm" == "y" ]]; then
-        while read -r acc newname; do
+        while IFS=$'\t' read -r acc newname; do
             #Ignore blank lines and comment lines in the mapping file.
             [[ -z "$acc" || "$acc" == \#* ]] && continue
 
@@ -105,15 +108,14 @@ conditions=()
 NUMBERS=()
 
 # Read mapping file and extract parts of newname
-while read -r acc newname; do
+while IFS=$'\t' read -r acc newname; do
     [[ -z "$acc" || "$acc" == \#* ]] && continue
 
-    # Remove prefix 'ChIP_' and split by underscores
-    base=${newname#ChIP_}             # HAL01_H3K27ac_Rep1
-    cell=$(echo "$base" | cut -d'_' -f1)   # HAL01
-    cond=$(echo "$base" | cut -d'_' -f2)   # H3K27ac
-    rep=$(echo "$base" | grep -oP 'Rep\K[0-9]+') # 1
-
+    base=${newname#ChIP_}      # Remove "ChIP_" prefix
+    cell=$(echo "$base" | cut -d'_' -f1)
+    cond=$(echo "$base" | cut -d'_' -f2)
+    rep=$(echo "$base" | grep -oP 'Rep\K[0-9]+')
+    
     # Append unique values into arrays
     [[ " ${CellLine[*]} " != *" $cell "* ]] && CellLine+=("$cell")
     [[ " ${conditions[*]} " != *" $cond "* ]] && conditions+=("$cond")
@@ -124,29 +126,14 @@ echo "CellLine: ${CellLine[@]}"
 echo "conditions: ${conditions[@]}"
 echo "NUMBERS: ${NUMBERS[@]}"
 
-
-#Extract array inputs from the Sample name.
-# Expected Sample nomenclature follows this pattern ChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix"
-echo " Respond to following to run the ChIPseq pipeline"
-echo "Sample name should follow following structure ChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix"
-read -rp "what are the Cell lines/Cell types"
-read -rp "what are the conditions (control samples are expected and included by default as control_Input)"
-read -rp "what are the Cell lines/Cell types"
-
-# Array containing Cell lines, replicate numbers and conditions found in filenames and defining samples.
-# Expected Sample nomenclature follows this pattern ChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix.
-CellLine=("HAL01") #Replace with your actual Cell Line 
-conditions=("control_Input" "H3K27ac" "H3K27me3" "H3K4me1" "H3K4me3") #Replace with your actual conditions
-NUMBERS=("1" "2") # Replace with your actual replicate numbers
-
 ##########################################################
 ### INITIALIZE DOVETAILHICHIP CONDA ENVIRONMENT #########
 ##########################################################
 
 #Environment should have following installed: bwa-mem, samtools, pairtools, fastqc, bedtools, multiqc, trim-galore, deeptools
 
-# Initialize Conda
-eval "$(conda shell.bash hook)"
+# Initialize Conda reliably
+source ~/anaconda3/etc/profile.d/conda.sh
 
 # Echo current Conda environment
 echo "Current Conda environment: $CONDA_DEFAULT_ENV"
@@ -217,7 +204,7 @@ for cell in "${CellLine[@]}"; do
             MAPPED_BAM="ChIP_${cell}_${cond}_Rep${num}_cle_sort.bam"
     
             #Create sorted BAM files with grep to remove alignments to alternative contigs, unlocalized sequence, or unplaced sequence.#####################
-            bwa mem -5 -T25 -t32 "$REF_FASTA" "$TRIMMED_R1_FILES" "$TRIMMED_R2_FILES" | samtools view -hS | grep -v chrUn | grep -v random | grep -v _alt | samtools view -bS -@32 | samtools sort -@32 -o "$OUTPUT_CHIP_ALIGN/$MAPPED_BAM" 
+            bwa mem -5 -T25 -t16 "$REF_FASTA" "$TRIMMED_R1_FILES" "$TRIMMED_R2_FILES" | samtools view -hS | grep -v chrUn | grep -v random | grep -v _alt | samtools view -bS -@16 | samtools sort -@16 -o "$OUTPUT_CHIP_ALIGN/$MAPPED_BAM" 
 
             # Set output file name for filtered BAM files. BLF referse to black list filtered file
             MAPPED_BLF_BAM="BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort.bam"

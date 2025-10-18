@@ -98,7 +98,7 @@ if [ "$perform_trimming" = true ]; then
                 echo "Trimming pair $READ1 and $READ2"
             
                 # Trim samples and generate new FastQC files for all replicates
-                trim_galore --fastqc --phred33 --length 30 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
+                trim_galore --fastqc --phred33 --length 50 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
 
                 echo "Trimming for sample $num completed."
             done

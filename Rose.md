@@ -15,6 +15,8 @@ macs2 callpeak -t /mnt/RawChIP_Histon/Merged/ChIP_Seq_H3K27ac_merged_cle_dd.bam 
 
 Setup Rose
 
+conda env create -n ROSE
+
 Download frot github
 suod git clone https://github.com/stjude/ROSE.git
 

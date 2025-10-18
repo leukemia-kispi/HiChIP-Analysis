@@ -1,0 +1,4 @@
+TCF3_Input_Knockout	ChIP_HAL01TCF3KO_controlInput_Rep1
+TCF3_Input_Parental	ChIP_HAL01_controlInput_Rep1
+TCF3_IP_Knockout	ChIP_HAL01TCF3KO_TCF3_Rep1
+TCF3_IP_Parental	ChIP_HAL01_TCF3_Rep1
