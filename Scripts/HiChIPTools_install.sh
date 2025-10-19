@@ -31,7 +31,7 @@ create_conda_env() {
 }
 
 # Create and set up Conda environments
-create_conda_env "DovetailHiChIP" "trim-galore=0.6.6 fastqc multiqc"
+create_conda_env "DovetailHiChIP" "trim-galore=0.6.6 fastqc multiqc deeptools=3.5.1"
 create_conda_env "MACS2" "python=3.7.11 macs2=2.2.6 idr=2.0.4.2 homer bedtools=2.30.0"
 create_conda_env "Picard" "picard=2.25.7"
 
