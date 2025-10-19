@@ -22,13 +22,13 @@ To get started follow this link [GeneralSetup.md](https://github.com/leukemia-ki
 
 Optionally use the Docker image with all tools and dependecies setup. [Still needs to be created]
 
-If you want to run the data using the same versions as the original was crated used this Docker images generated using the _Legacy.yml found under VersionDependecies/Legacy.
+If you want to run the data using the same software versions and dependecies for the data generated for TCF3::HLF HiChIP use the ...Legacy.yml found under VersionDependecies/Legacy.
 
 ## Overview
 
 ![Summary of whole HiChIP-Analysis workflow](/Images/Workflow.png)
 
-The HiChIP analysis pipeline follows the [HiChIP documentation release 0.1 by Dovetail®](https://hichip.readthedocs.io/en/latest/index.html) with some modifications. HiChIP paired-end read files were trimmed with TrimGalore (v0.6.6) and filtered to eliminate short and low-quality reads (<50bp, phred 33), biological replicates were merged as recommended. HiChIP reads were aligned to the hg38 genome using Burrows Wheeler Aligner, using the bwa mem algorithm with settings as described in the HiChIP documentation release 0.1. Interaction events are extracted with the parse module of pairtools followed by sorting and splitting of the generated pairsam file into mapped pairs and mapped bam files, the pairtools dedup step was omitted. We used mapped bam files to generate primary aligned bed files for 1D MACS2 peak calling as reference when calling genomic interactions with FitHiChIP, using 5kb bin size and 50kb to 3Mb range settings. Loop calling data was inegrated with ChIP-seq, ATAC-seq, RNA-seq data  for HAL-01 and databases such as Fantom5 for annotated enchancers. Results were visualized using tools such deepTools or coolbox.
+The HiChIP analysis pipeline follows the [HiChIP documentation release 0.1 by Dovetail®](https://hichip.readthedocs.io/en/latest/index.html) with some modifications. HiChIP paired-end read files were trimmed using TrimGalore (v0.6.6)with Phred+33 quality encoding. Reads shorter than 50 bp or with base quality scores below a Phred cutoff of 20 were removed. Biological replicates were merged as recommended HiChIP reads were aligned to the hg38 genome using Burrows Wheeler Aligner, using the bwa mem algorithm with settings as described in the HiChIP documentation release 0.1. Interaction events are extracted with the parse module of pairtools followed by sorting and splitting of the generated pairsam file into mapped pairs and mapped bam files, the pairtools dedup step was omitted. We used mapped bam files to generate primary aligned bed files for 1D MACS2 peak calling as reference when calling genomic interactions with FitHiChIP, using 5kb bin size and 50kb to 3Mb range settings. Loop calling data was inegrated with ChIP-seq, ATAC-seq, RNA-seq data  for HAL-01 and databases such as Fantom5 for annotated enchancers. Results were visualized using tools such deepTools or coolbox.
 
 ## Original Documentations
 

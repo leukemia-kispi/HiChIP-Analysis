@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -e
+set -e #Exit immediately if any command exits with a non-zero status
+set -u #Treat unset variables as an error when substituting.
 shopt -s nullglob # make globbing return empty array if no match
 
 #Script will create all directories needed for HiChIP and ChIP analysis.

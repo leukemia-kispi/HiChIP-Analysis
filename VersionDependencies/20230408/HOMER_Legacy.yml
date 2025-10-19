@@ -1,7 +1,0 @@
-name: HOMER
-channels:
-  - bioconda
-  - r
-  - conda-forge
-  - defaults
-prefix: /home/ubuntu/miniconda3/envs/HOMER
