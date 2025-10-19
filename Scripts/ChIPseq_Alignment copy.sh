@@ -3,7 +3,8 @@ set +e                 # Don’t exit on error — handle manually
 set -o pipefail        # But fail properly on pipe errors
 shopt -s nullglob # make globbing return empty array if no match
 
-# Using this script assumes DirectoryArchitecture.sh was execute beforhand
+# Using this script assumes DirectoryArchitecture.sh was execute beforhand.
+# Expected to provide pair-end read ChIP-seq fastq files.
 
 # Check if GNU Parallel is installed otherwise exis
 if ! command -v parallel &>/dev/null; then
@@ -22,6 +23,11 @@ read -rp "How many threads do you assign per job (recommend 4): " TOOL_THREADS
 [[ -z "$CORES" ]] && { echo "Thread count missing"; exit 1; }
 [[ -z "$TOOL_THREADS" ]] && { echo "Thread assigment per job missing"; exit 1; }
 
+
+# Compute number of parallel jobs (at least 1)
+JOBS=$(( CORES / TOOL_THREADS ))
+if [[ $JOBS -lt 1 ]]; then JOBS=1; fi
+
 ####################################
 ### SETUP LOGGING ##################
 ####################################
@@ -37,6 +43,8 @@ echo "  ChIP-seq Pipeline Log Started"
 echo "  Date: $(date)"
 echo "  Main Directory: $MAIN_DIR"
 echo "  Using $CORES cores"
+echo "  Threads per job: $TOOL_THREADS"
+echo "  Parallel jobs (JOBS): $JOBS"
 echo "  Log file: $LOG_DIR/run.log"
 echo "====================================="
 
@@ -56,18 +64,21 @@ OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.Alignment/ChIP"
 OUTPUT_CHIP_SUB="$MAIN_DIR/4.Alignment/ChIP/Outputs"
 BIGWIG_COVERAGE="$MAIN_DIR/7.Deeptool_Matrix/Coverage"
 
-#Ensure there are no hidden spaces in the ID.txt file
-sed -i 's/\r$//' "$MAPPING_FILE"
+# Ensure there are no hidden spaces in the ID.txt file
+if [[ -f "$MAPPING_FILE" ]]; then
+    sed -i 's/\r$//' "$MAPPING_FILE"
+else
+    echo "Warning: mapping file $MAPPING_FILE not found. Continuing but arrays will be empty."
+fi
 
 #############################
 ### MAPPING NEW IDs #########
 #############################
 
-#Assuming the fastqc files were for HAL-01 ChIP-seq for histone marks, downloaded from the European Nucleotide Archive deposited under accession number ERP109232. Use the Histone_ChIP_IDs.txt file to update the annotations.
-# Accession IDs = acc
 # Paired_Read = read_num
 # True sample name = newname
 # MAPPING_FILES is a .txt file with mapping_file format (acc newname):
+# Example from European Nucleotide Archive deposited under accession number ERP109232. Use the Histone_ChIP_IDs.txt file to update the annotations.
 #     ERR2618839  ChIP_HAL01_H3K27ac_Rep1
 #     ERR2618840  ChIP_HAL01_H3K27ac_Rep2
 
@@ -134,19 +145,20 @@ conditions=()
 NUMBERS=()
 
 # Read mapping file and extract parts of newname
-while IFS=$'\t' read -r acc newname; do
-    [[ -z "$acc" || "$acc" == \#* ]] && continue
-
-    base=${newname#ChIP_}      # Remove "ChIP_" prefix
-    cell=$(echo "$base" | cut -d'_' -f1)
-    cond=$(echo "$base" | cut -d'_' -f2)
-    rep=$(echo "$base" | grep -oP 'Rep\K[0-9]+')
-    
-    # Append unique values into arrays
-    [[ " ${CellLine[*]} " != *" $cell "* ]] && CellLine+=("$cell")
-    [[ " ${conditions[*]} " != *" $cond "* ]] && conditions+=("$cond")
-    [[ " ${NUMBERS[*]} " != *" $rep "* ]] && NUMBERS+=("$rep")
-done < "$MAPPING_FILE"
+if [[ -f "$MAPPING_FILE" ]]; then
+    while IFS=$'\t' read -r acc newname; do
+        [[ -z "$acc" || "$acc" == \#* ]] && continue
+        base=${newname#ChIP_}      # Remove "ChIP_" prefix
+        cell=$(echo "$base" | cut -d'_' -f1)
+        cond=$(echo "$base" | cut -d'_' -f2)
+        rep=$(echo "$base" | grep -oP 'Rep\K[0-9]+')
+        
+        # Append unique values into arrays
+        [[ " ${CellLine[*]} " != *" $cell "* ]] && CellLine+=("$cell")
+        [[ " ${conditions[*]} " != *" $cond "* ]] && conditions+=("$cond")
+        [[ " ${NUMBERS[*]} " != *" $rep "* ]] && NUMBERS+=("$rep")
+    done < "$MAPPING_FILE"
+fi
 
 echo "CellLine: ${CellLine[@]}"
 echo "conditions: ${conditions[@]}"
@@ -192,18 +204,20 @@ trim_sample() {
     # Perform trimming only if the expected output files are missing
     if [[ -f "$OUT_R1" && -f "$OUT_R2" ]]; then
         echo "Trimming already done for ${cell}_${cond}_Rep${num}, skipping."
-    else
-        echo "Trimming ${cell}_${cond}_Rep${num}..."
-        # Trim samples and generate new FastQC files for all replicates
-        trim_galore --fastqc --phred33 --length 30 --output_dir "$OUTPUT_DIR_TRIM" -j 4 --paired "$R1" "$R2"
+        return
     fi
+
+    echo "Trimming ${cell}_${cond}_Rep${num}..."
+    # Trim samples and generate new FastQC files for all replicates
+    trim_galore --fastqc --phred33 --length 30 --output_dir "$OUTPUT_DIR_TRIM" -j "$TOOL_THREADS" --paired "$R1" "$R2"
+   
 }
 
 export -f trim_sample
-export FASTQ_DIR OUTPUT_DIR_TRIM
+export FASTQ_DIR OUTPUT_DIR_TRIM TOOL_THREADS
 
 # Run in parallel
-parallel -j "$(($CORES / $TOOL_THREADS))" trim_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+parallel -j "$JOBS" trim_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
 
 #######################
 ### ALIGNMENT #########
@@ -230,11 +244,11 @@ align_sample() {
 
     echo "Aligning ${cell}_${cond}_Rep${num}..."
     #Create sorted BAM files with grep to remove alignments to alternative contigs, unlocalized sequence, or unplaced sequence.#####################
-    bwa mem -5 -T25 -t"$CORES" "$REF_FASTA" "$TRIM_R1" "$TRIM_R2" \
+    bwa mem -5 -T25 -t"$TOOL_THREADS" "$REF_FASTA" "$TRIM_R1" "$TRIM_R2" \
         | samtools view -hS \
         | grep -v chrUn | grep -v random | grep -v _alt \
-        | samtools view -bS -@"$CORES" \
-        | samtools sort -@"$CORES" -o "$BAM"
+        | samtools view -bS -@"$TOOL_THREADS"  \
+        | samtools sort -@"$TOOL_THREADS"  -o "$BAM"
 
     # Blacklist filtering
     bedtools intersect -v -abam "$BAM" -b "$BLACKLIST" > "$BLF_BAM"
@@ -242,9 +256,9 @@ align_sample() {
 }
 
 export -f align_sample
-export OUTPUT_CHIP_ALIGN REF_FASTA BLACKLIST CORES OUTPUT_DIR_TRIM
+export OUTPUT_CHIP_ALIGN REF_FASTA BLACKLIST TOOL_THREADS OUTPUT_DIR_TRIM
 
-parallel -j "$(($CORES / $TOOL_THREADS))" align_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+parallel -j "$JOBS" align_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
 
 ##########################################################
 ### INITIALIZE PICARD CONDA ENVIRONMENT #################
@@ -278,21 +292,22 @@ mark_duplicates() {
     BLF_DUPFLAG_TXT="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dups.txt"
     
     # Flag duplicates and skip if files exist
-    if [[ -f "$DUP_BAM" ]]; then
+    if [[ -f "$BLF_DUPFLAG_BAM" ]]; then
         echo "Duplicate marking already done for ${cell}_${cond}_Rep${num}, skipping."
         return
     fi
 
     java -jar "$(conda run -n Picard bash -c 'echo $CONDA_PREFIX')/share/$(ls "$(conda run -n Picard bash -c 'echo $CONDA_PREFIX')/share" | grep picard | sort -V | tail -n 1)/picard.jar" \
-        MarkDuplicates -I "$BLF_BAM" -O "$BLF_DUPFLAG_BAM" -M "$BLF_DUPFLAG_TXT" --REMOVE_DUPLICATES false
+    MarkDuplicates -I "$BLF_BAM" -O "$BLF_DUPFLAG_BAM" -M "$BLF_DUPFLAG_TXT" --REMOVE_DUPLICATES false
 }
 
 export -f mark_duplicates
 export OUTPUT_CHIP_ALIGN OUTPUT_CHIP_SUB
-parallel -j "$CORES" mark_duplicates ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+
+parallel -j "$JOBS" mark_duplicates ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
 
 #################################################################
-### INITIALIZE DOVETAILHICHIP CONDA ENVIRONMENT ################
+### RE-ACTIVATE DOVETAILHICHIP CONDA ENVIRONMENT ################
 #################################################################
 
 # Echo current Conda environment
@@ -327,6 +342,11 @@ dedup_sample() {
         return
     fi
 
+    if [[ ! -f "$BLF_DUPFLAG_BAM" ]]; then
+        echo "Input flagged BAM not found for ${cell}_${cond}_Rep${num}, skipping dedup."
+        return
+    fi
+
     echo "Deduplicating ${cell}_${cond}_Rep${num}..."
     # Remove flagged duplicates (F 1024) and index
     samtools view -b -F 1024 "$BLF_DUPFLAG_BAM" > "$BLF_DD_BAM"
@@ -337,7 +357,11 @@ export -f dedup_sample
 export OUTPUT_CHIP_SUB
 
 # Run in parallel
-parallel -j "$CORES" dedup_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+parallel -j "$JOBS" dedup_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+
+############################################
+### MERGE REPLICATES #######################
+############################################
 
 merge_replicates() {
     local cell=$1
@@ -367,7 +391,7 @@ merge_replicates() {
 }
 
 export -f merge_replicates
-parallel -j "$CORES" merge_replicates ::: "${CellLine[@]}" ::: "${conditions[@]}"
+parallel -j "$JOBS" merge_replicates ::: "${CellLine[@]}" ::: "${conditions[@]}"
 
 ##############################
 ### GENOMIC COVERAGE #########
@@ -378,89 +402,60 @@ coverage_sample() {
     local cond=$2
     local num=$3
 
-    # Input: deduplicated BAM
-    DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bam"
-    # Output: BigWig coverage
-    BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bw"
+    # Input deduplicated BAM
+    BLF_DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bam"
+    # Output BigWig coverage
+    BLF_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bw"
 
     # Skip if coverage file already exists
-    if [[ -f "$BIGWIG" ]]; then
+    if [[ -f "$BLF_BIGWIG" ]]; then
         echo "Coverage already generated for ${cell}_${cond}_Rep${num}, skipping."
         return
     fi
 
+    if [[ ! -f "$BLF_DD_BAM" ]]; then
+        echo "Dedup BAM not found for ${cell}_${cond}_Rep${num}, skipping coverage."
+        return
+    fi
+
     echo "Generating coverage for ${cell}_${cond}_Rep${num}..."
-    bamCoverage -b "$DD_BAM" -o "$BIGWIG" \
+    bamCoverage -b "$BLF_DD_BAM" -o "$BLF_BIGWIG" \
         --effectiveGenomeSize 2913022398 -bl "$BLACKLIST" \
-        --normalizeUsing RPKM -p max -bs 10 \
+        --normalizeUsing RPKM -p "$TOOL_THREADS" -bs 10 \
         --extendReads --ignoreForNormalization M
 }
-
-for cell in "${CellLine[@]}"; do   
-    for cond in "${conditions[@]}"; do
-        for num in "${NUMBERS[@]}"; do
-            # Set input file name
-            MAPPED_BLF_BAM_DD="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bam"
-            # Set output file name for bigwig file
-            BIGWIG_BLF_DD="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bw"
-
-            # Generate Enrichment coverage files for IGV visualization for each replicate
-            bamCoverage -b "$MAPPED_BLF_BAM_DD" -o "$BIGWIG_BLF_DD" --effectiveGenomeSize 2913022398 -bl "$BLACKLIST" --normalizeUsing RPKM -p max -bs 10 \
-            --extendReads --ignoreForNormalization M
-        done    
-    done
-done
 
 coverage_merged() {
     local cell=$1
     local cond=$2
 
-    MERGED_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
-    BIGWIG_MERGED="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bw"
+    BLF_MERGED_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
+    BLF_BIGWIG_MERGED="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bw"
 
     # Skip if merged BAM or output BigWig does not exist
-    if [[ ! -f "$MERGED_BAM" ]]; then
+    if [[ ! -f "$BLF_MERGED_BAM" ]]; then
         echo "Merged BAM not found for ${cell}_${cond}, skipping coverage."
         return
     fi
-    if [[ -f "$BIGWIG_MERGED" ]]; then
+    if [[ -f "$BLF_BIGWIG_MERGED" ]]; then
         echo "Coverage already generated for merged ${cell}_${cond}, skipping."
         return
     fi
 
     echo "Generating coverage for merged ${cell}_${cond}..."
-    bamCoverage -b "$MERGED_BAM" -o "$BIGWIG_MERGED" \
+    bamCoverage -b "$BLF_MERGED_BAM" -o "$BLF_BIGWIG_MERGED" \
         --effectiveGenomeSize 2913022398 -bl "$BLACKLIST" \
-        --normalizeUsing RPKM -p max -bs 10 \
+        --normalizeUsing RPKM -p "$TOOL_THREADS" -bs 10 \
         --extendReads --ignoreForNormalization M
 }
 
 export -f coverage_sample coverage_merged
-export OUTPUT_CHIP_SUB OUTPUT_CHIP_ALIGN BIGWIG_COVERAGE BLACKLIST
+export OUTPUT_CHIP_SUB OUTPUT_CHIP_ALIGN BIGWIG_COVERAGE BLACKLIST TOOL_THREADS
 
 # Replicate coverage
-parallel -j "$CORES" coverage_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+parallel -j "$JOBS" coverage_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
 
 # Merged coverage
-parallel -j "$CORES" coverage_merged ::: "${CellLine[@]}" ::: "${conditions[@]}"
-
-# Generate Enrichment coverage files for IGV visualization for merged files if they exist.
-for cell in "${CellLine[@]}"; do   
-    for cond in "${conditions[@]}"; do
-        # Set input file name
-        MAPPED_MERGED_BLF_BAM_DD="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
-        #Set output file name for bigwig file
-        BIGWIG_MERGED_BLF_DD="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bw"
-
-        if [[ -f "$MAPPED_MERGED_BLF_BAM_DD" ]]; then
-            echo "Generating coverage for merged sample ${cell}_${cond}..."
-            bamCoverage -b  "$MAPPED_MERGED_BLF_BAM_DD" -o "$BIGWIG_MERGED_BLF_DD" --effectiveGenomeSize 2913022398 -bl "$BLACKLIST" --normalizeUsing RPKM -p max -bs 10 \
-            --extendReads --ignoreForNormalization M
-            echo "Coverage file created: $(basename "$BIGWIG_MERGED_BLF_DD")"
-        else
-            echo "Skipping merged coverage: merged BAM not found for ${cell}_${cond}"
-        fi
-    done
-done
+parallel -j "$JOBS" coverage_merged ::: "${CellLine[@]}" ::: "${conditions[@]}"
 
 echo "ChIP-seq Aligment, Clean-up and Coverage file generation completed"
