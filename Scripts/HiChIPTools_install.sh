@@ -26,13 +26,13 @@ create_conda_env() {
 
     echo "Installing packages in $1: $2"
     conda activate "$1"
-    conda install -y -c bioconda $2
+    conda install -y -c conda-forge -c bioconda $2
     conda deactivate
 }
 
 # Create and set up Conda environments
 create_conda_env "DovetailHiChIP" "trim-galore=0.6.6 fastqc multiqc"
-create_conda_env "MACS2" "macs2=2.2.6 idr=2.0.4.2 homer bedtools=2.30.0"
+create_conda_env "MACS2" "python=3.7.11 macs2=2.2.6 idr=2.0.4.2 homer bedtools=2.30.0"
 create_conda_env "Picard" "picard=2.25.7"
 
 echo "Setup of Conda environments complete."

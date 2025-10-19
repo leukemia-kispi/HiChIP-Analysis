@@ -44,7 +44,6 @@ echo "====================================="
 
 #Set path to reference genome index and blacklist. Genome index has to be generated first if not done. 
 REF_FASTA="$MAIN_DIR/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna" 
-REF_GENOME="$MAIN_DIR/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="$MAIN_DIR/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for read files, *fastq.gz and ID mapping file
 FASTQ_DIR="$MAIN_DIR/1.RawData/ChIP" #Enusure read files are uploaded to this directory
