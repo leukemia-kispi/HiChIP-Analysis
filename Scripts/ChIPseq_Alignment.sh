@@ -401,7 +401,37 @@ parallel -j "$JOBS" merge_replicates ::: "${CellLine[@]}" ::: "${conditions[@]}"
 ### GENOMIC COVERAGE #########
 ##############################
 
+# Samples without deduplication
 coverage_sample() {
+    local cell=$1
+    local cond=$2
+    local num=$3
+
+    # Input deduplicated BAM
+    BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort.bam"
+    # Output BigWig coverage
+    BLF_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort.bw"
+
+    # Skip if coverage file already exists
+    if [[ -f "$BLF_BIGWIG" ]]; then
+        echo "Coverage already generated for ${cell}_${cond}_Rep${num}, skipping."
+        return
+    fi
+
+    if [[ ! -f "$BLF_BAM" ]]; then
+        echo "BAM not found for ${cell}_${cond}_Rep${num}, skipping coverage."
+        return
+    fi
+
+    echo "Generating coverage for ${cell}_${cond}_Rep${num}..."
+    bamCoverage -b "$BLF_BAM" -o "$BLF_BIGWIG" \
+        --effectiveGenomeSize 2913022398 -bl "$BLACKLIST" \
+        --normalizeUsing RPKM -p "$TOOL_THREADS" -bs 10 \
+        --extendReads --ignoreForNormalization M
+}
+
+# Samples with deduplication
+coverage_dd_sample() {
     local cell=$1
     local cond=$2
     local num=$3
@@ -409,10 +439,10 @@ coverage_sample() {
     # Input deduplicated BAM
     BLF_DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bam"
     # Output BigWig coverage
-    BLF_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bw"
+    BLF_DD_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bw"
 
     # Skip if coverage file already exists
-    if [[ -f "$BLF_BIGWIG" ]]; then
+    if [[ -f "$BLF_DD_BIGWIG" ]]; then
         echo "Coverage already generated for ${cell}_${cond}_Rep${num}, skipping."
         return
     fi
@@ -422,8 +452,8 @@ coverage_sample() {
         return
     fi
 
-    echo "Generating coverage for ${cell}_${cond}_Rep${num}..."
-    bamCoverage -b "$BLF_DD_BAM" -o "$BLF_BIGWIG" \
+    echo "Generating coverage for deduplicated ${cell}_${cond}_Rep${num}..."
+    bamCoverage -b "$BLF_DD_BAM" -o "$BLF_DD_BIGWIG" \
         --effectiveGenomeSize 2913022398 -bl "$BLACKLIST" \
         --normalizeUsing RPKM -p "$TOOL_THREADS" -bs 10 \
         --extendReads --ignoreForNormalization M
@@ -453,11 +483,14 @@ coverage_merged() {
         --extendReads --ignoreForNormalization M
 }
 
-export -f coverage_sample coverage_merged
-export OUTPUT_CHIP_SUB OUTPUT_CHIP_ALIGN BIGWIG_COVERAGE BLACKLIST TOOL_THREADS
+export -f coverage_sample coverage_dd_sample coverage_merged
+export OUTPUT_CHIP_ALIGN OUTPUT_CHIP_SUB OUTPUT_CHIP_ALIGN BIGWIG_COVERAGE BLACKLIST TOOL_THREADS
 
 # Replicate coverage
 parallel -j "$JOBS" coverage_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+
+# Replicate dd coverage
+parallel -j "$JOBS" coverage_dd_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
 
 # Merged coverage
 parallel -j "$JOBS" coverage_merged ::: "${CellLine[@]}" ::: "${conditions[@]}"
