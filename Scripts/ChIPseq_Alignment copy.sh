@@ -64,6 +64,9 @@ OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.Alignment/ChIP"
 OUTPUT_CHIP_SUB="$MAIN_DIR/4.Alignment/ChIP/Outputs"
 BIGWIG_COVERAGE="$MAIN_DIR/7.Deeptool_Matrix/Coverage"
 
+# Ensure output directories exist
+mkdir -p "$OUTPUT_DIR_TRIM" "$OUTPUT_CHIP_ALIGN" "$OUTPUT_CHIP_SUB" "$BIGWIG_COVERAGE"
+
 # Ensure there are no hidden spaces in the ID.txt file
 if [[ -f "$MAPPING_FILE" ]]; then
     sed -i 's/\r$//' "$MAPPING_FILE"
@@ -296,7 +299,8 @@ mark_duplicates() {
         echo "Duplicate marking already done for ${cell}_${cond}_Rep${num}, skipping."
         return
     fi
-
+    
+    echo "Flagging duplicates for ${cell}_${cond}_Rep${num}"
     java -jar "$(conda run -n Picard bash -c 'echo $CONDA_PREFIX')/share/$(ls "$(conda run -n Picard bash -c 'echo $CONDA_PREFIX')/share" | grep picard | sort -V | tail -n 1)/picard.jar" \
     MarkDuplicates -I "$BLF_BAM" -O "$BLF_DUPFLAG_BAM" -M "$BLF_DUPFLAG_TXT" --REMOVE_DUPLICATES false
 }
