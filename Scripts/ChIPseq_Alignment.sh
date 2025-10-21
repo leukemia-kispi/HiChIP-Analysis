@@ -57,7 +57,8 @@ REF_FASTA="$MAIN_DIR/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_se
 BLACKLIST="$MAIN_DIR/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for read files, *fastq.gz and ID mapping file
 FASTQ_DIR="$MAIN_DIR/1.RawData/ChIP" #Enusure read files are uploaded to this directory
-MAPPING_FILE="$MAIN_DIR/1.RawData/ChIP/ChIP_IDs.txt" #Provide your own list if running different samples
+# Provide your own list if running different samples
+MAPPING_FILE="$MAIN_DIR/1.RawData/ChIP/ChIP_IDs.txt" 
 # Set output directories
 OUTPUT_DIR_TRIM="$MAIN_DIR/3.TRIM/ChIP"
 OUTPUT_CHIP_ALIGN="$MAIN_DIR/4.Alignment/ChIP"
