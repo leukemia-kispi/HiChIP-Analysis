@@ -97,7 +97,7 @@ HiC-Pro
 MACS2
 
 >Zhang, Y., Liu, T., Meyer, C.A. et al. Model-based Analysis of ChIP-Seq (MACS). Genome Biol 9, R137 (2008).\
->doi:[0.1186/gb-2008-9-9-r137](https://doi.org/10.1186/gb-2008-9-9-r137)\
+>doi: [0.1186/gb-2008-9-9-r137](https://doi.org/10.1186/gb-2008-9-9-r137)\
 >PMID: [18798982](https://pubmed.ncbi.nlm.nih.gov/18798982/)
 
 deepTools

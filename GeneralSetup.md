@@ -1,6 +1,6 @@
 ## General Setup
 
-The latest working workflow were done on a virtual machine (VM) running Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
+The the original execution of the workflow were done on a virtual machine (VM) running Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
 
 For basic setup procedure proceed with below instructions.
 
@@ -68,7 +68,7 @@ sudo rm Anaconda3-2023.09-0-Linux-x86_64.sh
 conda update -n base -c defaults conda
 ```
 
-**Ensure all needed channels are added to conda**
+**Ensure all needed channels are added to conda to find and download packages**
 
 ```
 conda config --add channels defaults
@@ -76,7 +76,7 @@ conda config --add channels conda-forge
 ```
 ## Setup of directory architecture and DovetailHiChIP, MACS2, PICARD conda environments
 
-With Conda installed, we are now ready to set up the directory structure for our analysis. Additionally, we will create Conda environments where the required software will be installed. Different tools may require specific versions of their dependencies in order to function properly without conflicts.
+With conda installed, we are now ready to set up the directory structure for our analysis. Additionally, we will create conda environments where the required software will be installed. Different tools may require specific versions of their dependencies in order to function properly without conflicts.
 
 Clone the source code of the HiChIP-Analysis repository into a selected directory. 
 
