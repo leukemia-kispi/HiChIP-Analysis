@@ -11,7 +11,7 @@ This guide will take you through:
 
 - Installation of Picard, MACS2 and IDR for deduplication, peak calling and validation of reproducible peaks across replicates, respectivly.
 
-- Installation of tools for downstream analysis and vizualization of data such as deepTools, HOMER, ROSE and coolbox.
+- Installation of tools for downstream analysis and vizualization of data such as deepTools and coolbox.
 
 Additonal datasets integrated during donwstream analysis inlcude: 
 
@@ -19,10 +19,6 @@ Additonal datasets integrated during donwstream analysis inlcude:
 - The ATAC-seq data for HAL-01 cells found under the GEO series accession number GSE186942, [GSM5663910](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM5663910).
 
 To get started follow this link [GeneralSetup.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/GeneralSetup.md) and proceed from there to the specific pipeline steps. 
-
-Optionally use the Docker image with all tools and dependecies setup. [Still needs to be created]
-
-If you want to run the data using the same software versions and dependecies for the data generated for TCF3::HLF HiChIP use the ...Legacy.yml found under VersionDependecies/Legacy.
 
 ## Overview
 
@@ -55,14 +51,6 @@ coolbox
 
 deepTools
 + https://deeptools.readthedocs.io/en/develop/index.html
-
-Homer
-+ http://homer.ucsd.edu/homer/index.html
-
-ROSE
-+ https://github.com/younglab/ROSE
-+ https://github.com/stjude/ROSE
-+ http://younglab.wi.mit.edu/super_enhancer_code.html
 
 >[!NOTE]
 >If issues occure during installation or during execution of any of the tools, refere to above documents for eventual troubleshooting.
@@ -117,21 +105,3 @@ deepTools
 >F. Ramírez, D. P. Ryan, B. Grüning, V. Bhardwaj, F. Kilpert, A. S. Richter, S. Heyne, F. Dündar, T. Manke, deepTools2: a next generation web server for deep-sequencing data analysis. Nucleic Acids Res 44, W160–W165 (2016).\
 >doi: [10.1093/nar/gkw257](https://doi.org/10.1093/nar/gkw257)\
 >PMID: [27079975](https://pubmed.ncbi.nlm.nih.gov/27079975/)
-
-HOMER
-
->S. Heinz, C. Benner, N. Spann, E. Bertolino, Y. C. Lin, P. Laslo, J. X. Cheng, C. Murre, H. Singh, C. K. Glass, Simple Combinations of Lineage-Determining Transcription Factors Prime cis-Regulatory Elements Required for Macrophage and B Cell Identities. Molecular Cell 38, 576–589 (2010)
->doi: [10.1016/j.molcel.2010.05.004 ](https://doi.org/10.1016/j.molcel.2010.05.004 )\
->PMID: [ 20513432](https://pubmed.ncbi.nlm.nih.gov/20513432/)
-
-ROSE
-
->Warren A. Whyte, David A. Orlando, Denes Hnisz, Brian J. Abraham, Charles Y. Lin, Michael H. Kagey, Peter B. Rahl, Tong Ihn Lee and Richard A. Young, Master transcription factors and mediator establish super-enhancers at key cell identity genes. Cell 153, 307-319, April 11, 2013.\
->doi: [10.1016/j.cell.2013.03.035](https://doi.org/10.1016/j.cell.2013.03.035)\
->PMID: [23582322](https://pubmed.ncbi.nlm.nih.gov/23582322)
-
->Jakob Lovén, Heather A. Hoke, Charles Y. Lin, Ashley Lau, David A. Orlando, Christopher R. Vakoc, James E. Bradner, Tong Ihn Lee, and Richard A. Young. Selective inhibition of tumor oncogenes by disruption of super-enhancers. Cell 153, 320-334, April 11, 2013.\
->doi: [10.1016/j.cell.2013.03.036 ](https://doi.org/10.1016/j.cell.2013.03.036 )\
->PMID: [23582323](https://pubmed.ncbi.nlm.nih.gov/23582323/)
-
-
