@@ -5,7 +5,7 @@ Examples presented here are based on data generated with the adapted [Dovetail®
 Initial input files needed: 
 - Reference genome fasta file (can be downloaded from [GCA_000001405.15_GRCh38_no_alt_analysis_set](https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/001/405/GCA_000001405.15_GRCh38/seqs_for_alignment_pipelines.ucsc_ids/))
 - Black list for known artifact regions [BlackList](https://github.com/ValdemarP267/HiChIP-Analysis/0.BlackList)
-- HiChIP sequencing files GSE...  TO BE ADDED
+- HiChIP sequencing files [GSE266625](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE266625) 
 
 >[!Note]
 >Intermediery files will be generated that are required inputs for dowstream procedures.
@@ -46,6 +46,7 @@ Use the installDep.sh script from the Dovetail-Genomics source repository to ens
 
 >[!NOTE]
 >Numpy and pysam have to be installed in that order and before pairtools. The original installDep.sh script may need modefications before executing. For this use the nano editing tool.
+>Futhermore use the installDepMOD.sh found in the script folder of this repository to install version locked dependecies to reproduce 
 
 ```
 nano ./HiChiP/installDep.sh

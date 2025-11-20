@@ -59,7 +59,7 @@ deepTools
 
 If using the TCF3::HLF HiChIP data please cite
 
->
+>V. Priebe, B. Galvan, A.Drakul, N. Margelisch, J. Aguade-Gorgorio, K. Walavalkar, Y. Huang, H. K. A. Mikkola, B. Bornhauser, R. Santoro, J-P. Bourquin, TCF3::HLF Orchestrates an Enhancer-Promoter Network with Activation of MEF2C to Promote Immature HSC gene Expression in Leukemia, 
 
 Citation for integrated datasets:
 
