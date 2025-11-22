@@ -205,33 +205,32 @@ if [[ "$confirm" == "y" ]]; then
         local rep=$3
 
         # Set inpute files
-        IN_BAM_REP1="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep1_cle_sort_dd.bam"
-        IN_BAM_REP2="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd.bam"
-        CTR_BAM_REP1="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_controlInput_Rep1_cle_sort_dd.bam"
-        CTR_BAM_REP2="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_controlInput_Rep1_cle_sort_dd.bam"
+        IN_BAM="$INPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
+        CTR_BAM="$INPUT_CHIP_SUB/BLF_ChIP_${cell}_controlInput_Rep${rep}_cle_sort_dd.bam"
+        PREFIX="BLF_ChIP_${cell}_${cond}_Rep${rep}_p0.05macs2"
 
         # Check inputs
         if [[ ! -f "$IN_BAM" ]]; then
-            echo "Missing input BAM: $IN_BAM — skipping ${cell}_${cond}_Rep1"
+            echo "Missing input BAM: $IN_BAM — skipping ${cell}_${cond}_Rep${rep}"
             return
         fi
 
         # Narrow peaks
-        local NAR_OUT="$OUTDIR/${PREFIX}_peaks.narrowPeak"
+        local NAR_OUT="$OUTPUT_MACS2_PERMISSIVE/${PREFIX}_peaks.narrowPeak"
         if [[ -f "$NAR_OUT" ]]; then
             echo "Permissive narrow peaks exist for ${cell}_${cond}_Rep${rep}, skipping."
         else
             echo "Running MACS2 permissive narrow for ${cell}_${cond}_Rep${rep}..."
-            macs2 callpeak -t "$IN_BAM" -c "$CTRL_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$PERMISSIVE_PVAL" -B --outdir "$OUTDIR" -n "${PREFIX}" || { echo "MACS2 narrow failed for ${PREFIX}"; return 1; }
+            macs2 callpeak -t "$IN_BAM" -c "$CTRL_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$PERMISSIVE_PVAL" -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "${PREFIX}" || { echo "MACS2 narrow failed for ${PREFIX}"; return 1; }
         fi
 
         # Broad peaks
-        local BRO_OUT="$OUTDIR/${PREFIX}_peaks.broadPeak"
+        local BRO_OUT="$OUTPUT_MACS2_PERMISSIVE/${PREFIX}_peaks.broadPeak"
         if [[ -f "$BRO_OUT" ]]; then
             echo "Permissive broad peaks exist for ${cell}_${cond}_Rep${rep}, skipping."
         else
             echo "Running MACS2 permissive broad for ${cell}_${cond}_Rep${rep}..."
-            macs2 callpeak -t "$IN_BAM" -c "$CTRL_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$PERMISSIVE_PVAL" --broad -B --outdir "$OUTDIR" -n "${PREFIX}" || { echo "MACS2 broad failed for ${PREFIX}"; return 1; }
+            macs2 callpeak -t "$IN_BAM" -c "$CTRL_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$PERMISSIVE_PVAL" --broad -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "${PREFIX}" || { echo "MACS2 broad failed for ${PREFIX}"; return 1; }
         fi
 
         # Sort peak files if present
@@ -254,65 +253,52 @@ else
     echo "Skip Permissive MACS2 run"
 fi
 
-IN_BAM_MERGED="$"
-CTR_BAM_MERGED="BLF_ChIP_${cell}_control_Input_merge_cle_sort_dd.bam"
+echo 
+echo "Running MACS2 peak calling"
+macs2_Oracle_merge() {
+    local cell=$1
+    local cond=$2
 
-echo
-echo "Permissive MACS2 for later IDR Analysis"
-# Promt to procceed or skip Permissive MACS2
-read -rp "Do you want to proceed with Permissive MACS2 for later IDR Analysis (y/n): " confirm
-if [[ "$confirm" == "y" ]]; then   
-    for cell in "${CellLine[@]}"; do 
-        for cond in "${conditions[@]}"; do
-            # Set inpute files
-            MACS2_INPUT_R1="BLF_ChIP_${cell}_${cond}_Rep1_cle_sort_dd.bam"
-            MACS2_INPUT_R2="BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd.bam"
-            CONTROL_R1="BLF_ChIP_${cell}_control_Input_Rep1_cle_sort_dd.bam"
-            CONTROL_R2="BLF_ChIP_${cell}_control_Input_Rep2_cle_sort_dd.bam"
-            CONTROL_MERGED="BLF_ChIP_${cell}_control_Input_merge_cle_sort_dd.bam"
+    # Set inpute files
+    IN_BAM_MERGED="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
+    CTR_BAM_MERGED="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_controlInput_merged_cle_sort_dd.bam"
+    PREFIX="BLF_ChIP_${cell}_${cond}_merged_p9macs2_cle_sort_dd"
+    
+    # Narrow peaks
+    local NAR_OUT="$OUTPUT_MACS2/${PREFIX}_peaks.narrowPeak"
+    if [[ -f "$NAR_OUT" ]]; then
+        echo "Permissive narrow peaks exist for ${cell}_${cond}_Rep${rep}, skipping."
+    else
+        echo "Running MACS2 permissive narrow for ${cell}_${cond}_Rep${rep}..."
+        macs2 callpeak -t "$IN_BAM" -c "$CTRL_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$MERGED_PVAL" -B --outdir "$OUTPUT_MACS2" -n "${PREFIX}" || { echo "MACS2 narrow failed for ${PREFIX}"; return 1; }
+    fi
 
-            # Set output file name for peak files. MACS2 adds its own suffix   
-            MACS2_PEAK_R1="${cell}_${cond}_Rep1_cle_sort_dd_p0.05macs2"
-            MACS2_PEAK_R2="${cell}_${cond}_Rep2_cle_sort_dd_p0.05macs2"
-                
-            #Call Peaks with permissive settings <p 0.05> to be used for IDR.
-            macs2 callpeak -t "$OUTPUT_CHIP_SUB/$MACS2_INPUT_R1" -c "$OUTPUT_CHIP_SUB/$CONTROL_R1" -f BAMPE  -g 2913022398 -p 0.05 -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK_R1"
-            macs2 callpeak -t "$OUTPUT_CHIP_SUB/$MACS2_INPUT_R1" -c "$OUTPUT_CHIP_SUB/$CONTROL_R1" -f BAMPE  -g 2913022398 -p 0.05 --broad -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK_R1"
-            macs2 callpeak -t "$OUTPUT_CHIP_SUB/$MACS2_INPUT_R2" -c "$OUTPUT_CHIP_SUB/$CONTROL_R2" -f BAMPE  -g 2913022398 -p 0.05 -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK_R2"
-            macs2 callpeak -t "$OUTPUT_CHIP_SUB/$MACS2_INPUT_R2" -c "$OUTPUT_CHIP_SUB/$CONTROL_R2" -f BAMPE  -g 2913022398 -p 0.05 --broad -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK_R2"
+    # Broad peaks
+    local BRO_OUT="$OUTPUT_MACS2/${PREFIX}_peaks.broadPeak"
+    if [[ -f "$BRO_OUT" ]]; then
+        echo "Permissive broad peaks exist for ${cell}_${cond}_Rep${rep}, skipping."
+    else
+        echo "Running MACS2 permissive broad for ${cell}_${cond}_Rep${rep}..."
+        macs2 callpeak -t "$IN_BAM" -c "$CTRL_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$MERGED_PVAL" --broad -B --outdir "$OUTPUT_MACS2" -n "${PREFIX}" || { echo "MACS2 broad failed for ${PREFIX}"; return 1; }
+    fi
 
-            #Sort Peak files
-            sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R1}_peaks.narrowPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.narrowPeak"
-            sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R1}_peaks.broadPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.broadPeak"
-            sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R2}_peaks.narrowPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.narrowPeak"
-            sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK_R2}_peaks.broadPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.broadPeak"
+    # Sort peak files if present
+    if [[ -f "$NAR_OUT" ]]; then
+        sort -k8,8nr "$NAR_OUT" > "$OUTPUT_MACS2_SORT/Sort_${PREFIX}_peaks.narrowPeak"
+    fi
+    if [[ -f "$BRO_OUT" ]]; then
+        sort -k8,8nr "$BRO_OUT" > "$OUTPUT_MACS2_SORT/Sort_${PREFIX}_peaks.broadPeak"
+    fi
 
-            echo "Completed Permissive MACS2 for ${cell} ${cond} "
-        done
-    done
-else
-    echo "Skip Permissive MACS2 run"
-fi
+    echo "Completed MACS2 peak calling for ${cell}_${cond}_Rep${rep}"
+}
 
-for cell in "${CellLine[@]}"; do 
-    for cond in "${conditions[@]}"; do
-        # Set inpute files
-        MACS2_INPUT="BLF_ChIP_${cell}_${cond}_merge_cle_sort_dd.bam"
-        CONTROL_MERGED="BLF_ChIP_${cell}_control_Input_merged_cle_sort_dd.bam"
+export -f macs2_Oracle_merge
+export INPUT_CHIP_ALIGN OUTPUT_MACS2 OUTPUT_MACS2_SORT EFFECTIVE_GENOME MERGED_PVAL_PVAL
 
-        # Set output file name for peak files. MACS2 adds its own suffix   
-        MACS2_PEAK="${cell}_${cond}_merged_cle_sort_dd_p0.05macs2"
+# Launch permissive runs in parallel (per replicate)
+parallel --ungroup --line-buffer -j "$JOBS" macs2_permissive_rep ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
 
-        #Enter Merged Folder
-        macs2 callpeak -t  "$OUTPUT_CHIP_ALIGN/$MACS2_INPUT" -c  "$OUTPUT_CHIP_ALIGN/$CONTROL_MERGED" -f BAMPE -g 2913022398  -p 0.000000001 -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK"
-        macs2 callpeak -t  "$OUTPUT_CHIP_ALIGN/$MACS2_INPUT" -c  "$OUTPUT_CHIP_ALIGN/$CONTROL_MERGED" -f BAMPE -g 2913022398  -p 0.000000001 --broad -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$MACS2_PEAK"
-
-        #Sort Peak files
-        sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK}_peaks.narrowPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK}_peaks.narrowPeak"
-        sort -k8,8nr "$OUTPUT_MACS2_PERMISSIVE/${MACS2_PEAK}_peaks.broadPeak" > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK}_peaks.broadPeak"
-
-    done
-done
 
 ####################################
 ### IDR ANALYSIS: OPTIONAL #########
@@ -321,13 +307,19 @@ echo
 echo "IDR Analysis"
 # Promt to procceed or skip IDR
 read -rp "Do you want to proceed IDR Analysis (y/n): " confirm
-if [[ "$confirm" == "y" ]]; then  
-    for cell in "${CellLine[@]}"; do 
-        for cond in "${conditions[@]}"; do
-            # Set input file names
-            MACS2_PEAK_R1="${cell}_${cond}_Rep1_cle_sort_dd_p0.05macs2"
-            MACS2_PEAK_R2="${cell}_${cond}_Rep2_cle_sort_dd_p0.05macs2"
-            MACS2_PEAK_ORACLE="${cell}_${cond}_merged_cle_sort_dd_p0.05macs2"
+if [[ "$confirm" == "y" ]]; then
+
+    macs2_IDR(){
+        local cell=$1
+        local cond=$2
+        local peaktype=$3
+
+        # Set inpute files    
+        MACS2_PEAK_R1="$OUTPUT_MACS2_SORT/${cell}_${cond}_Rep1_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
+        MACS2_PEAK_R2="$OUTPUT_MACS2_SORT/${cell}_${cond}_Rep2_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
+        MACS2_PEAK_ORACLE="$INPUT_CHIP_ALIGN/${cell}_${cond}_merged_cle_sort_dd_p9macs2_peaks.${peaktype}"
+    }    
+
 
             # Set output file name for IDR files
             IDR_OUTPUT="${cell}_${cond}"

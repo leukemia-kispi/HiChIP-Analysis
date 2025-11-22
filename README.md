@@ -24,7 +24,7 @@ To get started follow this link [GeneralSetup.md](https://github.com/leukemia-ki
 
 ![Summary of whole HiChIP-Analysis workflow](/Images/Workflow.png)
 
-The HiChIP analysis pipeline follows the [HiChIP documentation release 0.1 by Dovetail®](https://hichip.readthedocs.io/en/latest/index.html) with some modifications. HiChIP paired-end read files were trimmed using TrimGalore (v0.6.6)with Phred+33 quality encoding. Reads shorter than 50 bp or with base quality scores below a Phred cutoff of 20 were removed. Biological replicates were merged as recommended HiChIP reads were aligned to the hg38 genome using Burrows Wheeler Aligner, using the bwa mem algorithm with settings as described in the HiChIP documentation release 0.1. Interaction events are extracted with the parse module of pairtools followed by sorting and splitting of the generated pairsam file into mapped pairs and mapped bam files, the pairtools dedup step was omitted. We used mapped bam files to generate primary aligned bed files for 1D MACS2 peak calling as reference when calling genomic interactions with FitHiChIP, using 5kb bin size and 50kb to 3Mb range settings. Loop calling data was inegrated with ChIP-seq, ATAC-seq, RNA-seq data  for HAL-01 and databases such as Fantom5 for annotated enchancers. Results were visualized using tools such deepTools or coolbox.
+The HiChIP analysis pipeline follows the [HiChIP documentation release 0.1 by Dovetail®](https://hichip.readthedocs.io/en/latest/index.html) with some modifications. HiChIP paired-end read files were trimmed using TrimGalore (v0.6.6) with Phred+33 quality encoding. Reads shorter than 50 bp or with base quality scores below a Phred cutoff of 20 were removed. Biological replicates were merged as recommended and HiChIP reads were aligned to the hg38 genome using Burrows Wheeler Aligner, using the bwa mem algorithm with settings as described in the HiChIP documentation release 0.1. Interaction events are extracted with the parse module of pairtools followed by sorting and splitting of the generated pairsam file into mapped pairs and mapped bam files, the pairtools dedup step was omitted. We used mapped bam files to generate primary aligned bed files for 1D MACS2 peak calling as reference when calling genomic interactions with FitHiChIP, using 5kb bin size and 50kb to 3Mb range settings. Loop calling data was inegrated with ChIP-seq, ATAC-seq, RNA-seq data  for HAL-01 and databases such as Fantom5 for annotated enchancers. Results were visualized using tools such deepTools or coolbox.
 
 ## Original Documentations
 
@@ -60,6 +60,8 @@ deepTools
 If using the TCF3::HLF HiChIP data please cite
 
 >V. Priebe, B. Galvan, A.Drakul, N. Margelisch, J. Aguade-Gorgorio, K. Walavalkar, Y. Huang, H. K. A. Mikkola, B. Bornhauser, R. Santoro, J-P. Bourquin, TCF3::HLF Orchestrates an Enhancer-Promoter Network with Activation of MEF2C to Promote Immature HSC gene Expression in Leukemia, 
+>doi:
+>PMID: 
 
 Citation for integrated datasets:
 
