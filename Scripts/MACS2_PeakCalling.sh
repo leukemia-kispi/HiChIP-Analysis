@@ -207,7 +207,7 @@ if [[ "$confirm" == "y" ]]; then
         # Set inpute files
         IN_BAM="$INPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
         CTR_BAM="$INPUT_CHIP_SUB/BLF_ChIP_${cell}_controlInput_Rep${rep}_cle_sort_dd.bam"
-        PREFIX="BLF_ChIP_${cell}_${cond}_Rep${rep}_p0.05macs2"
+        PREFIX="BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd_p0.05macs2"
 
         # Check inputs
         if [[ ! -f "$IN_BAM" ]]; then
@@ -262,7 +262,7 @@ macs2_Oracle_merge() {
     # Set inpute files
     IN_BAM_MERGED="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
     CTR_BAM_MERGED="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_controlInput_merged_cle_sort_dd.bam"
-    PREFIX="BLF_ChIP_${cell}_${cond}_merged_p9macs2_cle_sort_dd"
+    PREFIX="BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd_p9macs2"
     
     # Narrow peaks
     local NAR_OUT="$OUTPUT_MACS2/${PREFIX}_peaks.narrowPeak"
@@ -315,24 +315,22 @@ if [[ "$confirm" == "y" ]]; then
         local peaktype=$3
 
         # Set inpute files    
-        MACS2_PEAK_R1="$OUTPUT_MACS2_SORT/${cell}_${cond}_Rep1_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
-        MACS2_PEAK_R2="$OUTPUT_MACS2_SORT/${cell}_${cond}_Rep2_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
-        MACS2_PEAK_ORACLE="$INPUT_CHIP_ALIGN/${cell}_${cond}_merged_cle_sort_dd_p9macs2_peaks.${peaktype}"
+        MACS2_PEAK_R1="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_Rep1_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
+        MACS2_PEAK_R2="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
+        MACS2_PEAK_ORACLE="$INPUT_CHIP_ALIGN/Sort_BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd_p9macs2_peaks.${peaktype}"
+
+        # Set output file name for IDR files
+        IDR_OUTPUT1="$OUTPUT_MACS2_IDR/${cell}_${cond}_cle_${peaktype}-idr"
+        IDR_OUTPUT2="$OUTPUT_MACS2_IDR/${cell}_${cond}_cle_${peaktype}.idr.log"
+        for peaktype in "narrowPeak" "broadPeak"; do
+            # IDR without Oracle Peak file
+            idr --samples "$MACS2_PEAK_R1" "$MACS2_PEAK_R2" --input-file-type "$peaktype" --rank p.value --output-file "$IDR_OUTPUT1" --plot --log-output-file "$IDR_OUTPUT2"
+                                                                                
+            # IDR with Oracle Peak file
+            idr --samples "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.${peaktype}" "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.${peaktype}" --peak-list "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_ORACLE}_peaks.${peaktype}" --input-file-type "$peaktype" --rank p.value --output-file "$OUTPUT_MACS2_IDR/Oracle_${IDR_OUTPUT}_cle_${peaktype}-idr" --plot --log-output-file "$OUTPUT_MACS2_IDR/Oracle_${IDR_OUTPUT}_cle_${peaktype}.idr.log"
+        done
     }    
 
-
-            # Set output file name for IDR files
-            IDR_OUTPUT="${cell}_${cond}"
-
-            for peaktype in "narrowPeak" "broadPeak"; do
-                # IDR without Oracle Peak file
-                idr --samples "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.${peaktype}" "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.${peaktype}" --input-file-type "$peaktype" --rank p.value --output-file "$OUTPUT_MACS2_IDR/${IDR_OUTPUT}_cle_${peaktype}-idr" --plot --log-output-file "$OUTPUT_MACS2_IDR/${IDR_OUTPUT}_cle_${peaktype}.idr.log"
-                                                                                
-                # IDR with Oracle Peak file
-                idr --samples "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.${peaktype}" "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.${peaktype}" --peak-list "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_ORACLE}_peaks.${peaktype}" --input-file-type "$peaktype" --rank p.value --output-file "$OUTPUT_MACS2_IDR/Oracle_${IDR_OUTPUT}_cle_${peaktype}-idr" --plot --log-output-file "$OUTPUT_MACS2_IDR/Oracle_${IDR_OUTPUT}_cle_${peaktype}.idr.log"
-            done
-        done
-    done
 else
     echo "Skip IDR"
 fi
