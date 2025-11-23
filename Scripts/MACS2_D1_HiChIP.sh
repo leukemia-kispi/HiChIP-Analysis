@@ -126,13 +126,13 @@ fi
 
 # Parameters can be adapted for personl needs
 EFFECTIVE_GENOME=2913022398
-PERMISSIVE_PVAL=0.00001
-STRICT_PVAL=0.000000001
+PERMISSIVE_PVAL=1e-5
+STRICT_PVAL=1e-9
 
 ########################################################
 ### GENERATE PRIMARY ALIGNMENT FILES AND MACS2 #########
 ########################################################
-
+# ---------- merged ----------
 echo
 echo "Initiating conversion of HiChIP alignment files into primary alignments followed by MACS2 peak calling"
 
@@ -143,25 +143,40 @@ primary_aln_macs2(){
     #Set input files
     local MAPPED_MERGED="$INPUT_HICHIP_ALIGN/BLF_HiChIP_${cell}_${cond}_merged_nodd_mapped.PT.bam"
     #Set output files
-    local PRIMARY_ALN_MERGED="$INPUT_HICHIP_ALIGN/BLF_HiChIP_${cell}_${cond}_merged_nodd_primary.aln.bed"
-    local MACS2_MERGED="$OUTPUT_MACS2/BLF_HiChIP_${cell}_${cond}_merged_nodd_p9macs2"
+    local PRIMARY_OUT="$INPUT_HICHIP_ALIGN/BLF_HiChIP_${cell}_${cond}_merged_nodd_primary.aln.bed"
+    local PREFIX="BLF_HiChIP_${cell}_${cond}_merged_nodd_p${STRICT_PVAL}macs2"
 
-    samtools view -b "$MAPPED_MERGED" -h -F 0x900 | bedtools bamtobed -i stdin > "$PRIMARY_ALN_MERGED"
+    if [[ ! -f "$MAPPED_MERGED" ]]; then
+        echo "Missing merged BAM: $MAPPED_MERGED — skipping ${cell}_${cond}"
+        return 0
+    fi
 
-    echo "Generated $PRIMARY_ALN_MERGED proceed with macs2 peak calling"
+    echo "Generating primary aln: $PRIMARY_OUT"
+    samtools view -b "$MAPPED_MERGED" -h -F 0x900 | bedtools bamtobed -i stdin > "$PRIMARY_OUT"
 
-    macs2 callpeak -t "$PRIMARY_ALN_MERGED" --keep-dup 10 --min-length 300 -p "$STRICT_PVAL" -g "$EFFECTIVE_GENOME" --bw 300 --mfold 5 50 -n "$MACS2_MERGED"
+    if [[ ! -s "$PRIMARY_OUT" ]]; then
+        echo "Primary file empty: $PRIMARY_OUT — skipping MACS2"
+        return 0
+    fi
+
+    echo "Running strict MACS2 on $PRIMARY_OUT"
+    macs2 callpeak -t "$PRIMARY_OUT" --keep-dup 10 --min-length 300 -p "$STRICT_PVAL" -g "$EFFECTIVE_GENOME" --bw 300 --mfold 5 50 --outdir "$OUTPUT_MACS2" -n "$PREFIX"
    
-    echo "Peak calling finished: $MACS2_MERGED"
+    echo "Peak calling finished: $PREFIX"
 
 }
 
 export -f primary_aln_macs2
 export INPUT_HICHIP_ALIGN OUTPUT_MACS2 EFFECTIVE_GENOME STRICT_PVAL
 
-# Launch permissive runs in parallel (per replicate)
-parallel --ungroup --line-buffer -j "$JOBS" primary_aln_macs2 ::: "${CellLine[@]}" ::: "${conditions[@]}"
+if [[ ${#CellLine[@]} -ne 0 && ${#conditions[@]} -ne 0 ]]; then
+    # Launch permissive runs in parallel
+    parallel --ungroup --line-buffer -j "$JOBS" primary_aln_macs2 ::: "${CellLine[@]}" ::: "${conditions[@]}"
+else
+    echo "No merged samples found to process."
+fi
 
+# ---------- per-replicate ----------
 echo
 read -rp "Do you want to proceed with primary alignnments for individual replicates files (y/n): " confirm
 if [[ "$confirm" == "y" ]]; then
@@ -173,24 +188,35 @@ if [[ "$confirm" == "y" ]]; then
         #Set input files
         local MAPPED_REP="$INPUT_HICHIP_SUB/BLF_HiChIP_${cell}_${cond}_Rep${rep}_nodd_mapped.PT.bam"
         #Set output files
-        local PRIMARY_ALN_REP="$INPUT_HICHIP_SUB/BLF_HiChIP_${cell}_${cond}_Rep${rep}_nodd_primary.aln.bed"
-        local MACS2_REP="$OUTPUT_MACS2/BLF_HiChIP_${cell}_${cond}_Rep${rep}_nodd_p9macs2"
+        local PRIMARY_OUT="$INPUT_HICHIP_SUB/BLF_HiChIP_${cell}_${cond}_Rep${rep}_nodd_primary.aln.bed"
+        local PREFIX="BLF_HiChIP_${cell}_${cond}_Rep${rep}_nodd_p${STRICT_PVAL}macs2"
 
-        samtools view -b "$MAPPED_REP" -h -F 0x900 | bedtools bamtobed -i stdin > "$PRIMARY_ALN_REP"
+        if [[ ! -f "$MAPPED_REP" ]]; then
+            echo "Missing replicate BAM: $MAPPED_REP — skipping ${cell}_${cond}_Rep${rep}"
+            return 0
+        fi
 
-        echo "Generated $PRIMARY_ALN_REP proceed with macs2 peak calling"
+        samtools view -b "$MAPPED_REP" -h -F 0x900 | bedtools bamtobed -i stdin > "$PRIMARY_OUT"
     
-        macs2 callpeak -t "$PRIMARY_ALN_REP" --keep-dup 10 --min-length 300 -p "$STRICT_PVAL" -g "$EFFECTIVE_GENOME" --bw 300 --mfold 5 50 -n "$MACS2_REP"
+        if [[ ! -s "$PRIMARY_OUT" ]]; then
+            echo "Primary file empty: $PRIMARY_OUT — skipping MACS2"
+            return 0
+        fi
+        echo "Running strict MACS2 on $PRIMARY_OUT"
+        macs2 callpeak -t "$PRIMARY_OUT" --keep-dup 10 --min-length 300 -p "$STRICT_PVAL" -g "$EFFECTIVE_GENOME" --bw 300 --mfold 5 50 --outdir "$OUTPUT_MACS2" -n "$PREFIX"
 
-        echo "Peak calling finished: $MACS2_REP"
+        echo "Peak calling finished: $PREFIX"
     }
 
     export -f primary_aln_macs2_rep
     export INPUT_HICHIP_SUB OUTPUT_MACS2 EFFECTIVE_GENOME STRICT_PVAL
 
-    # Launch permissive runs in parallel (per replicate)
-    parallel --ungroup --line-buffer -j "$JOBS" primary_aln_macs2_rep ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
-
+    if [[ ${#CellLine[@]} -ne 0 && ${#conditions[@]} -ne 0 && ${#NUMBERS[@]} -ne 0 ]]; then
+        # Launch permissive runs in parallel (per replicate)
+        parallel --ungroup --line-buffer -j "$JOBS" primary_aln_macs2_rep ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+    else
+        echo "No replicate samlpes found."
+    fi
 else
     echo "Skip primary alignment for replicates"
 fi
@@ -201,54 +227,71 @@ fi
 echo
 echo "IDR Analysis"
 # Promt to procceed or skip IDR
-read -rp "Do you want to proceed IDR Analysis (y/n): " confirm
-if [[ "$confirm" == "y" ]]; then
+read -rp "Do you want to proceed permissive MACS2 on replicates and perform IDR (y/n): " confirm_idr
+if [[ "$confirm_idr" == "y" ]]; then
 
     primary_aln_IDR(){
         local cell="$1"
         local cond="$2"
 
-
         # Set input files
-        local PRIMARY_ALN_MERGED="$INPUT_HICHIP_ALIGN/BLF_HiChIP_${cell}_${cond}_merged_nodd_primary.aln.bed"
-        local PREFIX_MERGED="BLF_HiChIP_${cell}_${cond}_merged_nodd_p9macs2"
-        local PRIMARY_ALN_REP1="$INPUT_HICHIP_SUB/BLF_HiChIP_${cell}_${cond}_Rep1_nodd_primary.aln.bed"
-        local PRIMARY_ALN_REP2="$INPUT_HICHIP_SUB/BLF_HiChIP_${cell}_${cond}_Rep2_nodd_primary.aln.bed"
+        local PRIMARY_OUT_MERGED="$INPUT_HICHIP_ALIGN/BLF_HiChIP_${cell}_${cond}_merged_nodd_primary.aln.bed"
+        local MACS2_MERGED="$OUTPUT_MACS2/BLF_HiChIP_${cell}_${cond}_merged_nodd_p${STRICT_PVAL}macs2"
+        local PRIMARY_OUT_REP1="$INPUT_HICHIP_SUB/BLF_HiChIP_${cell}_${cond}_Rep1_nodd_primary.aln.bed"
+        local PRIMARY_OUT_REP2="$INPUT_HICHIP_SUB/BLF_HiChIP_${cell}_${cond}_Rep2_nodd_primary.aln.bed"
 
         # Set output files
-        local MACS2_PERMISSIVE_REP1="$OUTPUT_MACS2_PERMISSIVE/BLF_HiChIP_${cell}_${cond}_Rep1_nodd_p5macs2"
-        local MACS2_PERMISSIVE_REP2="$OUTPUT_MACS2_PERMISSIVE/BLF_HiChIP_${cell}_${cond}_Rep2_nodd_p5macs2"
-        local IDR_OUT="$OUTPUT_MACS2_IDR/${cell}_${cond}_cle_narrowPeak.idr"
-        local IDR_LOG="$OUTPUT_MACS2_IDR/${cell}_${cond}_cle_narrowPeak.idr.log"
+        local PREFIX_PERMISSIVE_REP1="$OUTPUT_MACS2_PERMISSIVE/BLF_HiChIP_${cell}_${cond}_Rep1_nodd_p${PERMISSIVE_PVAL}macs2"
+        local PREFIX_PERMISSIVE_REP2="$OUTPUT_MACS2_PERMISSIVE/BLF_HiChIP_${cell}_${cond}_Rep2_nodd_p${PERMISSIVE_PVAL}macs2"
+        local MACS2_SORT_MERGED="$OUTPUT_MACS2_SORT/Sort_BLF_HiChIP_${cell}_${cond}_merged_nodd_p${STRICT_PVAL}macs2_peaks.narrowPeak"
+        local MACS2_SORT_REP1="$OUTPUT_MACS2_SORT/Sort_BLF_HiChIP_${cell}_${cond}_Rep1_nodd_p${PERMISSIVE_PVAL}macs2_peaks.narrowPeak"
+        local MACS2_SORT_REP2="$OUTPUT_MACS2_SORT/Sort_BLF_HiChIP_${cell}_${cond}_Rep2_nodd_p${PERMISSIVE_PVAL}macs2_peaks.narrowPeak"
+        local IDR_OUT="$OUTPUT_MACS2_IDR/HiChIP_${cell}_${cond}_narrowPeak.idr"
+        local IDR_LOG="$OUTPUT_MACS2_IDR/HiChIP_${cell}_${cond}_narrowPeak.idr.log"
 
-        # Perform alignment and skip if files already exist
-        if [[ -f "$IDR_OUT" ]]; then
-            echo "IDR already done for ${cell}_${cond}, skipping."
-            return
+        if [[ ! -f "$PRIMARY_OUT_REP1" || ! -f "$PRIMARY_OUT_REP2" ]]; then
+            echo "Missing primary replicate bed(s) for ${cell}_${cond}, skipping IDR."
+            return 0
+        fi
+       
+        # run permissive MACS2 if outputs missing (macs2 writes into OUTPUT_MACS2_PERMISSIVE with basename prefix)
+        if [[ ! -f "$OUTPUT_MACS2_PERMISSIVE/$(basename "$PREFIX_PERMISSIVE_REP1")_peaks.narrowPeak" ]]; then
+            echo "Permissive MACS2 on rep1 for ${cell}_${cond}"
+            macs2 callpeak -t "$PRIMARY_OUT_REP1" --keep-dup 10 --min-length 300 -p "$PERMISSIVE_PVAL" -g "$EFFECTIVE_GENOME" --bw 300 --mfold 5 50 --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$(basename "$PREFIX_PERMISSIVE_REP1")"
+        fi
+        if [[ ! -f "$OUTPUT_MACS2_PERMISSIVE/$(basename "$PREFIX_PERMISSIVE_REP2")_peaks.narrowPeak" ]]; then
+            echo "Permissive MACS2 on rep2 for ${cell}_${cond}"
+            macs2 callpeak -t "$PRIMARY_OUT_REP2" --keep-dup 10 --min-length 300 -p "$PERMISSIVE_PVAL" -g "$EFFECTIVE_GENOME" --bw 300 --mfold 5 50 --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "$(basename "$PREFIX_PERMISSIVE_REP2")"
         fi
 
-        # PERMISSIVE MACS2 on replicate files
-        local MACS2_PERMISSIVE_REP1="$OUTPUT_MACS2_PERMISSIVE/BLF_HiChIP_${cell}_${cond}_Rep1_nodd_p5macs2"
-        local MACS2_PERMISSIVE_REP2="$OUTPUT_MACS2_PERMISSIVE/BLF_HiChIP_${cell}_${cond}_Rep2_nodd_p5macs2"
-        macs2 callpeak -t "$PRIMARY_ALN_REP1" --keep-dup 10 --min-length 300 -p "$PERMISSIV_PVAL" -g "$EFFECTIVE_GENOME" --bw 300 --mfold 5 50 -n "$MACS2_PERMISSIVE_REP1"
-        macs2 callpeak -t "$PRIMARY_ALN_REP2" --keep-dup 10 --min-length 300 -p "$PERMISSIV_PVAL" -g "$EFFECTIVE_GENOME" --bw 300 --mfold 5 50 -n "$MACS2_PERMISSIVE_REP2"
-
         # Sort peak files
-        sort -k8,8nr "${MACS2_MERGED}_peaks.narrowPeak" > "$OUTPUT_MACS2_SORT/Sort_${PREFIX_MERGED}_peaks.narrowPeak"
-        sort -k8,8nr "${MACS2_PERMISSIVE_REP1}_peaks.narrowPeak"  > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PERMISSIVE_REP1}_peaks.narrowPeak"
-        sort -k8,8nr "${MACS2_PERMISSIVE_REP1}_peaks.narrowPeak"  > "$OUTPUT_MACS2_SORT/Sort_${MACS2_PERMISSIVE_REP2}_peaks.narrowPeak"
+        sort -k8,8nr "${MACS2_MERGED}_peaks.narrowPeak" > "$MACS2_SORT_MERGED"
+        sort -k8,8nr "${PREFIX_PERMISSIVE_REP1}_peaks.narrowPeak"  > "$MACS2_SORT_REP1"
+        sort -k8,8nr "${PREFIX_PERMISSIVE_REP2}_peaks.narrowPeak"  > "$MACS2_SORT_REP2"
+        
+        if [[ ! -f "$MACS2_SORT_REP1" || ! -f "$MACS2_SORT_REP2" ]]; then
+            echo "Missing sorted permissive peaks for IDR for ${cell}_${cond}; skipping IDR."
+            return 0
+        fi
 
-        idr --samples $OUTPUT_MACS2_SORT/$MACS2_Rep1_SORT $OUTPUT_MACS2_SORT/$MACS2_Rep2_SORT --peak-list $OUTPUT_MACS2_SORT/$MACS2_JoinedRep_SORT --input-file-type narrowPeak --rank p.value --output-file "$IDR_OUT" --plot --log-output-file "$IDR_LOG"
+        echo "Running IDR (rep1 vs rep2) for ${cell}_${cond}"
+        idr --samples "$MACS2_SORT_REP1" "$MACS2_SORT_REP2" --input-file-type narrowPeak --rank p.value --output-file "$IDR_OUT" --plot --log-output-file "$IDR_LOG"
+        
+        if [[ -f "$MACS2_SORT_MERGED" ]]; then
+        idr --samples "$MACS2_SORT_REP1" "$MACS2_SORT_REP2" --peak-list "$MACS2_SORT_MERGED" --input-file-type narrowPeak --rank p.value --output-file "${IDR_OUT%.idr}__withOracle.idr" --plot --log-output-file "${IDR_LOG%.idr.log}_withOracle.idr.log"
 
-        echo "IDR for HiChIP primary alignment HiChIP_${cell}_${cond} completed"
+        echo "Completed IDR for ${cell}_${cond}"
     }
 
     export -f primary_aln_IDR
-    export INPUT_HICHIP_ALIGN INPUT_HICHIP_SUB OUTPUT_MACS2 OUTPUT_MACS2_PERMISSIVE EFFECTIVE_GENOME PERMISSIV_PVAL
-
-    # Launch permissive runs in parallel (per replicate)
-    parallel --ungroup --line-buffer -j "$JOBS" primary_aln_IDR ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
-
+    export INPUT_HICHIP_ALIGN INPUT_HICHIP_SUB OUTPUT_MACS2 OUTPUT_MACS2_PERMISSIVE OUTPUT_MACS2_SORT OUTPUT_MACS2_IDR EFFECTIVE_GENOME PERMISSIVE_PVAL STRICT_PVAL
+    
+    if [[ ${#CellLine[@]} -ne 0 && ${#conditions[@]} -ne 0 ]]; then
+        # Launch permissive runs in parallel (per replicate)
+        parallel --ungroup --line-buffer -j "$JOBS" primary_aln_IDR ::: "${CellLine[@]}" ::: "${conditions[@]}"
+    else
+        echo "No samples found to run IDR."
+    fi    
 else
     echo "Skipping IDR"
 fi

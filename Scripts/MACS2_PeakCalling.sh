@@ -127,7 +127,7 @@ fi
 # Parameters can be adapted for personl needs
 EFFECTIVE_GENOME=2913022398
 PERMISSIVE_PVAL=0.05
-MERGED_PVAL=0.000000001
+STRICT_PVAL=1e-9
 
 ###################################
 # MACS2 permissive per replicate  #
@@ -146,18 +146,18 @@ if [[ "$confirm" == "y" ]]; then
         # Set inpute files
         local IN_BAM="$INPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
         local CTR_BAM="$INPUT_CHIP_SUB/BLF_ChIP_${cell}_controlInput_Rep${rep}_cle_sort_dd.bam"
-        local PREFIX="BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd_p0.05macs2"
+        local PREFIX="BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd_p${PERMISSIVE_PVAL}macs2"
 
         # Check inputs
         if [[ ! -f "$IN_BAM" ]]; then
             echo "Missing input BAM: $IN_BAM — skipping ${cell}_${cond}_Rep${rep}"
-            return
+            return 0
         fi
 
         # Check control
         if [[ ! -f "$CTR_BAM" ]]; then
             echo "Missing input BAM: $CTR_BAM — skipping ${cell}_${cond}_Rep${rep}"
-            return
+            return 0
         fi
 
         # Narrow peaks
@@ -211,18 +211,18 @@ macs2_merged() {
     # Set inpute files
     local IN_BAM_MERGED="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
     local CTR_BAM_MERGED="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_controlInput_merged_cle_sort_dd.bam"
-    local PREFIX="BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd_p9macs2"
+    local PREFIX="BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd_p${STRICT_PVAL}macs2"
     
     # Check inputs
     if [[ ! -f "$IN_BAM_MERGED" ]]; then
         echo "Missing input BAM: $IN_BAM_MERGED — skipping ${cell}_${cond}_merged"
-        return
+        return 0
     fi
 
     # Check control
     if [[ ! -f "$CTR_BAM_MERGED" ]]; then
         echo "Missing input BAM: $CTR_BAM_MERGED — skipping ${cell}_${cond}_merged"
-        return
+        return 0
     fi
 
     # Narrow peaks
@@ -231,7 +231,7 @@ macs2_merged() {
         echo "Narrow peaks exist for ${cell}_${cond}_merged, skipping."
     else
         echo "Running MACS2 narrow for ${cell}_${cond}_merged..."
-        macs2 callpeak -t "$IN_BAM_MERGED" -c "$CTR_BAM_MERGED" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$MERGED_PVAL" -B --outdir "$OUTPUT_MACS2" -n "${PREFIX}" || { echo "MACS2 narrow failed for ${PREFIX}"; return 1; }
+        macs2 callpeak -t "$IN_BAM_MERGED" -c "$CTR_BAM_MERGED" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$STRICT_PVAL" -B --outdir "$OUTPUT_MACS2" -n "${PREFIX}" || { echo "MACS2 narrow failed for ${PREFIX}"; return 1; }
     fi
 
     # Broad peaks
@@ -240,7 +240,7 @@ macs2_merged() {
         echo "Broad peaks exist for ${cell}_${cond}_merged, skipping."
     else
         echo "Running MACS2 broad for ${cell}_${cond}_merged..."
-        macs2 callpeak -t "$IN_BAM_MERGED" -c "$CTR_BAM_MERGED" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$MERGED_PVAL" --broad -B --outdir "$OUTPUT_MACS2" -n "${PREFIX}" || { echo "MACS2 broad failed for ${PREFIX}"; return 1; }
+        macs2 callpeak -t "$IN_BAM_MERGED" -c "$CTR_BAM_MERGED" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$STRICT_PVAL" --broad -B --outdir "$OUTPUT_MACS2" -n "${PREFIX}" || { echo "MACS2 broad failed for ${PREFIX}"; return 1; }
     fi
 
     # Sort peak files if present
@@ -255,7 +255,7 @@ macs2_merged() {
 }
 
 export -f macs2_merged
-export INPUT_CHIP_ALIGN OUTPUT_MACS2 OUTPUT_MACS2_SORT EFFECTIVE_GENOME MERGED_PVAL
+export INPUT_CHIP_ALIGN OUTPUT_MACS2 OUTPUT_MACS2_SORT EFFECTIVE_GENOME STRICT_PVAL
 
 # Launch permissive runs in parallel (per replicate)
 parallel --ungroup --line-buffer -j "$JOBS" macs2_merged ::: "${CellLine[@]}" ::: "${conditions[@]}"
@@ -277,9 +277,9 @@ if [[ "$confirm" == "y" ]]; then
         # Loop over peak types
         for peaktype in narrowPeak broadPeak; do
             # Set inpute files    
-            local MACS2_R1="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_Rep1_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
-            local MACS2_R2="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
-            local MACS2_ORACLE="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd_p9macs2_peaks.${peaktype}"
+            local MACS2_R1="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_Rep1_cle_sort_dd_p${PERMISSIVE_PVAL}macs2_peaks.${peaktype}"
+            local MACS2_R2="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd_p${PERMISSIVE_PVAL}macs2_peaks.${peaktype}"
+            local MACS2_ORACLE="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd_p${STRICT_PVAL}macs2_peaks.${peaktype}"
            
             # Set output file name for IDR files
             local IDR_OUT="$OUTPUT_MACS2_IDR/${cell}_${cond}_cle_${peaktype}.idr"
@@ -312,7 +312,7 @@ if [[ "$confirm" == "y" ]]; then
     }    
 
     export -f macs2_IDR
-    export OUTPUT_MACS2_SORT OUTPUT_MACS2_IDR
+    export OUTPUT_MACS2_SORT OUTPUT_MACS2_IDR PERMISSIVE_PVAL STRICT_PVAL
 
     # Launch IDR per condition
     parallel --ungroup --line-buffer -j "$JOBS" macs2_IDR ::: "${CellLine[@]}" ::: "${conditions[@]}"
