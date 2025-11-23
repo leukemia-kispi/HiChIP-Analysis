@@ -195,23 +195,23 @@ fi
 
 # Trimming funciton
 trim_sample() {
-    local cell=$1
-    local cond=$2
-    local num=$3
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
      # Set path to input FASTQ files
-    R1="$FASTQ_DIR/ChIP_${cell}_${cond}_Rep${num}_R1.fastq.gz"
-    R2="$FASTQ_DIR/ChIP_${cell}_${cond}_Rep${num}_R2.fastq.gz"
+    R1="$FASTQ_DIR/ChIP_${cell}_${cond}_Rep${rep}_R1.fastq.gz"
+    R2="$FASTQ_DIR/ChIP_${cell}_${cond}_Rep${rep}_R2.fastq.gz"
      # Set path to output 
-    OUT_R1="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${num}_R1_val_1.fq.gz"
-    OUT_R2="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${num}_R2_val_2.fq.gz"
+    OUT_R1="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R1_val_1.fq.gz"
+    OUT_R2="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R2_val_2.fq.gz"
 
     # Perform trimming only if the expected output files are missing
     if [[ -f "$OUT_R1" && -f "$OUT_R2" ]]; then
-        echo "Trimming already done for ${cell}_${cond}_Rep${num}, skipping."
+        echo "Trimming already done for ${cell}_${cond}_Rep${rep}, skipping."
         return
     fi
 
-    echo "Trimming ${cell}_${cond}_Rep${num}..."
+    echo "Trimming ${cell}_${cond}_Rep${rep}..."
     # Trim samples and generate new FastQC files for all replicates
     trim_galore --fastqc --phred33 --length 30 --output_dir "$OUTPUT_DIR_TRIM" -j "$TOOL_THREADS" --paired "$R1" "$R2"
    
@@ -229,24 +229,24 @@ parallel -j "$JOBS" trim_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: 
 
 # Alignment funciton
 align_sample() {
-    local cell=$1
-    local cond=$2
-    local num=$3
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
     # Set path to trimmed input FASTQ files
-    TRIM_R1="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${num}_R1_val_1.fq.gz"
-    TRIM_R2="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${num}_R2_val_2.fq.gz"
+    TRIM_R1="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R1_val_1.fq.gz"
+    TRIM_R2="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R2_val_2.fq.gz"
     # Set path to aligned output files
-    BAM="$OUTPUT_CHIP_ALIGN/ChIP_${cell}_${cond}_Rep${num}_cle_sort.bam"
+    BAM="$OUTPUT_CHIP_ALIGN/ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
     # Set output file name for filtered BAM files. BLF referse to black list filtered file
-    BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort.bam"
+    BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
     
     #Perform alignment and skip if files already exist
     if [[ -f "$BLF_BAM" ]]; then
-        echo "Alignment already done for ${cell}_${cond}_Rep${num}, skipping."
+        echo "Alignment already done for ${cell}_${cond}_Rep${rep}, skipping."
         return
     fi
 
-    echo "Aligning ${cell}_${cond}_Rep${num}..."
+    echo "Aligning ${cell}_${cond}_Rep${rep}..."
     #Create sorted BAM files with grep to remove alignments to alternative contigs, unlocalized sequence, or unplaced sequence.#####################
     bwa mem -5 -T25 -t"$TOOL_THREADS" "$REF_FASTA" "$TRIM_R1" "$TRIM_R2" \
         | samtools view -hS \
@@ -286,22 +286,22 @@ fi
 
 # Picard funciton
 mark_duplicates() {
-    local cell=$1
-    local cond=$2
-    local num=$3
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
     # Set path to aligned input files
-    BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort.bam"
+    BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
     # Set path to flagged output files
-    BLF_DUPFLAG_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dupsflag.bam"
-    BLF_DUPFLAG_TXT="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dups.txt"
+    BLF_DUPFLAG_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dupsflag.bam"
+    BLF_DUPFLAG_TXT="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dups.txt"
     
     # Flag duplicates and skip if files exist
     if [[ -f "$BLF_DUPFLAG_BAM" ]]; then
-        echo "Duplicate marking already done for ${cell}_${cond}_Rep${num}, skipping."
+        echo "Duplicate marking already done for ${cell}_${cond}_Rep${rep}, skipping."
         return
     fi
     
-    echo "Flagging duplicates for ${cell}_${cond}_Rep${num}"
+    echo "Flagging duplicates for ${cell}_${cond}_Rep${rep}"
     java -jar "$(conda run -n Picard bash -c 'echo $CONDA_PREFIX')/share/$(ls "$(conda run -n Picard bash -c 'echo $CONDA_PREFIX')/share" | grep picard | sort -V | tail -n 1)/picard.jar" \
     MarkDuplicates -I "$BLF_BAM" -O "$BLF_DUPFLAG_BAM" -M "$BLF_DUPFLAG_TXT" --REMOVE_DUPLICATES false
 }
@@ -332,27 +332,27 @@ fi
 ##############################################
 
 dedup_sample() {
-    local cell=$1
-    local cond=$2
-    local num=$3
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
 
     # Input: BAM file with duplicates flagged by Picard
-    BLF_DUPFLAG_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dupsflag.bam"
+    BLF_DUPFLAG_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dupsflag.bam"
     # Output: deduplicated BAM
-    BLF_DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bam"
+    BLF_DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
 
     # Skip if deduplication already done
     if [[ -f "$BLF_DD_BAM" ]]; then
-        echo "Deduplication already done for ${cell}_${cond}_Rep${num}, skipping."
+        echo "Deduplication already done for ${cell}_${cond}_Rep${rep}, skipping."
         return
     fi
 
     if [[ ! -f "$BLF_DUPFLAG_BAM" ]]; then
-        echo "Input flagged BAM not found for ${cell}_${cond}_Rep${num}, skipping dedup."
+        echo "Input flagged BAM not found for ${cell}_${cond}_Rep${rep}, skipping dedup."
         return
     fi
 
-    echo "Deduplicating ${cell}_${cond}_Rep${num}..."
+    echo "Deduplicating ${cell}_${cond}_Rep${rep}..."
     # Remove flagged duplicates (F 1024) and index
     samtools view -b -F 1024 "$BLF_DUPFLAG_BAM" > "$BLF_DD_BAM"
     samtools index "$BLF_DD_BAM"
@@ -369,8 +369,9 @@ parallel -j "$JOBS" dedup_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" :::
 ############################################
 
 merge_replicates() {
-    local cell=$1
-    local cond=$2
+    local cell="$1"
+    local cond="$2"
+
     # Set input replicate files for merging
     REP1="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep1_cle_sort_dd.bam"
     REP2="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd.bam"
@@ -404,27 +405,27 @@ parallel -j "$JOBS" merge_replicates ::: "${CellLine[@]}" ::: "${conditions[@]}"
 
 # Samples without deduplication
 coverage_sample() {
-    local cell=$1
-    local cond=$2
-    local num=$3
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
 
     # Input deduplicated BAM
-    BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort.bam"
+    BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
     # Output BigWig coverage
-    BLF_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort.bw"
+    BLF_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bw"
 
     # Skip if coverage file already exists
     if [[ -f "$BLF_BIGWIG" ]]; then
-        echo "Coverage already generated for ${cell}_${cond}_Rep${num}, skipping."
+        echo "Coverage already generated for ${cell}_${cond}_Rep${rep}, skipping."
         return
     fi
 
     if [[ ! -f "$BLF_BAM" ]]; then
-        echo "BAM not found for ${cell}_${cond}_Rep${num}, skipping coverage."
+        echo "BAM not found for ${cell}_${cond}_Rep${rep}, skipping coverage."
         return
     fi
 
-    echo "Generating coverage for ${cell}_${cond}_Rep${num}..."
+    echo "Generating coverage for ${cell}_${cond}_Rep${rep}..."
     bamCoverage -b "$BLF_BAM" -o "$BLF_BIGWIG" \
         --effectiveGenomeSize 2913022398 -bl "$BLACKLIST" \
         --normalizeUsing RPKM -p "$TOOL_THREADS" -bs 10 \
@@ -433,27 +434,27 @@ coverage_sample() {
 
 # Samples with deduplication
 coverage_dd_sample() {
-    local cell=$1
-    local cond=$2
-    local num=$3
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
 
     # Input deduplicated BAM
-    BLF_DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bam"
+    BLF_DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
     # Output BigWig coverage
-    BLF_DD_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${num}_cle_sort_dd.bw"
+    BLF_DD_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bw"
 
     # Skip if coverage file already exists
     if [[ -f "$BLF_DD_BIGWIG" ]]; then
-        echo "Coverage already generated for ${cell}_${cond}_Rep${num}, skipping."
+        echo "Coverage already generated for ${cell}_${cond}_Rep${rep}, skipping."
         return
     fi
 
     if [[ ! -f "$BLF_DD_BAM" ]]; then
-        echo "Dedup BAM not found for ${cell}_${cond}_Rep${num}, skipping coverage."
+        echo "Dedup BAM not found for ${cell}_${cond}_Rep${rep}, skipping coverage."
         return
     fi
 
-    echo "Generating coverage for deduplicated ${cell}_${cond}_Rep${num}..."
+    echo "Generating coverage for deduplicated ${cell}_${cond}_Rep${rep}..."
     bamCoverage -b "$BLF_DD_BAM" -o "$BLF_DD_BIGWIG" \
         --effectiveGenomeSize 2913022398 -bl "$BLACKLIST" \
         --normalizeUsing RPKM -p "$TOOL_THREADS" -bs 10 \
@@ -461,8 +462,8 @@ coverage_dd_sample() {
 }
 
 coverage_merged() {
-    local cell=$1
-    local cond=$2
+    local cell="$1"
+    local cond="$2"
 
     BLF_MERGED_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
     BLF_BIGWIG_MERGED="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bw"

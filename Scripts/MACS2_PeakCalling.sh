@@ -5,7 +5,7 @@ shopt -s nullglob # make globbing return empty array if no match
 # Using this script assumes DirectoryArchitecture.sh was execute beforhand.
 # This MACS2 pipeline expects inputs originating from pair-end read files.
 
-# Check if GNU Parallel is installed otherwise exis
+# Check if GNU Parallel is installed otherwise exits
 if ! command -v parallel &>/dev/null; then
     echo "Error: GNU parallel not found. Please install with 'sudo apt install parallel'"
     exit 1
@@ -215,13 +215,13 @@ macs2_merged() {
     
     # Check inputs
     if [[ ! -f "$IN_BAM_MERGED" ]]; then
-        echo "Missing input BAM: $IN_BAM_MERGED — skipping ${cell}_${cond}_Rep${rep}"
+        echo "Missing input BAM: $IN_BAM_MERGED — skipping ${cell}_${cond}_merged"
         return
     fi
 
     # Check control
     if [[ ! -f "$CTR_BAM_MERGED" ]]; then
-        echo "Missing input BAM: $CTR_BAM_MERGED — skipping ${cell}_${cond}_Rep${rep}"
+        echo "Missing input BAM: $CTR_BAM_MERGED — skipping ${cell}_${cond}_merged"
         return
     fi
 
@@ -284,6 +284,21 @@ if [[ "$confirm" == "y" ]]; then
             # Set output file name for IDR files
             local IDR_OUT="$OUTPUT_MACS2_IDR/${cell}_${cond}_cle_${peaktype}.idr"
             local IDR_LOG="$OUTPUT_MACS2_IDR/${cell}_${cond}_cle_${peaktype}.idr.log"
+            
+            # ---- File checks ----
+            local missing=0
+            for f in "$MACS2_R1" "$MACS2_R2" "$MACS2_ORACLE"; do
+                if [[ ! -f "$f" ]]; then
+                    echo "Missing required file: $f"
+                    missing=1
+                fi
+            done
+
+            if [[ $missing -eq 1 ]]; then
+                echo "Skipping IDR for $cell $cond ($peaktype) due to missing files."
+                continue  # Will continue with pipeline if you decide to delete files of one peaktype
+            fi
+            # ----------------------
 
             # IDR without Oracle Peak file
             echo "Running IDR (rep1 vs rep2) for $cell $cond ($peaktype)..."
