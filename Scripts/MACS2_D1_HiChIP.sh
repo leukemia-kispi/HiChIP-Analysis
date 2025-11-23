@@ -39,7 +39,7 @@ exec > >(tee -a "$LOG_DIR/run.log") 2>&1
 
 echo "==== Starting MACS2 Pipeline ====="
 echo "====================================="
-echo "  MACS2 Peak calling Log Started"
+echo "  MACS2 D1 Peak calling Log Started"
 echo "  Date: $(date)"
 echo "  Main Directory: $MAIN_DIR"
 echo "  Using $CORES cores"
@@ -56,7 +56,6 @@ echo "====================================="
 INPUT_HICHIP_ALIGN="$MAIN_DIR/4.Alignment/HiChIP"
 $INPUT_HICHIP_SUB="$MAIN_DIR/4.Alignment/HiChIP/Outputs"
 # Provide your own list if running different samples
-BLACKLIST="$MAIN_DIR/0.BlackList/hg38-blacklist.v2.bed"
 MAPPING_FILE="$MAIN_DIR/1.RawData/HiChIP/HiChIP_IDs.txt" 
 # Set output directories
 OUTPUT_MACS2="$MAIN_DIR/5.MACS2/HiChIP"
@@ -74,70 +73,6 @@ else
     echo "Warning: mapping file $MAPPING_FILE not found. Continuing but arrays will be empty."
 fi
 
-#############################
-### MAPPING NEW IDs #########
-#############################
-
-# Paired_Read = read_num
-# True sample name = newname
-# MAPPING_FILES is a .txt file with mapping_file format (acc newname):
-# Example from European Nucleotide Archive deposited under accession number ERP109232. Use the Histone_ChIP_IDs.txt file to update the annotations.
-#     ERR2618839  ChIP_HAL01_H3K27ac_Rep1
-#     ERR2618840  ChIP_HAL01_H3K27ac_Rep2
-
-echo
-echo "=== DRY RUN: Planned renames ==="
-# Promt to procceed or skip sample ID mapping step.
-read -rp "Do you need to map new IDs using new_ID .txt file (y/n): " confirm
-if [[ "$confirm" == "y" ]]; then
-    while IFS=$'\t' read -r acc newname; do
-        # Skip empty lines or lines starting with #
-        [[ -z "$acc" || "$acc" == \#* ]] && continue
-
-        for read_num in 1 2; do
-            #Variable for old and new file names
-            old_file="$FASTQ_DIR/${acc}_${read_num}.fastq.gz"
-            new_file="$FASTQ_DIR/${newname}_R${read_num}.fastq.gz"
-            # Check if old file exists and if renamed file exists does not overwrite.
-            if [[ -f "$old_file" ]]; then
-                if [[ -f "$new_file" ]]; then
-                    echo "SKIP: $(basename "$new_file") already exists — will not overwrite"
-                else
-                    echo "$(basename "$old_file") → $(basename "$new_file")"
-                fi
-            else
-                echo "WARNING: $(basename "$old_file") not found"
-            fi
-        done
-    done < "$MAPPING_FILE"
-
-    #Ask user if they wish to proceed with file name changes.
-    echo
-    read -rp "Do you want to apply these changes? (y/n): " confirm
-    if [[ "$confirm" == "y" ]]; then
-        while IFS=$'\t' read -r acc newname; do
-            #Ignore blank lines and comment lines in the mapping file.
-            [[ -z "$acc" || "$acc" == \#* ]] && continue
-
-            for read_num in 1 2; do
-                old_file="$FASTQ_DIR/${acc}_${read_num}.fastq.gz"
-                new_file="$FASTQ_DIR/${newname}_R${read_num}.fastq.gz"
-
-                if [[ -f "$old_file" && ! -f "$new_file" ]]; then
-                    mv "$old_file" "$new_file"
-                    echo "Renamed: $(basename "$old_file") → $(basename "$new_file")"
-                elif [[ -f "$new_file" ]]; then
-                    echo "SKIP: $(basename "$new_file") already exists — not overwritten"
-                fi
-            done
-        done < "$MAPPING_FILE"
-    else
-        echo "No changes applied."
-    fi
-else
- echo "Skip mapping new IDs"
-fi
-
 ################################################
 ### EXTRACT ANNOTATIONS FROM SAMPLE NAME #######
 ################################################
@@ -151,7 +86,7 @@ NUMBERS=()
 if [[ -f "$MAPPING_FILE" ]]; then
     while IFS=$'\t' read -r acc newname; do
         [[ -z "$acc" || "$acc" == \#* ]] && continue
-        base=${newname#ChIP_}      # Remove "ChIP_" prefix
+        base=${newname#HiChIP_}      # Remove "HiChIP_" prefix
         cell=$(echo "$base" | cut -d'_' -f1)
         cond=$(echo "$base" | cut -d'_' -f2)
         rep=$(echo "$base" | grep -oP 'Rep\K[0-9]+')

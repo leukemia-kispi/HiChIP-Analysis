@@ -71,9 +71,6 @@ SUBDIRS=(
     "7.Deeptool_Matrix/Sorted_Lists"
     "7.Deeptool_Matrix/Target_Regions"
     "8.JupyterLab"
-    "9.HOMER"
-    "9.HOMER/Outputs"
-    "10.ROSE"
     "tmp"
 )
 

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-set +e                 # Don’t exit on error — handle manually
-set -o pipefail        # But fail properly on pipe errors
+set -euo pipefail # But fail properly on pipe errors
 shopt -s nullglob # make globbing return empty array if no match
 
 # Using this script assumes DirectoryArchitecture.sh was execute beforhand.
@@ -73,70 +72,6 @@ else
     echo "Warning: mapping file $MAPPING_FILE not found. Continuing but arrays will be empty."
 fi
 
-#############################
-### MAPPING NEW IDs #########
-#############################
-
-# Paired_Read = read_num
-# True sample name = newname
-# MAPPING_FILES is a .txt file with mapping_file format (acc newname):
-# Example from European Nucleotide Archive deposited under accession number ERP109232. Use the Histone_ChIP_IDs.txt file to update the annotations.
-#     ERR2618839  ChIP_HAL01_H3K27ac_Rep1
-#     ERR2618840  ChIP_HAL01_H3K27ac_Rep2
-
-echo
-echo "=== DRY RUN: Planned renames ==="
-# Promt to procceed or skip sample ID mapping step.
-read -rp "Do you need to map new IDs using new_ID .txt file (y/n): " confirm
-if [[ "$confirm" == "y" ]]; then
-    while IFS=$'\t' read -r acc newname; do
-        # Skip empty lines or lines starting with #
-        [[ -z "$acc" || "$acc" == \#* ]] && continue
-
-        for read_num in 1 2; do
-            #Variable for old and new file names
-            old_file="$FASTQ_DIR/${acc}_${read_num}.fastq.gz"
-            new_file="$FASTQ_DIR/${newname}_R${read_num}.fastq.gz"
-            # Check if old file exists and if renamed file exists does not overwrite.
-            if [[ -f "$old_file" ]]; then
-                if [[ -f "$new_file" ]]; then
-                    echo "SKIP: $(basename "$new_file") already exists — will not overwrite"
-                else
-                    echo "$(basename "$old_file") → $(basename "$new_file")"
-                fi
-            else
-                echo "WARNING: $(basename "$old_file") not found"
-            fi
-        done
-    done < "$MAPPING_FILE"
-
-    #Ask user if they wish to proceed with file name changes.
-    echo
-    read -rp "Do you want to apply these changes? (y/n): " confirm
-    if [[ "$confirm" == "y" ]]; then
-        while IFS=$'\t' read -r acc newname; do
-            #Ignore blank lines and comment lines in the mapping file.
-            [[ -z "$acc" || "$acc" == \#* ]] && continue
-
-            for read_num in 1 2; do
-                old_file="$FASTQ_DIR/${acc}_${read_num}.fastq.gz"
-                new_file="$FASTQ_DIR/${newname}_R${read_num}.fastq.gz"
-
-                if [[ -f "$old_file" && ! -f "$new_file" ]]; then
-                    mv "$old_file" "$new_file"
-                    echo "Renamed: $(basename "$old_file") → $(basename "$new_file")"
-                elif [[ -f "$new_file" ]]; then
-                    echo "SKIP: $(basename "$new_file") already exists — not overwritten"
-                fi
-            done
-        done < "$MAPPING_FILE"
-    else
-        echo "No changes applied."
-    fi
-else
- echo "Skip mapping new IDs"
-fi
-
 ################################################
 ### EXTRACT ANNOTATIONS FROM SAMPLE NAME #######
 ################################################
@@ -189,10 +124,14 @@ fi
 ### MACS2 PEAK CALLING #########
 ################################
 
-# Parameters
+# Parameters can be adapted for personl needs
 EFFECTIVE_GENOME=2913022398
 PERMISSIVE_PVAL=0.05
 MERGED_PVAL=0.000000001
+
+###################################
+# MACS2 permissive per replicate  #
+###################################
 
 echo
 echo "Permissive MACS2 for later IDR Analysis"
@@ -205,13 +144,19 @@ if [[ "$confirm" == "y" ]]; then
         local rep=$3
 
         # Set inpute files
-        IN_BAM="$INPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
-        CTR_BAM="$INPUT_CHIP_SUB/BLF_ChIP_${cell}_controlInput_Rep${rep}_cle_sort_dd.bam"
-        PREFIX="BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd_p0.05macs2"
+        local IN_BAM="$INPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
+        local CTR_BAM="$INPUT_CHIP_SUB/BLF_ChIP_${cell}_controlInput_Rep${rep}_cle_sort_dd.bam"
+        local PREFIX="BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd_p0.05macs2"
 
         # Check inputs
         if [[ ! -f "$IN_BAM" ]]; then
             echo "Missing input BAM: $IN_BAM — skipping ${cell}_${cond}_Rep${rep}"
+            return
+        fi
+
+        # Check control
+        if [[ ! -f "$CTR_BAM" ]]; then
+            echo "Missing input BAM: $CTR_BAM — skipping ${cell}_${cond}_Rep${rep}"
             return
         fi
 
@@ -221,7 +166,7 @@ if [[ "$confirm" == "y" ]]; then
             echo "Permissive narrow peaks exist for ${cell}_${cond}_Rep${rep}, skipping."
         else
             echo "Running MACS2 permissive narrow for ${cell}_${cond}_Rep${rep}..."
-            macs2 callpeak -t "$IN_BAM" -c "$CTRL_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$PERMISSIVE_PVAL" -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "${PREFIX}" || { echo "MACS2 narrow failed for ${PREFIX}"; return 1; }
+            macs2 callpeak -t "$IN_BAM" -c "$CTR_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$PERMISSIVE_PVAL" -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "${PREFIX}" || { echo "MACS2 narrow failed for ${PREFIX}"; return 1; }
         fi
 
         # Broad peaks
@@ -230,7 +175,7 @@ if [[ "$confirm" == "y" ]]; then
             echo "Permissive broad peaks exist for ${cell}_${cond}_Rep${rep}, skipping."
         else
             echo "Running MACS2 permissive broad for ${cell}_${cond}_Rep${rep}..."
-            macs2 callpeak -t "$IN_BAM" -c "$CTRL_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$PERMISSIVE_PVAL" --broad -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "${PREFIX}" || { echo "MACS2 broad failed for ${PREFIX}"; return 1; }
+            macs2 callpeak -t "$IN_BAM" -c "$CTR_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$PERMISSIVE_PVAL" --broad -B --outdir "$OUTPUT_MACS2_PERMISSIVE" -n "${PREFIX}" || { echo "MACS2 broad failed for ${PREFIX}"; return 1; }
         fi
 
         # Sort peak files if present
@@ -246,40 +191,56 @@ if [[ "$confirm" == "y" ]]; then
     export -f macs2_permissive_rep
     export INPUT_CHIP_SUB OUTPUT_MACS2_PERMISSIVE OUTPUT_MACS2_SORT EFFECTIVE_GENOME PERMISSIVE_PVAL
 
-    # Launch permissive runs in parallel (per replicate)
+    # Launch permissive runs in parallel
     parallel --ungroup --line-buffer -j "$JOBS" macs2_permissive_rep ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
 
 else
     echo "Skip Permissive MACS2 run"
 fi
 
+###################################
+# MACS2 merged (stringent) calls  #
+###################################
+
 echo 
 echo "Running MACS2 peak calling"
-macs2_Oracle_merge() {
+macs2_merged() {
     local cell=$1
     local cond=$2
 
     # Set inpute files
-    IN_BAM_MERGED="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
-    CTR_BAM_MERGED="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_controlInput_merged_cle_sort_dd.bam"
-    PREFIX="BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd_p9macs2"
+    local IN_BAM_MERGED="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
+    local CTR_BAM_MERGED="$INPUT_CHIP_ALIGN/BLF_ChIP_${cell}_controlInput_merged_cle_sort_dd.bam"
+    local PREFIX="BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd_p9macs2"
     
+    # Check inputs
+    if [[ ! -f "$IN_BAM_MERGED" ]]; then
+        echo "Missing input BAM: $IN_BAM_MERGED — skipping ${cell}_${cond}_Rep${rep}"
+        return
+    fi
+
+    # Check control
+    if [[ ! -f "$CTR_BAM_MERGED" ]]; then
+        echo "Missing input BAM: $CTR_BAM_MERGED — skipping ${cell}_${cond}_Rep${rep}"
+        return
+    fi
+
     # Narrow peaks
     local NAR_OUT="$OUTPUT_MACS2/${PREFIX}_peaks.narrowPeak"
     if [[ -f "$NAR_OUT" ]]; then
-        echo "Permissive narrow peaks exist for ${cell}_${cond}_Rep${rep}, skipping."
+        echo "Narrow peaks exist for ${cell}_${cond}_merged, skipping."
     else
-        echo "Running MACS2 permissive narrow for ${cell}_${cond}_Rep${rep}..."
-        macs2 callpeak -t "$IN_BAM" -c "$CTRL_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$MERGED_PVAL" -B --outdir "$OUTPUT_MACS2" -n "${PREFIX}" || { echo "MACS2 narrow failed for ${PREFIX}"; return 1; }
+        echo "Running MACS2 narrow for ${cell}_${cond}_merged..."
+        macs2 callpeak -t "$IN_BAM_MERGED" -c "$CTR_BAM_MERGED" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$MERGED_PVAL" -B --outdir "$OUTPUT_MACS2" -n "${PREFIX}" || { echo "MACS2 narrow failed for ${PREFIX}"; return 1; }
     fi
 
     # Broad peaks
     local BRO_OUT="$OUTPUT_MACS2/${PREFIX}_peaks.broadPeak"
     if [[ -f "$BRO_OUT" ]]; then
-        echo "Permissive broad peaks exist for ${cell}_${cond}_Rep${rep}, skipping."
+        echo "Broad peaks exist for ${cell}_${cond}_merged, skipping."
     else
-        echo "Running MACS2 permissive broad for ${cell}_${cond}_Rep${rep}..."
-        macs2 callpeak -t "$IN_BAM" -c "$CTRL_BAM" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$MERGED_PVAL" --broad -B --outdir "$OUTPUT_MACS2" -n "${PREFIX}" || { echo "MACS2 broad failed for ${PREFIX}"; return 1; }
+        echo "Running MACS2 broad for ${cell}_${cond}_merged..."
+        macs2 callpeak -t "$IN_BAM_MERGED" -c "$CTR_BAM_MERGED" -f BAMPE -g "$EFFECTIVE_GENOME" -p "$MERGED_PVAL" --broad -B --outdir "$OUTPUT_MACS2" -n "${PREFIX}" || { echo "MACS2 broad failed for ${PREFIX}"; return 1; }
     fi
 
     # Sort peak files if present
@@ -290,14 +251,14 @@ macs2_Oracle_merge() {
         sort -k8,8nr "$BRO_OUT" > "$OUTPUT_MACS2_SORT/Sort_${PREFIX}_peaks.broadPeak"
     fi
 
-    echo "Completed MACS2 peak calling for ${cell}_${cond}_Rep${rep}"
+    echo "Completed MACS2 peak calling for ${cell}_${cond}_merged"
 }
 
-export -f macs2_Oracle_merge
-export INPUT_CHIP_ALIGN OUTPUT_MACS2 OUTPUT_MACS2_SORT EFFECTIVE_GENOME MERGED_PVAL_PVAL
+export -f macs2_merged
+export INPUT_CHIP_ALIGN OUTPUT_MACS2 OUTPUT_MACS2_SORT EFFECTIVE_GENOME MERGED_PVAL
 
 # Launch permissive runs in parallel (per replicate)
-parallel --ungroup --line-buffer -j "$JOBS" macs2_permissive_rep ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+parallel --ungroup --line-buffer -j "$JOBS" macs2_merged ::: "${CellLine[@]}" ::: "${conditions[@]}"
 
 
 ####################################
@@ -312,25 +273,37 @@ if [[ "$confirm" == "y" ]]; then
     macs2_IDR(){
         local cell=$1
         local cond=$2
-        local peaktype=$3
 
-        # Set inpute files    
-        MACS2_PEAK_R1="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_Rep1_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
-        MACS2_PEAK_R2="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
-        MACS2_PEAK_ORACLE="$INPUT_CHIP_ALIGN/Sort_BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd_p9macs2_peaks.${peaktype}"
+        # Loop over peak types
+        for peaktype in narrowPeak broadPeak; do
+            # Set inpute files    
+            local MACS2_R1="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_Rep1_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
+            local MACS2_R2="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd_p0.05macs2_peaks.${peaktype}"
+            local MACS2_ORACLE="$OUTPUT_MACS2_SORT/Sort_BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd_p9macs2_peaks.${peaktype}"
+           
+            # Set output file name for IDR files
+            local IDR_OUT="$OUTPUT_MACS2_IDR/${cell}_${cond}_cle_${peaktype}.idr"
+            local IDR_LOG="$OUTPUT_MACS2_IDR/${cell}_${cond}_cle_${peaktype}.idr.log"
 
-        # Set output file name for IDR files
-        IDR_OUTPUT1="$OUTPUT_MACS2_IDR/${cell}_${cond}_cle_${peaktype}-idr"
-        IDR_OUTPUT2="$OUTPUT_MACS2_IDR/${cell}_${cond}_cle_${peaktype}.idr.log"
-        for peaktype in "narrowPeak" "broadPeak"; do
             # IDR without Oracle Peak file
-            idr --samples "$MACS2_PEAK_R1" "$MACS2_PEAK_R2" --input-file-type "$peaktype" --rank p.value --output-file "$IDR_OUTPUT1" --plot --log-output-file "$IDR_OUTPUT2"
+            echo "Running IDR (rep1 vs rep2) for $cell $cond ($peaktype)..."
+            idr --samples "$MACS2_R1" "$MACS2_R2" --input-file-type "$peaktype" --rank p.value --output-file "$IDR_OUT" --plot --log-output-file "$IDR_LOG"
                                                                                 
             # IDR with Oracle Peak file
-            idr --samples "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R1}_peaks.${peaktype}" "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_R2}_peaks.${peaktype}" --peak-list "$OUTPUT_MACS2_SORT/Sort_${MACS2_PEAK_ORACLE}_peaks.${peaktype}" --input-file-type "$peaktype" --rank p.value --output-file "$OUTPUT_MACS2_IDR/Oracle_${IDR_OUTPUT}_cle_${peaktype}-idr" --plot --log-output-file "$OUTPUT_MACS2_IDR/Oracle_${IDR_OUTPUT}_cle_${peaktype}.idr.log"
+            echo "Running IDR with oracle for $cell $cond ($peaktype)..."
+            idr --samples "$MACS2_R1" "$MACS2_R2" --peak-list "$MACS2_ORACLE" --input-file-type "$peaktype" --rank p.value --output-file "${IDR_OUT%.idr}_withOracle.idr" --plot --log-output-file "${IDR_LOG%.idr.log}_withOracle.idr.log"
+        
         done
     }    
 
+    export -f macs2_IDR
+    export OUTPUT_MACS2_SORT OUTPUT_MACS2_IDR
+
+    # Launch IDR per condition
+    parallel --ungroup --line-buffer -j "$JOBS" macs2_IDR ::: "${CellLine[@]}" ::: "${conditions[@]}"
+
 else
-    echo "Skip IDR"
+    echo "Skipping IDR"
 fi
+
+echo "MACS2 + IDR pipeline completed"
