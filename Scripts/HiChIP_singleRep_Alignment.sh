@@ -1,21 +1,67 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail # But fail properly on pipe errors
 shopt -s nullglob # make globbing return empty array if no match
 
 #Using this script assumes the script DirectoryArchitecture&CondaEnv.sh was run beforhand to create the DirectoryArchitecture and generate conda environments with needed tools.
 
-#############################
-### MAIN FILE PATHS #########
-#############################
+# Check if GNU Parallel is installed otherwise exis
+if ! command -v parallel &>/dev/null; then
+    echo "Error: GNU parallel not found. Please install with 'sudo apt install parallel'"
+    exit 1
+fi
 
 # Prompt the user for the main directory
 read -rp "Enter the path to the MAIN_DIR: " MAIN_DIR
+read -rp "How many cores does the machine have: " CORES
+read -rp "How many threads do you assign per job (recommend 4): " TOOL_THREADS
+
 
 # Check if input is empty
-if [ -z "$MAIN_DIR" ]; then
-    echo "Error: No directory path entered."
-    exit 1
+[[ -z "$MAIN_DIR" ]] && { echo "No directory entered"; exit 1; }
+[[ -z "$CORES" ]] && { echo "Thread count missing"; exit 1; }
+[[ -z "$TOOL_THREADS" ]] && { echo "Thread assigment per job missing"; exit 1; }
+
+# Ensure TOOL_THREADS is integer and at least 1
+TOOL_THREADS=$(( TOOL_THREADS ))
+if [[ $TOOL_THREADS -lt 1 ]]; then
+    TOOL_THREADS=1
 fi
+
+# Helper: safe half-threads (>=1)
+half_threads() {
+    local t=$(( TOOL_THREADS / 2 ))
+    if [[ $t -lt 1 ]]; then t=1; fi
+    echo "$t"
+}
+
+# Compute number of parallel jobs (at least 1)
+JOBS=$(( CORES / TOOL_THREADS ))
+if [[ $JOBS -lt 1 ]]; then JOBS=1; fi
+
+####################################
+### SETUP LOGGING ##################
+####################################
+LOG_DIR="$MAIN_DIR/logs"
+mkdir -p "$LOG_DIR"
+
+# Capture all stdout and stderr into run.log while still showing it on screen
+exec > >(tee -a "$LOG_DIR/run.log") 2>&1
+
+echo "==== Starting HiChIP-seq Pipeline ====="
+echo "====================================="
+echo "  HiChIP-seq Pipeline Log Started"
+echo "  Date: $(date)"
+echo "  Main Directory: $MAIN_DIR"
+echo "  Using $CORES cores"
+echo "  Threads per job: $TOOL_THREADS"
+echo "  Parallel jobs (JOBS): $JOBS"
+echo "  Log file: $LOG_DIR/run.log"
+echo "====================================="
+
+
+#############################
+### MAIN FILE PATHS #########
+#############################
 
 #Set path to reference genome index and blacklist. Genome index has to be generated first if not done. 
 REF_FASTA="$MAIN_DIR/0.GenomeAssembly/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna" 
@@ -23,27 +69,118 @@ REF_GENOME="$MAIN_DIR/0.GenomeAssembly/GRCh38_no_alt_ref.genome"
 BLACKLIST="$MAIN_DIR/0.BlackList/hg38-blacklist.v2.bed"
 # Set Path for read before and after trimming, *fg.gz files
 FASTQ_DIR="$MAIN_DIR/1.RawData/HiChIP"
+# Provide your own list if running different samples
+MAPPING_FILE="$MAIN_DIR/1.RawData/HiChIP/HiChIP_IDs.txt" 
 # Set output directories
 OUTPUT_DIR_TRIM="$MAIN_DIR/3.TRIM/HiChIP"
 OUTPUT_HICHIP_ALIGN="$MAIN_DIR/4.Alignment/HiChIP"
 OUTPUT_HICHIP_SUB="$MAIN_DIR/4.Alignment/HiChIP/Outputs"
-# Thread usage
-cores=32
-#Thread usage for pairtools dedup and split processes
-cores2=16
+BIGWIG_COVERAGE="$MAIN_DIR/7.Deeptool_Matrix/Coverage"
 # Set Path to temporary directory
 TEMP="$MAIN_DIR/tmp"
 
+# Ensure output directories exist
+mkdir -p "$OUTPUT_DIR_TRIM" "$OUTPUT_HICHIP_ALIGN" "$OUTPUT_HICHIP_SUB" "$BIGWIG_COVERAGE" "$TEMP"
+
+# Ensure there are no hidden spaces in the ID.txt file
+if [[ -f "$MAPPING_FILE" ]]; then
+    sed -i 's/\r$//' "$MAPPING_FILE"
+else
+    echo "Warning: mapping file $MAPPING_FILE not found. Continuing but arrays will be empty."
+fi
+
+#############################
+### MAPPING NEW IDs #########
+#############################
+
+# Paired_Read = read_num
+# True sample name = newname
+# MAPPING_FILES is a .txt file with mapping_file format (acc newname):
+# Example from European Nucleotide Archive deposited under accession number ERP109232. Use the Histone_ChIP_IDs.txt file to update the annotations.
+#     ERR2618839  ChIP_HAL01_H3K27ac_Rep1
+#     ERR2618840  ChIP_HAL01_H3K27ac_Rep2
+
+echo
+echo "=== DRY RUN: Planned renames ==="
+# Promt to procceed or skip sample ID mapping step.
+read -rp "Do you need to map new IDs using new_ID .txt file (y/n): " confirm
+if [[ "$confirm" == "y" ]]; then
+    while IFS=$'\t' read -r acc newname; do
+        # Skip empty lines or lines starting with #
+        [[ -z "$acc" || "$acc" == \#* ]] && continue
+
+        for read_num in 1 2; do
+            #Variable for old and new file names
+            old_file="$FASTQ_DIR/${acc}_${read_num}.fastq.gz"
+            new_file="$FASTQ_DIR/${newname}_R${read_num}.fastq.gz"
+            # Check if old file exists and if renamed file exists does not overwrite.
+            if [[ -f "$old_file" ]]; then
+                if [[ -f "$new_file" ]]; then
+                    echo "SKIP: $(basename "$new_file") already exists — will not overwrite"
+                else
+                    echo "$(basename "$old_file") → $(basename "$new_file")"
+                fi
+            else
+                echo "WARNING: $(basename "$old_file") not found"
+            fi
+        done
+    done < "$MAPPING_FILE"
+
+    #Ask user if they wish to proceed with file name changes.
+    echo
+    read -rp "Do you want to apply these changes? (y/n): " confirm
+    if [[ "$confirm" == "y" ]]; then
+        while IFS=$'\t' read -r acc newname; do
+            #Ignore blank lines and comment lines in the mapping file.
+            [[ -z "$acc" || "$acc" == \#* ]] && continue
+
+            for read_num in 1 2; do
+                old_file="$FASTQ_DIR/${acc}_${read_num}.fastq.gz"
+                new_file="$FASTQ_DIR/${newname}_R${read_num}.fastq.gz"
+
+                if [[ -f "$old_file" && ! -f "$new_file" ]]; then
+                    mv "$old_file" "$new_file"
+                    echo "Renamed: $(basename "$old_file") → $(basename "$new_file")"
+                elif [[ -f "$new_file" ]]; then
+                    echo "SKIP: $(basename "$new_file") already exists — not overwritten"
+                fi
+            done
+        done < "$MAPPING_FILE"
+    else
+        echo "No changes applied."
+    fi
+else
+ echo "Skip mapping new IDs"
+fi
+
 ################################################
-### ADJUST THESE TO MATCH SAMPLE NAMES #########
+### EXTRACT ANNOTATIONS FROM SAMPLE NAME #######
 ################################################
 
-# Array containing Cell lines, replicate numbers and conditions found in filenames and defining samples.
-# Expected Sample nomenclature follows this pattern HiChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix.
-CellLine=("HAL01") #Replace with your actual Cell Line 
-conditions=("TCF3HLF") #Replace with your actual conditions
-NUMBERS=("1" "2") # Replace with your actual replicate numbers
+# Initialize arrays
+CellLine=()
+conditions=()
+NUMBERS=()
 
+# Read mapping file and extract parts of newname
+if [[ -f "$MAPPING_FILE" ]]; then
+    while IFS=$'\t' read -r acc newname; do
+        [[ -z "$acc" || "$acc" == \#* ]] && continue
+        base=${newname#HiChIP_}      # Remove "HiChIP_" prefix
+        cell=$(echo "$base" | cut -d'_' -f1)
+        cond=$(echo "$base" | cut -d'_' -f2)
+        rep=$(echo "$base" | grep -oP 'Rep\K[0-9]+')
+        
+        # Append unique values into arrays
+        [[ " ${CellLine[*]} " != *" $cell "* ]] && CellLine+=("$cell")
+        [[ " ${conditions[*]} " != *" $cond "* ]] && conditions+=("$cond")
+        [[ " ${NUMBERS[*]} " != *" $rep "* ]] && NUMBERS+=("$rep")
+    done < "$MAPPING_FILE"
+fi
+
+echo "CellLine: ${CellLine[@]}"
+echo "conditions: ${conditions[@]}"
+echo "NUMBERS: ${NUMBERS[@]}"
 
 ##########################################################
 ### INITIALIZE DOVETAILHICHIP CONDA ENVIRONMENT #########
@@ -51,8 +188,8 @@ NUMBERS=("1" "2") # Replace with your actual replicate numbers
 
 #Environment should have following installed: bwa-mem, samtools, pairtools, fastqc, bedtools, multiqc, trim-galore, deeptools
 
-# Initialize Conda
-eval "$(conda shell.bash hook)"
+# Initialize Conda reliably
+source ~/anaconda3/etc/profile.d/conda.sh
 
 # Echo current Conda environment
 echo "Current Conda environment: $CONDA_DEFAULT_ENV"
@@ -70,43 +207,37 @@ fi
 ### TRIMMING #########
 ######################
 
-# Flag to check if trimming needs to be performed initially set to false
-perform_trimming=false
+# Trimming funciton
+trim_sample() {
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
 
-# Loop through each pair of FASTQ files if working with paired-end read files
-for cell in "${CellLine[@]}"; do    
-    for cond in "${conditions[@]}"; do
-        for num in "${NUMBERS[@]}"; do
-            # Check if trimmed files already exist for the current replicate
-            if [ ! -f "$OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep${num}_R1_val_1.fq.gz" ] || [ ! -f "$OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep${num}_R2_val_2.fq.gz" ]; then
-                perform_trimming=true
-                break  # No need to check other replicates once one is found missing
-            fi
-        done
-    done
-done
+    # Set path to input FASTQ files
+    local R1="$FASTQ_DIR/HiChIP_${cell}_${cond}_Rep${rep}_R1.fastq.gz"
+    local R2="$FASTQ_DIR/HiChIP_${cell}_${cond}_Rep${rep}_R2.fastq.gz"
+    # Set path to output 
+    local OUT_R1="$OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep${rep}_R1_val_1.fq.gz"
+    local OUT_R2="$OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep${rep}_R2_val_2.fq.gz"
 
-# Perform trimming only if the flag is set to true
-if [ "$perform_trimming" = true ]; then
-    for cell in "${CellLine[@]}"; do 
-        for cond in "${conditions[@]}"; do
-            for num in "${NUMBERS[@]}"; do
-                # Set path to input FASTQ files using wildcard pattern
-                READ1="$FASTQ_DIR/HiChIP_${cell}_${cond}_Rep${num}_R1.fastq.gz"
-                READ2="$FASTQ_DIR/HiChIP_${cell}_${cond}_Rep${num}_R2.fastq.gz"
-        
-                echo "Trimming pair $READ1 and $READ2"
-            
-                # Trim samples and generate new FastQC files for all replicates
-                trim_galore --fastqc --phred33 --length 50 --output_dir $OUTPUT_DIR_TRIM -j 4 --paired $READ1 $READ2
+    # Perform trimming only if the expected output files are missing
+    if [[ -f "$OUT_R1" && -f "$OUT_R2" ]]; then
+        echo "Trimming already done for ${cell}_${cond}_Rep${rep}, skipping."
+        return 0
+    fi
 
-                echo "Trimming for sample $num completed."
-            done
-        done
-    done
-else
-    echo "Trimming not needed as output files already exist."
-fi
+    echo "Trimming ${cell}_${cond}_Rep${rep}..."
+    # Trim samples and generate new FastQC files for all replicates
+    trim_galore --fastqc --phred33 --length 50 --output_dir "$OUTPUT_DIR_TRIM" -j "$TOOL_THREADS" --paired "$R1" "$R2"
+   
+}
+
+export -f trim_sample
+export FASTQ_DIR OUTPUT_DIR_TRIM TOOL_THREADS
+
+# Run in parallel
+parallel -j "$JOBS" trim_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+
 
 #############################
 ### MULITQC #################
@@ -114,49 +245,63 @@ fi
 echo
 echo "Start MULTIQC summary of FASTQC output for trimmed fastq files"
 # Promt to procceed or skip IDR
-read -rp "Do you want to proceed MULTIQC Analysis (y/n): " confirm
-if [[ "$confirm" == "y" ]]; then  
-    multiqc $OUTPUT_DIR_TRIM
+read -rp "Do you want to proceed MULTIQC Analysis (y/n): " confirm_qc
+if [[ "$confirm_qc" == "y" ]]; then  
+    multiqc "$OUTPUT_DIR_TRIM"
     echo "MULTIQC done"
 else    
     echo " MULTIQC skipped"
 fi
 
-####################################
-### DOVETAIL ALIGNMENT #############
-####################################
-for cell in "${CellLine[@]}"; do    
-    for cond in "${conditions[@]}"; do
-        for num in "${NUMBERS[@]}"; do
-            # Input files for alignment
-            HICHIP_R1="$OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep${num}_R1.fq.gz"
-            HICHIP_R2="$OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep${num}_R2.fq.gz"
+#######################
+### ALIGNMENT #########
+#######################
 
-            # Output files
-            # BLF referse to black list filtered files
-            MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.pairs"
-            MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.PT.bam"
-            MAPPED_BLF_BAM="$OUTPUT_HICHIP_ALIGN/BLF_HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.PT.bam"
+# Alignment funciton
+align_sample() {
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
 
-            # Alignment, dedup skipped. Can be included by removing comment mark.
-            bwa mem -5SP -T0 -t$cores $REF_FASTA $HICHIP_R1 $HICHIP_R2 | \
-            pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in $cores2 --nproc-out $cores2 --chroms-path $REF_GENOME | \
-            pairtools sort --tmpdir=$TEMP --nproc $cores | \
-            #pairtools dedup --nproc-in $cores2 --nproc-out $cores2 --mark-dups --dry-run --output-stats Merge_${cell}_${cond}_stats.txt | \
-            pairtools split --nproc-in $cores2 --nproc-out $cores2 --output-pairs $MAPPED_PAIRS --output-sam -|\
-            samtools view -bS -@$cores | \
-            samtools sort -@$cores -o $MAPPED_BAM;samtools index $MAPPED_BAM
-            
-            echo "HiChIP Alignment Complete for $MAPPED_BAM "
+    # Set path to trimmed input FASTQ files
+    local TRIM_R1="$OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep${rep}_R1_val_1.fq.gz"
+    local TRIM_R2="$OUTPUT_DIR_TRIM/HiChIP_${cell}_${cond}_Rep${rep}_R2_val_2.fq.gz"
+    
+    # Set path to aligned output files
+    local MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${rep}_nodd_mapped.pairs"
+    local MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${rep}_nodd_mapped.PT.bam"
+    # Set output file name for filtered BAM files. BLF referse to black list filtered file
+    local BLF_BAM="$OUTPUT_HICHIP_ALIGN/BLF_HiChIP_${cell}_${cond}_Rep${rep}_nodd_mapped.PT.bam"
+    
+    #Perform alignment and skip if files already exist
+    if [[ -f "$BLF_BAM" ]]; then
+        echo "Alignment already done for ${cell}_${cond}_Rep${rep}, skipping."
+        return 0
+    fi
+    
+    echo "Aligning ${cell}_${cond}_Rep${rep}..."
 
-            #Remove black listed regions
-            bedtools intersect -v -abam $MAPPED_BAM -b $BLACKLIST > $MAPPED_BLF_BAM
-            samtools index $MAPPED_BLF_BAM
+    # compute safe nproc values (>=1)
+    local nproc_in
+    nproc_in="$(half_threads)"
 
-            echo "Blacklist filter Complete for $MAPPED_BLF_BAM "
-        done
-    done  
-done
+    # Alignment, dedup skipped. Can be included by removing comment mark.
+    bwa mem -5SP -T0 -t"$TOOL_THREADS" "$REF_FASTA" "$TRIM_R1" "$TRIM_R2" | \
+    pairtools parse --min-mapq 40 --walks-policy 5unique --max-inter-align-gap 30 --nproc-in "$nproc_in" --nproc-out "$nproc_in" --chroms-path "$REF_GENOME" | \
+    pairtools sort --tmpdir="$TEMP" --nproc "$TOOL_THREADS" | \
+    pairtools split --nproc-in "$nproc_in" --nproc-out "$nproc_in" --output-pairs $MAPPED_PAIRS --output-sam -|\
+    samtools view -bS -@"$TOOL_THREADS" | \
+    samtools sort -@"$TOOL_THREADS" -o "$MAPPED_BAM";samtools index "$MAPPED_BAM"
+
+    # Blacklist filtering
+    bedtools intersect -v -abam "$MAPPED_BAM" -b "$BLACKLIST" > "$BLF_BAM"
+    samtools index "$BLF_BAM"
+}
+
+export -f align_sample
+export OUTPUT_HICHIP_ALIGN REF_FASTA TEMP REF_GENOME BLACKLIST TOOL_THREADS OUTPUT_DIR_TRIM
+
+parallel -j "$JOBS" align_sample ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
 
 ####################
 ### FILTER PAIRS ###
@@ -165,19 +310,32 @@ done
 # The "paritools select" command in the DovtailHiChIP conda environment will filter
 # and include unique and rescue mapped read pairs.
 
-for cell in "${CellLine[@]}"; do    
-    for cond in "${conditions[@]}"; do
-        for num in "${NUMBERS[@]}"; do
-            # Input files
-            MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.pairs"
+filter_pairs() {
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
 
-            # Output files
-            MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.filtered.pairs"
+     # Input files
+    local MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${rep}_nodd_mapped.pairs"
 
-            pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' "$MAPPED_PAIRS" -o "$MAPPED_PAIRS_FILTERED"
-        done
-    done
-done
+    # Output files
+    local MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${rep}_nodd_mapped.filtered.pairs"
+
+    # Perform filtering if  output files are missing
+    if [[ -f "$MAPPED_PAIRS_FILTERED" ]]; then
+        echo "Filter pairs file already generated for ${cell}_${cond}_Rep${rep}, skipping."
+        return 0
+    fi
+
+    pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' "$MAPPED_PAIRS" -o "$MAPPED_PAIRS_FILTERED"
+
+}
+
+export -f filter_pairs
+export OUTPUT_HICHIP_ALIGN
+
+parallel -j "$JOBS" filter_pairs ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+
 
 ################################
 ### HICPRO VALID PAIRS FILES ### 
@@ -186,60 +344,108 @@ done
 # The paired files generated during aligment needs to be converted
 # into valid HiC-Pro files to proceed with FitHiChIP.
 
-for cell in "${CellLine[@]}"; do    
-    for cond in "${conditions[@]}"; do
-        for num in "${NUMBERS[@]}"; do
-            # Input files
-            MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.filtered.pairs"
+convert_pairs() {
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
+    # Input files
+    local MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${rep}_nodd_mapped.filtered.pairs"
 
-            # Output files
-            MAPPED_PAIRS_HICPRO="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_hicpro_mapped.filtered.pairs.gz"
+    # Output files
+    local MAPPED_PAIRS_HICPRO="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${rep}_nodd_hicpro_mapped.filtered.pairs.gz"
 
-            grep -v '#' "$MAPPED_PAIRS"| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > "$MAPPED_PAIRS_HICPRO"
+    # Perform conversion if output files are missing
+    if [[ -f "$MAPPED_PAIRS_HICPRO" ]]; then
+        echo "Filter pairs file already generated for ${cell}_${cond}_Rep${rep}, skipping."
+        return 0
+    fi
+
+    grep -v '#' "$MAPPED_PAIRS_FILTERED"| awk -F"\t" '{print $1"\t"$2"\t"$3"\t"$6"\t"$4"\t"$5"\t"$7}' | gzip -c > "$MAPPED_PAIRS_HICPRO"
             
-            echo "Converted $MAPPED_PAIRS into HiC-Pro format"
-        done
-   done
-done
+    echo "Converted paired files for ${cell}_${cond}_Rep${rep} into HiC-Pro format"
+}
+
+export -f convert_pairs
+export OUTPUT_HICHIP_ALIGN
+
+parallel -j "$JOBS" convert_pairs ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
 
 
 ####################
 ### COVERAGE #######
 ####################
 
-for cell in "${CellLine[@]}"; do    
-    for cond in "${conditions[@]}"; do
-        for num in "${NUMBERS[@]}"; do
-            # Input files for generating coverage files
-            MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.PT.bam"
+coverage() {
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
 
-            # Output file
-            BIGWIG_OUT="$OUTPUT_HICHIP_SUB/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.bw"
+    # Input files for generating coverage files
+    local MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${rep}_nodd_mapped.PT.bam"
 
-            # Enrichment for IGV
-            bamCoverage -b $MAPPED_BAM -o $BIGWIG_OUT --effectiveGenomeSize 2913022398 -bl $BLACKLIST --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
+    # Output file
+    local BIGWIG_OUT="$OUTPUT_HICHIP_SUB/HiChIP_${cell}_${cond}_Rep${rep}_nodd_mapped.bw"
+    
+    # Perform coverage analysis if output files are missing
+    if [[ -f "$BIGWIG_OUT" ]]; then
+        echo "Coverage already generated for ${cell}_${cond}_Rep${rep}, skipping."
+        return 0
+    fi
 
-            echo "Generated Bigwig file $MAPPED_BAM "
-        done
-    done
-done
+    # Skip if missing input files
+    if [[ ! -f "$MAPPED_BAM" ]]; then
+        echo "Input bam file not found — skipping coverage for ${cell}_${cond}_Rep${rep}."
+        return 0
+    fi
+
+    # Enrichment for IGV
+    bamCoverage -b "$MAPPED_BAM" -o "$BIGWIG_OUT" --effectiveGenomeSize 2913022398 -bl "$BLACKLIST" --normalizeUsing RPKM -p max -bs 10 --extendReads --ignoreForNormalization M
+
+    echo "Generated BigWig file for ${cell}_${cond}_Rep${rep}"
+
+}
+
+export -f coverage
+export OUTPUT_HICHIP_ALIGN OUTPUT_HICHIP_SUB BLACKLIST
+
+parallel -j "$JOBS" coverage ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
 
 #########################
 ### CONTACT FILES #######
 #########################
 
-for cell in "${CellLine[@]}"; do    
-    for cond in "${conditions[@]}"; do
-        for num in "${NUMBERS[@]}"; do
-            # Input files
-            MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_mapped.pairs"
-            # Output files
-            CONTACT_MAP="$OUTPUT_HICHIP_SUB/HiChIP_${cell}_${cond}_Rep${num}_hg38_nodd_contact_map.hic"
+contact() {
+    local cell="$1"
+    local cond="$2"
+    local rep="$3"
 
-            # ContacMaps
-            java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads "$cores" "$MAPPED_PAIRS" "$CONTACT_MAP" "$REF_GENOME"
+    # Input files
+    local MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${rep}_nodd_mapped.pairs"
+    # Output files
+    local CONTACT_MAP="$OUTPUT_HICHIP_SUB/HiChIP_${cell}_${cond}_Rep${rep}_nodd_contact_map.hic"
+    
+    # Perform generation of contac maps if output files are missing
+    if [[ -f "$CONTACT_MAPT" ]]; then
+        echo "ontact map already exists for ${cell}_${cond}_Rep${rep}, skipping."
+        return 0
+    fi
+    # Skip if missing input file
+    if [[ ! -f "$MAPPED_PAIRS" ]]; then
+        echo "Mapped pairs input missing: ${cell}_${cond}_Rep${rep} — skipping contact map."
+        return 0
+    fi
 
-            echo "Generated $CONTACT_MAP"
-        done
-    done
-done
+    echo "Generating contact map for ${cell}_${cond}_Rep${rep}..."
+    # ContacMaps
+    java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads "$TOOL_THREADS" "$MAPPED_PAIRS" "$CONTACT_MAP" "$REF_GENOME"
+
+echo "Generated contact maps for ${cell}_${cond}_Rep${rep}"
+
+}
+
+export -f contact
+export OUTPUT_HICHIP_ALIGN OUTPUT_HICHIP_SUB TOOLS_THREADS REF_GENOME
+
+parallel -j "$JOBS" contact ::: "${CellLine[@]}" ::: "${conditions[@]}" ::: "${NUMBERS[@]}"
+
+echo "HiChIP aligmnet for replicates, coverage file and contact map file generation complete"

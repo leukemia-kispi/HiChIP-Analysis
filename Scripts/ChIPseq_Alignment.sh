@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-set +e                 # Don’t exit on error — handle manually
-set -o pipefail        # But fail properly on pipe errors
+set -euo pipefail        # But fail properly on pipe errors
 shopt -s nullglob # make globbing return empty array if no match
 
 # Using this script assumes DirectoryArchitecture.sh was execute beforhand.
@@ -198,17 +197,17 @@ trim_sample() {
     local cell="$1"
     local cond="$2"
     local rep="$3"
-     # Set path to input FASTQ files
-    R1="$FASTQ_DIR/ChIP_${cell}_${cond}_Rep${rep}_R1.fastq.gz"
-    R2="$FASTQ_DIR/ChIP_${cell}_${cond}_Rep${rep}_R2.fastq.gz"
-     # Set path to output 
-    OUT_R1="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R1_val_1.fq.gz"
-    OUT_R2="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R2_val_2.fq.gz"
+    # Set path to input FASTQ files
+    local R1="$FASTQ_DIR/ChIP_${cell}_${cond}_Rep${rep}_R1.fastq.gz"
+    local R2="$FASTQ_DIR/ChIP_${cell}_${cond}_Rep${rep}_R2.fastq.gz"
+    # Set path to output 
+    local OUT_R1="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R1_val_1.fq.gz"
+    local OUT_R2="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R2_val_2.fq.gz"
 
     # Perform trimming only if the expected output files are missing
     if [[ -f "$OUT_R1" && -f "$OUT_R2" ]]; then
         echo "Trimming already done for ${cell}_${cond}_Rep${rep}, skipping."
-        return
+        return 0
     fi
 
     echo "Trimming ${cell}_${cond}_Rep${rep}..."
@@ -233,17 +232,17 @@ align_sample() {
     local cond="$2"
     local rep="$3"
     # Set path to trimmed input FASTQ files
-    TRIM_R1="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R1_val_1.fq.gz"
-    TRIM_R2="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R2_val_2.fq.gz"
+    local TRIM_R1="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R1_val_1.fq.gz"
+    local TRIM_R2="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R2_val_2.fq.gz"
     # Set path to aligned output files
-    BAM="$OUTPUT_CHIP_ALIGN/ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
+    local BAM="$OUTPUT_CHIP_ALIGN/ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
     # Set output file name for filtered BAM files. BLF referse to black list filtered file
-    BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
+    local BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
     
     #Perform alignment and skip if files already exist
     if [[ -f "$BLF_BAM" ]]; then
         echo "Alignment already done for ${cell}_${cond}_Rep${rep}, skipping."
-        return
+        return 0
     fi
 
     echo "Aligning ${cell}_${cond}_Rep${rep}..."
@@ -290,15 +289,15 @@ mark_duplicates() {
     local cond="$2"
     local rep="$3"
     # Set path to aligned input files
-    BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
+    local BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
     # Set path to flagged output files
-    BLF_DUPFLAG_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dupsflag.bam"
-    BLF_DUPFLAG_TXT="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dups.txt"
+    local BLF_DUPFLAG_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dupsflag.bam"
+    local BLF_DUPFLAG_TXT="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dups.txt"
     
     # Flag duplicates and skip if files exist
     if [[ -f "$BLF_DUPFLAG_BAM" ]]; then
         echo "Duplicate marking already done for ${cell}_${cond}_Rep${rep}, skipping."
-        return
+        return 0
     fi
     
     echo "Flagging duplicates for ${cell}_${cond}_Rep${rep}"
@@ -337,19 +336,19 @@ dedup_sample() {
     local rep="$3"
 
     # Input: BAM file with duplicates flagged by Picard
-    BLF_DUPFLAG_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dupsflag.bam"
+    local BLF_DUPFLAG_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dupsflag.bam"
     # Output: deduplicated BAM
-    BLF_DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
+    local BLF_DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
 
     # Skip if deduplication already done
     if [[ -f "$BLF_DD_BAM" ]]; then
         echo "Deduplication already done for ${cell}_${cond}_Rep${rep}, skipping."
-        return
+        return 0
     fi
 
     if [[ ! -f "$BLF_DUPFLAG_BAM" ]]; then
         echo "Input flagged BAM not found for ${cell}_${cond}_Rep${rep}, skipping dedup."
-        return
+        return 0
     fi
 
     echo "Deduplicating ${cell}_${cond}_Rep${rep}..."
@@ -373,15 +372,15 @@ merge_replicates() {
     local cond="$2"
 
     # Set input replicate files for merging
-    REP1="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep1_cle_sort_dd.bam"
-    REP2="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd.bam"
+    local REP1="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep1_cle_sort_dd.bam"
+    local REP2="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep2_cle_sort_dd.bam"
     # Set output merged file
-    MERGED="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
+    local MERGED="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
 
     # Skip if merged files already exist
     if [[ -f "$MERGED" ]]; then
         echo "Merged BAM already exists for ${cell}_${cond}, skipping."
-        return
+        return 0
     fi
 
     # Merge replicate files if both exist
@@ -397,6 +396,7 @@ merge_replicates() {
 }
 
 export -f merge_replicates
+export OUTPUT_CHIP_SUB OUTPUT_CHIP_ALIGN
 parallel -j "$JOBS" merge_replicates ::: "${CellLine[@]}" ::: "${conditions[@]}"
 
 ##############################
@@ -410,19 +410,19 @@ coverage_sample() {
     local rep="$3"
 
     # Input deduplicated BAM
-    BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
+    local BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
     # Output BigWig coverage
-    BLF_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bw"
+    local BLF_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bw"
 
     # Skip if coverage file already exists
     if [[ -f "$BLF_BIGWIG" ]]; then
         echo "Coverage already generated for ${cell}_${cond}_Rep${rep}, skipping."
-        return
+        return 0
     fi
 
     if [[ ! -f "$BLF_BAM" ]]; then
         echo "BAM not found for ${cell}_${cond}_Rep${rep}, skipping coverage."
-        return
+        return 0
     fi
 
     echo "Generating coverage for ${cell}_${cond}_Rep${rep}..."
@@ -439,19 +439,19 @@ coverage_dd_sample() {
     local rep="$3"
 
     # Input deduplicated BAM
-    BLF_DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
+    local BLF_DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
     # Output BigWig coverage
-    BLF_DD_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bw"
+    local BLF_DD_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bw"
 
     # Skip if coverage file already exists
     if [[ -f "$BLF_DD_BIGWIG" ]]; then
         echo "Coverage already generated for ${cell}_${cond}_Rep${rep}, skipping."
-        return
+        return 0
     fi
 
     if [[ ! -f "$BLF_DD_BAM" ]]; then
         echo "Dedup BAM not found for ${cell}_${cond}_Rep${rep}, skipping coverage."
-        return
+        return 0
     fi
 
     echo "Generating coverage for deduplicated ${cell}_${cond}_Rep${rep}..."
@@ -465,17 +465,17 @@ coverage_merged() {
     local cell="$1"
     local cond="$2"
 
-    BLF_MERGED_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
-    BLF_BIGWIG_MERGED="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bw"
+    local BLF_MERGED_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
+    local BLF_BIGWIG_MERGED="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bw"
 
     # Skip if merged BAM or output BigWig does not exist
     if [[ ! -f "$BLF_MERGED_BAM" ]]; then
         echo "Merged BAM not found for ${cell}_${cond}, skipping coverage."
-        return
+        return 0
     fi
     if [[ -f "$BLF_BIGWIG_MERGED" ]]; then
         echo "Coverage already generated for merged ${cell}_${cond}, skipping."
-        return
+        return 0
     fi
 
     echo "Generating coverage for merged ${cell}_${cond}..."
