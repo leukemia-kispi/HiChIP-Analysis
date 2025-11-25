@@ -421,7 +421,7 @@ coverage() {
     local MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_merged_nodd_mapped.PT.bam"
 
     # Output file
-    local BIGWIG_OUT="$OUTPUT_HICHIP_SUB/HiChIP_${cell}_${cond}_merged_nodd_mapped.bw"
+    local BIGWIG_OUT="$OUTPUT_HICHIP_SUB/HiChIP_${cell}_${cond}_merged_nodd_mapped_RPKM.bw"
     
     # Perform coverage analysis if output files are missing
     if [[ -f "$BIGWIG_OUT" ]]; then

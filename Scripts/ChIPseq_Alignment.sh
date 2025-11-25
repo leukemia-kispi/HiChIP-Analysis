@@ -409,10 +409,10 @@ coverage_sample() {
     local cond="$2"
     local rep="$3"
 
-    # Input deduplicated BAM
+    # Input BAM
     local BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
     # Output BigWig coverage
-    local BLF_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bw"
+    local BLF_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_RPKM.bw"
 
     # Skip if coverage file already exists
     if [[ -f "$BLF_BIGWIG" ]]; then
@@ -441,7 +441,7 @@ coverage_dd_sample() {
     # Input deduplicated BAM
     local BLF_DD_BAM="$OUTPUT_CHIP_SUB/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bam"
     # Output BigWig coverage
-    local BLF_DD_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd.bw"
+    local BLF_DD_BIGWIG="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort_dd_RPKM.bw"
 
     # Skip if coverage file already exists
     if [[ -f "$BLF_DD_BIGWIG" ]]; then
@@ -465,8 +465,10 @@ coverage_merged() {
     local cell="$1"
     local cond="$2"
 
+    # Input deduplicated BAM
     local BLF_MERGED_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bam"
-    local BLF_BIGWIG_MERGED="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd.bw"
+    # Output BigWig coverage
+    local BLF_BIGWIG_MERGED="$BIGWIG_COVERAGE/BLF_ChIP_${cell}_${cond}_merged_cle_sort_dd_RPKM.bw"
 
     # Skip if merged BAM or output BigWig does not exist
     if [[ ! -f "$BLF_MERGED_BAM" ]]; then
