@@ -1,7 +1,6 @@
 # HiChIP-Analysis
 
-This is a setup and execution guide for analysis of TCF3::HLF HiChIP data ([GSE266625](addLINK)), generated from the HAL-01 cell line using the [Dovetail® MNase-HiChIP kit](https://cantatabio.com/dovetail-genomics/products/hichip/).
-Can be used for analysis of othere dataset with carefull adaptation of provided scripts.
+This is a setup and execution guide for analysis of TCF3::HLF HiChIP data [GSE266625](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE266625), generated from the HAL-01 cell line using the [Dovetail® MNase-HiChIP kit](https://cantatabio.com/dovetail-genomics/products/hichip/).Provided scripts can be used for analysis of othere dataset with carefull adaptation.
 
 This guide will take you through:
 

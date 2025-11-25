@@ -46,7 +46,7 @@ Use the installDep.sh script from the Dovetail-Genomics source repository to ens
 
 >[!NOTE]
 >Numpy and pysam have to be installed in that order and before pairtools. The original installDep.sh script may need modefications before executing. For this use the nano editing tool.
->Futhermore use the installDepMOD.sh found in the script folder of this repository to install version locked dependecies to reproduce 
+>Use the installDepMOD.sh found in the script folder of this repository to install version locked dependecies to reproduce the environment used for the published data.
 
 ```
 nano ./HiChiP/installDep.sh
