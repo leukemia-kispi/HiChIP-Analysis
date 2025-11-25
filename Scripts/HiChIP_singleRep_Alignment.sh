@@ -13,7 +13,7 @@ fi
 # Prompt the user for the main directory
 read -rp "Enter the path to the MAIN_DIR: " MAIN_DIR
 read -rp "How many cores does the machine have: " CORES
-read -rp "How many threads do you assign per job (recommend 4): " TOOL_THREADS
+read -rp "How many threads do you assign per job (recommend 8,16,32): " TOOL_THREADS
 
 
 # Check if input is empty
@@ -57,7 +57,6 @@ echo "  Threads per job: $TOOL_THREADS"
 echo "  Parallel jobs (JOBS): $JOBS"
 echo "  Log file: $LOG_DIR/run.log"
 echo "====================================="
-
 
 #############################
 ### MAIN FILE PATHS #########
@@ -329,6 +328,8 @@ filter_pairs() {
 
     pairtools select '(pair_type=="UU") or (pair_type=="UR") or (pair_type=="RU") or (pair_type=="uu") or (pair_type=="Uu")  or (pair_type=="uU")' "$MAPPED_PAIRS" -o "$MAPPED_PAIRS_FILTERED"
 
+    echo "Filterd paired files for ${cell}_${cond}_${rep}."
+
 }
 
 export -f filter_pairs
@@ -348,6 +349,7 @@ convert_pairs() {
     local cell="$1"
     local cond="$2"
     local rep="$3"
+
     # Input files
     local MAPPED_PAIRS_FILTERED="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_Rep${rep}_nodd_mapped.filtered.pairs"
 
@@ -439,7 +441,7 @@ contact() {
     # ContacMaps
     java -Xmx48000m  -Djava.awt.headless=true -jar /home/ubuntu/HiChiP/juicer_tools_1.22.01.jar pre --threads "$TOOL_THREADS" "$MAPPED_PAIRS" "$CONTACT_MAP" "$REF_GENOME"
 
-echo "Generated contact maps for ${cell}_${cond}_Rep${rep}"
+echo "Generated contact maps for ${cell}_${cond}_Rep${rep}."
 
 }
 
