@@ -16,6 +16,7 @@ Additonal datasets integrated during donwstream analysis inlcude:
 
 - RNA-seq of HAL-01 CRIPSR edited with TCF3::HLF-KO and HAL-01 Histone (H3K27ac, H3K4me1, H3K4m3, H3K27me3) ChIP-seq found in the European Nucleotide archive under accession number [ERP109232](https://www.ebi.ac.uk/ena/browser/view/ERP109232). 
 - The ATAC-seq data for HAL-01 cells found under the GEO series accession number GSE186942, [GSM5663910](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM5663910).
+- CTCF bigwig files from GM12878 cells were dowloaded from 4DNA Data portal accession number 4DNESQPLRLYZ, [4DNFIRPH78IF](https://data.4dnucleome.org/files-processed/4DNFIRPH78IF/).
 
 To get started follow this link [GeneralSetup.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/GeneralSetup.md) and proceed from there to the specific pipeline steps. 
 

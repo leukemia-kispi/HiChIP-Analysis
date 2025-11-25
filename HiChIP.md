@@ -109,14 +109,14 @@ bwa index GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
 
 ## Execute the Aligment Script
 
-Run the HiChIP_mergedRep.sh script. You will be promted to provide the main working directory, should be same for where you setup the directory architecture by executing DirectoyrArchitecture.sh. The read files for your samples should be allocated to folder 1.Rawdata should. Make sure sample name will follow stucture HiChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix, you can use the HiChIP_ID.txt file to have the script make the change.
+Run the HiChIP_mergedRep_Alignment.sh script. You will be promted to provide the main working directory, should be same for where you setup the directory architecture by executing DirectoyrArchitecture.sh. The read files for your samples should be allocated to folder 1.Rawdata should. Make sure sample name will follow stucture HiChIP_<CellLine>_<conditions>_Rep<NUMBERS>_suffix, you can use the HiChIP_IDs.txt file to have the script make the change.
 
 ```
 bash HiChIP_mergedRep.sh
 ```
 
 The script will:
-- Adjust the sample names accordign to HiCHIP_ID.txt
+- Adjust the sample names accordign to HiCHIP_IDs.txt
 - Initiate DovetailHiChIP conda environment
 - Trim adapters and short reads, generate fastqc after trimming 
 - Merge trimmed replicate reads before alignment
@@ -125,15 +125,13 @@ The script will:
 - Generate .hic files for Juicebox tool browsing
 
 **Good Practice**
-It is also recommended to run the script HiChIP_singleRep.sh. This one omits the merging step and aligns each replicate seperatly. Comparing these output to the fused data outputs can ensure higher confidence in the called interactions from running FitHiChIP.
+It is also recommended to run the script HiChIP_singleRep_Alignment.sh. This one omits the merging step and aligns each replicate seperatly. Comparing these output to the fused data outputs can ensure higher confidence in the called interactions from running FitHiChIP.
 
 ## Dovetail QC Analysis
 
-Executing enrichment_stats.sh and plot_chip_enrichment_bed.py from Dovetail for quality control. This requires a ChIP-seq bed output for same pulldown target as the one used in HiChIP. 
+Executing enrichment_stats.sh and plot_chip_enrichment_bed.py from Dovetail for quality control. This requires a ChIP-seq bed output for the same pulldown target as the one used in HiChIP. While not optimal ChIP_Seq_HAL01_TCF3HLF_FLAG.bed is provided in the Extras folder to be used with the script QC_HiChIP.sh 
 
-#QC compare ChIP-seq TCF3-HLF_FLAG
-bash /home/$USER/HiChiP/enrichment_stats.sh -g $REF_FASTA -b $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -p /home/$USER/HiChIP_Analysis/ChIP-Seq/ChIP.bed -t $cores2 -x $OUTPUT_HICHIP_SUB/HiChIPvsChIP_enrichment.png
+## Cooler contact maps
+To generate cooler contact maps with matrix
 
-#QC Plot ChIP-seq TCF3-HLF_FLAG
-python3 /home/$USER/HiChiP/plot_chip_enrichment_bed.py -bam $OUTPUT_HICHIP_ALIGN/$MAPPED_BLF_BAM -peaks /home/$USER/HiChIP_Analysis/ChIP-Seq/ChIP.bed -output $OUTPUT_HICHIP_SUB/HiChIPvsChIP_enrichment.png
-
+Install cooler and its depencdies
