@@ -129,9 +129,10 @@ It is also recommended to run the script HiChIP_singleRep_Alignment.sh. This one
 
 ## Dovetail QC Analysis
 
-Executing enrichment_stats.sh and plot_chip_enrichment_bed.py from Dovetail for quality control. This requires a ChIP-seq bed output for the same pulldown target as the one used in HiChIP. While not optimal ChIP_Seq_HAL01_TCF3HLF_FLAG.bed is provided in the Extras folder to be used with the script QC_HiChIP.sh 
+For quality control of the HiChIP data it is recommended to execute the  enrichment_stats.sh and plot_chip_enrichment_bed.py from Dovetail. This requires a .bed file generated from a ChIP-seq experiment using the same pulldown target as the one used in HiChIP. While not optimal ChIP_Seq_HAL01_TCF3HLF_FLAG.bed is provided in the Extras folder of this repository to be used as an example. Expected outpus are in the OutPuts folder of this repository. For execution and interpretation guides check out [HiChIP documentation release 0.1 by Dovetail®](https://hichip.readthedocs.io/en/latest/index.html)
 
 ## Cooler contact maps
-To generate cooler contact maps with matrix
+Indexed .pairs files can be converted into cool or mcool contact matrices. These file types can be used for visualization in CoolBox or browsers such as HiGlass.
 
-Install cooler and its depencdies
+Installation and execution guide can be followed in the [HiChIP documentation release 0.1 by Dovetail®](https://hichip.readthedocs.io/en/latest/index.html).
+You need to bgzip compress the mapped.pairs file generated during HiChIP aligment followed by indexing with the "pairix" utility. Next for visualization it is recommended to generate a multi-resolution .mcool file by inputing the mapped.pairs.gz into the "cooler zoomify" utility. This allows zooming in and out to inspect regions of interest.

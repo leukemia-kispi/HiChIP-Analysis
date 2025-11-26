@@ -1,0 +1,9 @@
+Total ChIP peaks                                                     428
+Mean ChIP peak size                                                  223 bp
+Median ChIP peak size                                                203 bp
+Total reads in 500 bp around center of peaks                         1,033,562  0.1%
+Total reads in 1000 bp around center of peaks                        1,546,761  0.14%
+Total reads in 2000 bp around summits                                2,335,235  0.22%
+Observed/Expected ratio for reads in 500 bp around center of peaks   13.8
+Observed/Expected ratio for reads in 1000 bp around center of peaks  10.33
+Observed/Expected ratio for reads in 2000 bp around center of peaks  7.8
