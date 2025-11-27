@@ -1,9 +1,8 @@
 # Coolbox
 
-## Setup of Coolbox and running it with JupyterNotebook
+## Setup of Coolbox and running it with Jupyter Notebook
 
 To install coolbox and use it with the Jupyter Notebook web application, clone the source code https://github.com/GangCaoLab/CoolBox.git. Enter the Coolbox directory and follow instruction for installation in conda environment.
-The command lines used for creating the visuals in the paper ...  are documented in the file ....
 
 ```
 git clone https://github.com/GangCaoLab/CoolBox.git
@@ -13,14 +12,14 @@ conda activate coolbox
 python setup.py install
 ```
 
-After installation, you should enable ipywidgets to use the browser in Jupyter notebook (depending on version this may be already enabled):
+After installation, you should enable ipywidgets to use the browser in Jupyter Notebook (depending on version this may be already enabled):
 
 ```
 jupyter nbextension enable --py widgetsnbextension
 ```
 
-Make sure you are in the coolbox conda environment and enter the directory of where you put the working directory. Called JypyterLab in example. (here you put all bigwig, interaction bed/bedpe and contact matrices files needed for generating visuals) 
-Run jypeter lab and setup a 4 digit network endpoint (8585 in example)
+Make sure you are in the coolbox conda environment and enter your working directory. Called JypyterLab in example. (upload all bigwig, interaction bed/bedpe and contact matrices files needed for generating visuals) 
+Run jupyter lab and setup a 4 digit network endpoint (8585 in example).
 
 ```
 cd directoryPATH/JupyterLab
@@ -28,7 +27,7 @@ jupyter lab --no-browser --port 8585
 ```
 
 When the server is initiated, a link with the token for access is made available. 
-If working on local machine, copy the link and paste it in your internet browser to begin using coolbox in JupyterNotebook.
+If working on local machine, copy the link and paste it in your internet browser to begin using coolbox in Jupyter Notebook.
 
 If you run Jypyter from a remote server you need to tunnel the port with SSH first
 
@@ -45,6 +44,4 @@ Input http://localhost:8585 in web browser and respond to the password request. 
 
 >[!NOTE]
 >Commands and features to visualize genomic data with coolbox API can be found at https://gangcaolab.github.io/CoolBox/quick_start_API.html
-
-
-ssh -i cloud.key -L 8585:localhost:8585 ubuntu@
+>The command lines used for creating the visuals in the publication by V. Priebe et. al. can be found in the Jypyter Notebook file Coolbox_HiChIP_Manuscript_Visualizations.ipynb located in the OutPuts folder of the repository.
