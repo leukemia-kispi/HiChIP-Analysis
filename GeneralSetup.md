@@ -6,7 +6,7 @@ For basic setup procedure proceed with below instructions.
 
 **Update**
 
-Ensure the new virtual machine/instance runing Linux/Ubuntu operation system is up to date and upgraded. Confirm with defaults when prompted. This may take few mininutes. 
+Ensure the new virtual machine/instance running Linux/Ubuntu operation system is up to date and upgraded. Confirm with defaults when prompted. This may take few minutes. 
 
 ```
 sudo apt update && sudo apt upgrade -y  
