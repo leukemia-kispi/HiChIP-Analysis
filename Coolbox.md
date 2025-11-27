@@ -43,5 +43,5 @@ Replace remote_server_ip with the actual IP address of your remote server.
 Input http://localhost:8585 in web browser and respond to the password request. The password will corespond to instance password.
 
 >[!NOTE]
->Commands and features to visualize genomic data with coolbox API can be found at https://gangcaolab.github.io/CoolBox/quick_start_API.html
->The command lines used for creating the visuals in the publication by V. Priebe et. al. can be found in the Jypyter Notebook file Coolbox_HiChIP_Manuscript_Visualizations.ipynb located in the OutPuts folder of the repository.
+>Commands and features to visualize genomic data with coolbox API can be found at https://gangcaolab.github.io/CoolBox/quick_start_API.html.
+>The command lines used for creating the visuals in the publication by V. Priebe et. al. can be found in the Jupyter Notebook file Coolbox_HiChIP_Manuscript_Visualizations.ipynb located in the OutPuts folder of the repository.
