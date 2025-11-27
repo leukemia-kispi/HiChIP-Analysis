@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
-set -euo pipefail        # But fail properly on pipe errors
+set -euo pipefail # fail properly on pipe errors
 shopt -s nullglob # make globbing return empty array if no match
 
 # Using this script assumes DirectoryArchitecture.sh was execute beforhand.
 # Expected to provide pair-end read ChIP-seq fastq files.
 
-# Check if GNU Parallel is installed otherwise exis
+# Check if GNU Parallel is installed otherwise exit
 if ! command -v parallel &>/dev/null; then
     echo "Error: GNU parallel not found. Please install with 'sudo apt install parallel'"
     exit 1
 fi
 
-# Prompt the user for the main directory
+# Prompt the user for the main directory, cpu cores available and threads to assign per job
 read -rp "Enter the path to the MAIN_DIR: " MAIN_DIR
 read -rp "How many cores does the machine have: " CORES
 read -rp "How many threads do you assign per job (recommend 4): " TOOL_THREADS
 
 
-# Check if input is empty
+# Check if promt inputs are empty
 [[ -z "$MAIN_DIR" ]] && { echo "No directory entered"; exit 1; }
 [[ -z "$CORES" ]] && { echo "Thread count missing"; exit 1; }
 [[ -z "$TOOL_THREADS" ]] && { echo "Thread assigment per job missing"; exit 1; }
@@ -231,22 +231,23 @@ align_sample() {
     local cell="$1"
     local cond="$2"
     local rep="$3"
+
     # Set path to trimmed input FASTQ files
     local TRIM_R1="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R1_val_1.fq.gz"
     local TRIM_R2="$OUTPUT_DIR_TRIM/ChIP_${cell}_${cond}_Rep${rep}_R2_val_2.fq.gz"
     # Set path to aligned output files
     local BAM="$OUTPUT_CHIP_ALIGN/ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
-    # Set output file name for filtered BAM files. BLF referse to black list filtered file
+    # Set output file name for filtered BAM files. BLF referse to black list filtered files
     local BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
     
-    #Perform alignment and skip if files already exist
+    # Perform alignment and skip if files already exist
     if [[ -f "$BLF_BAM" ]]; then
         echo "Alignment already done for ${cell}_${cond}_Rep${rep}, skipping."
         return 0
     fi
 
     echo "Aligning ${cell}_${cond}_Rep${rep}..."
-    #Create sorted BAM files with grep to remove alignments to alternative contigs, unlocalized sequence, or unplaced sequence.#####################
+    # Create sorted BAM files with grep to remove alignments to alternative contigs, unlocalized sequence, or unplaced sequence.
     bwa mem -5 -T25 -t"$TOOL_THREADS" "$REF_FASTA" "$TRIM_R1" "$TRIM_R2" \
         | samtools view -hS \
         | grep -v chrUn | grep -v random | grep -v _alt \
@@ -288,6 +289,7 @@ mark_duplicates() {
     local cell="$1"
     local cond="$2"
     local rep="$3"
+
     # Set path to aligned input files
     local BLF_BAM="$OUTPUT_CHIP_ALIGN/BLF_ChIP_${cell}_${cond}_Rep${rep}_cle_sort.bam"
     # Set path to flagged output files

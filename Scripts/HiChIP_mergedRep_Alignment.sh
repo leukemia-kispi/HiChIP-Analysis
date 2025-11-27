@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-set -euo pipefail # But fail properly on pipe errors
+set -euo pipefail # fail properly on pipe errors
 shopt -s nullglob # make globbing return empty array if no match
 
 #Using this script assumes the script DirectoryArchitecture&CondaEnv.sh was run beforhand to create the DirectoryArchitecture and generate conda environments with needed tools.
 
-# Check if GNU Parallel is installed otherwise exis
+# Check if GNU Parallel is installed otherwise exit
 if ! command -v parallel &>/dev/null; then
     echo "Error: GNU parallel not found. Please install with 'sudo apt install parallel'"
     exit 1
 fi
 
-# Prompt the user for the main directory
+# Prompt the user for the main directory, cpu cores available and threads to assign per job
 read -rp "Enter the path to the MAIN_DIR: " MAIN_DIR
 read -rp "How many cores does the machine have: " CORES
 read -rp "How many threads do you assign per job (recommend 8,16,32): " TOOL_THREADS
 
 
-# Check if input is empty
+# Check if promt inputs are empty
 [[ -z "$MAIN_DIR" ]] && { echo "No directory entered"; exit 1; }
 [[ -z "$CORES" ]] && { echo "Thread count missing"; exit 1; }
 [[ -z "$TOOL_THREADS" ]] && { echo "Thread assigment per job missing"; exit 1; }
@@ -306,7 +306,7 @@ align_sample() {
     # Set path to aligned output files
     local MAPPED_PAIRS="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_merged_nodd_mapped.pairs"
     local MAPPED_BAM="$OUTPUT_HICHIP_ALIGN/HiChIP_${cell}_${cond}_merged_nodd_mapped.PT.bam"
-    # Set output file name for filtered BAM files. BLF referse to black list filtered file
+    # Set output file name for filtered BAM files. BLF referse to black list filtered files
     local BLF_BAM="$OUTPUT_HICHIP_ALIGN/BLF_HiChIP_${cell}_${cond}_merged_nodd_mapped.PT.bam"
     
     #Perform alignment and skip if files already exist
