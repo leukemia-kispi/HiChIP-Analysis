@@ -40,7 +40,7 @@ Replace username with your remote server username.
 
 Replace remote_server_ip with the actual IP address of your remote server.
 
-Input http://localhost:8585 in web browser and respond to the password request. The password will corespond to instance password.
+Input http://localhost:8585 in web browser and respond to the password request. The password will correspond to instance password.
 
 >[!NOTE]
 >Commands and features to visualize genomic data with coolbox API can be found at https://gangcaolab.github.io/CoolBox/quick_start_API.html.

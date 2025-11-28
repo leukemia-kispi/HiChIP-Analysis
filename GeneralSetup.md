@@ -1,12 +1,12 @@
 ## General Setup
 
-The the original execution of the workflow were done on a virtual machine (VM) running Ubuntu 20.04 operating system. The VM was created with 32 core CPU and 128GB RAM for data processing.
+The original execution of the workflow were done on a virtual machine (VM) running the Ubuntu 20.04 operating system. The VM was created with 32-core CPU and 128 GB RAM for data processing.
 
-For basic setup procedure proceed with below instructions.
+Follow the instructions below for the basic setup procedure.
 
 **Update**
 
-Ensure the new virtual machine/instance running Linux/Ubuntu operation system is up to date and upgraded. Confirm with defaults when prompted. This may take few minutes. 
+Ensure the new virtual machine/instance running Linux/Ubuntu is up to date and upgraded. Confirm with defaults when prompted. This may take few minutes. 
 
 ```
 sudo apt update && sudo apt upgrade -y  
@@ -14,7 +14,7 @@ sudo apt update && sudo apt upgrade -y
 
 **Install Anaconda3 to enable set up of conda environments and access conda archives**
 
-Ensure curl is installed for transferring data from or to a server using URLs. Download the bash file for installation of Anaconda3. Verify the checksum of selected install version
+Ensure curl is installed for transferring data using URLs. Download the bash installer for Anaconda3 and verify the checksum of the selected version.
 
 ```
 sudo apt install curl -y 
@@ -27,7 +27,7 @@ The expected checksum for above example is:
 
 Other version available at https://repo.anaconda.com/archive/.
 
-**Execute the bash file**
+**Execute the Anaconda installer**
 
 ```
 bash Anaconda3-2023.09-0-Linux-x86_64.sh
@@ -49,14 +49,14 @@ echo $PATH #check new PATH
 conda init
 ```
 
-Logout "ctr+D" and re-enter the instance. "(base)" should show before the shell name.
-Check the installed version of anaconda and confirm it's working.
+Logout "ctr+D" and re-enter the instance. "(base)" should appear before the shell promt.
+Check that Anaconda is working.
 
 ```
 conda --version
 ```
 
-Now you can delet the Anaconda3-2023.09-0-Linux-x86_64.sh file.
+You can now delete teh installer.
 
 ```
 sudo rm Anaconda3-2023.09-0-Linux-x86_64.sh
@@ -68,30 +68,30 @@ sudo rm Anaconda3-2023.09-0-Linux-x86_64.sh
 conda update -n base -c defaults conda
 ```
 
-**Ensure all needed channels are added to conda to find and download packages**
+**Add required conda channels**
 
 ```
 conda config --add channels defaults
 conda config --add channels conda-forge
 ```
-## Setup of directory architecture and DovetailHiChIP, MACS2, PICARD conda environments
+## Setup of Directory Architecture and Conda Environments (DovetailHiChIP, MACS2, PICARD)
 
-With conda installed, we are now ready to set up the directory structure for our analysis. Additionally, we will create conda environments where the required software will be installed. Different tools may require specific versions of their dependencies in order to function properly without conflicts.
+With conda installed, we can now set up the directory structure for the analysis and create conda environments for the required software. Different tools may require specific versions of dependencies to avoid conflicts.
 
-Clone the source code of the HiChIP-Analysis repository into a selected directory. 
+Clone the HiChIP-Analysis repository into a selected directory:
 
 ```
 cd /home/<$USER>/
 git clone https://github.com/ValdemarP267/HiChIP-Analysis.git
 ```
-Make sure whole folder has permission. Run script DirectoryArchitecture.sh. Specefiy the main working directory when promted.
+Ensure the whole folder has proper permissions. Run the DirectoryArchitecture.sh script and specify the main working directory when prompted.
 
 ```
 sudo chmod 777 -R ./HiChIP-Analysis
 bash ./HiChIP-Analysis/Scripts/DirectoryArchitecture.sh
 ```
 
-To avoid memory issues, some of the pipeline steps require writing of temporary files into a temp folder. Running the DirectoryArchitecture.sh will create this folder in addition to other directories that will be used during the workflow. Temporary files may take up to x3 of the space that fastq.gz files do, make sure the working volume is sufficient.
+To avoid memory issues, some pipeline steps write temporary files into a temp directory. The script DirectoryArchitecture.sh creates this folder along with all other required directories. Temporary files may occupy up to 3× the size of the fastq.gz files, so ensure enough storage space is available.
 
 Next execute the HiChIPTools_install.sh
 
@@ -103,24 +103,24 @@ Confirm any prompts with defaults.
 
 >[!NOTE]
 >Running the script HiChIPTools_install.sh should create three conda environments:
-> - DovetailHiChIP with trim-galore, fastqc and multiqc installed. Additional tools will be installed here following [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md)
+> - DovetailHiChIP with trim-galore, fastqc and multiqc installed. Additional tools are installed following [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md)
 > - MACS2 with macs2, idr installed
 > - Picard with picard installed
 
-## Install Docker Engine needed for FitHiChIP tool
+## Install Docker Engine (required for FitHiChIP)
 
-Docker is a platform designed to help developers build, share, and run container applications.  Follow instructions below or visit offical site for [Docker](https://docs.docker.com/engine/install/ubuntu/). You will also need to perform this step if you want to build or access the container with the older versions of all sofwares that were used during the generation of original data present in TCF3::HLF HiChIP manuscript.
+Docker is a platform designed to help developers build, share, and run container applications.  Follow instructions below or visit official site for [Docker](https://docs.docker.com/engine/install/ubuntu/). 
 
 **Uninstall old versions, conflicting packages**
 
-The unofficial packages to uninstall are:
+Remove the following unofficial packages if installed:
 
 - docker.io
 - docker-compose
 - docker-doc
 - podman-docker
 
-Run the following command to uninstall all conflicting packages
+Run:
 
 ```
 for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
@@ -128,7 +128,7 @@ for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do
 
 **Instalaltion using the apt repository. Set up Docker's apt repository**
 
-Add Docker's official GPG key
+Install dependencies and add Docker’s GPG key:
 
 ```
 sudo apt-get update
@@ -162,7 +162,7 @@ This command downloads a test image and runs it in a container. It will prints a
 sudo docker run hello-world
 ```
 
-**Linux post-installation steps for Docker Engine enable root user group permissions for docker**
+**Linux post-installation steps for Docker Engine enable root user group permissions for Docker**
 
 ```
 sudo usermod -aG docker $USER
@@ -172,6 +172,6 @@ docker run hello-world
 
 With above steps done you are ready to proceed with:
 
-- [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md) - Setup instructions for the Dovetail pipleline for aligments and pre-processing of HiChIP output.
+- [HiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/HiChIP.md) - Setup instructions for the Dovetail pipeline for alignments and pre-processing of HiChIP output.
 - [FitHiChIP.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/FitHiChIP.md) - Setup instructions for FitHiChIP for loop calling.
 - [Coolbox.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/Coolbox.md) - Setup of Coolbox visualization toolkit for genomic data imported to Jupyter Notebook for creating visuals and browse. 
