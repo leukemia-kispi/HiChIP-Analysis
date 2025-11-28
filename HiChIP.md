@@ -47,7 +47,6 @@ Use the installDep.sh script from the Dovetail-Genomics source repository to ens
 
 >[!NOTE]
 >The original script may require modifications. Use nano to edit it as needed.
->Use the installDepMOD.sh found in the script folder of this repository to install version locked dependencies to reproduce the environment used for the published data.
 
 ```
 nano ./HiChiP/installDep.sh
