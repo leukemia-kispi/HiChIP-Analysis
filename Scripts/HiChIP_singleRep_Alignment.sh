@@ -4,7 +4,7 @@ shopt -s nullglob # make globbing return empty array if no match
 
 #Using this script assumes the script DirectoryArchitecture&CondaEnv.sh was run beforhand to create the DirectoryArchitecture and generate conda environments with needed tools.
 
-# Check if GNU Parallel is installed otherwise exits
+# Check if GNU Parallel is installed otherwise exit
 if ! command -v parallel &>/dev/null; then
     echo "Error: GNU parallel not found. Please install with 'sudo apt install parallel'"
     exit 1

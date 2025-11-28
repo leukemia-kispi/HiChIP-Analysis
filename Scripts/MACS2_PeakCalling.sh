@@ -5,7 +5,7 @@ shopt -s nullglob # make globbing return empty array if no match
 # Using this script assumes DirectoryArchitecture.sh was execute beforhand.
 # This MACS2 pipeline expects inputs originating from pair-end read files.
 
-# Check if GNU Parallel is installed otherwise exits
+# Check if GNU Parallel is installed otherwise exit
 if ! command -v parallel &>/dev/null; then
     echo "Error: GNU parallel not found. Please install with 'sudo apt install parallel'"
     exit 1
