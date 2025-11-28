@@ -1,22 +1,22 @@
 # HiChIP-Analysis
 
-This is a setup and execution guide for analysis of TCF3::HLF HiChIP data [GSE266625](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE266625), generated from the HAL-01 cell line using the [Dovetail® MNase-HiChIP kit](https://cantatabio.com/support/hichip).Provided scripts can be used for analysis of othere dataset with carefull adaptation.
+This is a setup and execution guide for analysis of TCF3::HLF HiChIP data [GSE266625](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE266625), generated from the HAL-01 cell line using the [Dovetail® MNase-HiChIP kit](https://cantatabio.com/support/hichip).Provided scripts can be used for analysis of other dataset with careful adaptation.
 
 This guide will take you through:
 
 - Setup of Linux operating system with the necessary base to proceed with installation of all needed tools, as well as directory architecture.
 
-- Installation of Dovetail HiChIP pipeline and setup of Docker to pull docker image for FitHiChIP.
+- Installation of Dovetail HiChIP pipeline and setup of Docker to pull the Docker image for FitHiChIP.
 
-- Installation of Picard, MACS2 and IDR for deduplication, peak calling and validation of reproducible peaks across replicates, respectivly.
+- Installation of Picard, MACS2 and IDR for deduplication, peak calling and validation of reproducible peaks across replicates, respectively.
 
-- Installation of tools for downstream analysis and vizualization of data such as deepTools and coolbox.
+- Installation of coolbox for downstream analysis and visualization of data.
 
-Additonal datasets integrated during donwstream analysis inlcude: 
+Additional datasets integrated during downstream analysis include: 
 
 - RNA-seq of HAL-01 CRIPSR edited with TCF3::HLF-KO and HAL-01 Histone (H3K27ac, H3K4me1, H3K4m3, H3K27me3) ChIP-seq found in the European Nucleotide archive under accession number [ERP109232](https://www.ebi.ac.uk/ena/browser/view/ERP109232). 
 - The ATAC-seq data for HAL-01 cells found under the GEO series accession number GSE186942, [GSM5663910](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM5663910).
-- CTCF bigwig files from GM12878 cells were dowloaded from 4DNA Data portal accession number 4DNESQPLRLYZ, [4DNFIRPH78IF](https://data.4dnucleome.org/files-processed/4DNFIRPH78IF/).
+- CTCF bigwig files from GM12878 cells were downloaded from 4DNA Data portal accession number 4DNESQPLRLYZ, [4DNFIRPH78IF](https://data.4dnucleome.org/files-processed/4DNFIRPH78IF/).
 
 To get started follow this link [GeneralSetup.md](https://github.com/leukemia-kispi/HiChIP-Analysis/blob/main/GeneralSetup.md) and proceed from there to the specific pipeline steps. 
 
@@ -24,7 +24,11 @@ To get started follow this link [GeneralSetup.md](https://github.com/leukemia-ki
 
 ![Summary of whole HiChIP-Analysis workflow](/Images/Workflow.png)
 
-The HiChIP analysis pipeline follows the [HiChIP documentation release 0.1 by Dovetail®](https://hichip.readthedocs.io/en/latest/index.html) with some modifications. HiChIP paired-end read files were trimmed using TrimGalore (v0.6.6) with Phred+33 quality encoding. Reads shorter than 50 bp or with base quality scores below a Phred cutoff of 20 were removed. Biological replicates were merged as recommended and HiChIP reads were aligned to the hg38 genome using Burrows Wheeler Aligner, using the bwa mem algorithm with settings as described in the HiChIP documentation release 0.1. Interaction events are extracted with the parse module of pairtools followed by sorting and splitting of the generated pairsam file into mapped pairs and mapped bam files, the pairtools dedup step was omitted. We used mapped bam files to generate primary aligned bed files for 1D MACS2 peak calling as reference when calling genomic interactions with FitHiChIP, using 5kb bin size and 50kb to 3Mb range settings. Loop calling data was inegrated with ChIP-seq, ATAC-seq, RNA-seq data  for HAL-01 and databases such as Fantom5 for annotated enchancers. Results were visualized using tools such deepTools or coolbox.
+The HiChIP analysis pipeline follows the [HiChIP documentation release 0.1 by Dovetail®](https://hichip.readthedocs.io/en/latest/index.html) with some modifications. HiChIP paired-end read files were trimmed using TrimGalore (v0.6.6) with Phred+33 quality encoding. Reads shorter than 50 bp or with base quality scores below a Phred cutoff of 20 were removed. Biological replicates were merged as recommended. 
+
+HiChIP reads were aligned to the hg38 genome using Burrows Wheeler Aligner, using the bwa mem algorithm with settings as described in the HiChIP documentation release 0.1. Interaction events are extracted with the parse module of pairtools followed by sorting and splitting of the generated pairsam file into mapped pairs and mapped bam files; the pairtools dedup step was omitted. 
+
+Mapped bam files were used to generate primary aligned bed files for 1D MACS2 peak calling as reference when calling genomic interactions with FitHiChIP, using 5kb bin size and 50kb to 3Mb range settings. Loop-calling data was integrated with ChIP-seq, ATAC-seq, and RNA-seq data for HAL-01 as well as databases such as Fantom5 for annotated enhancers. Results were visualized using tools such deepTools or coolbox.
 
 ## Original Documentations
 
@@ -53,14 +57,14 @@ deepTools
 + https://deeptools.readthedocs.io/en/develop/index.html
 
 >[!NOTE]
->If issues occure during installation or during execution of any of the tools, refere to above documents for eventual troubleshooting.
+>If issues occur during installation or execution of any of the tools, refer to the above documentation for troubleshooting.
 
 ## Citation
 
-If using the TCF3::HLF HiChIP data please cite
+If using the TCF3::HLF HiChIP data please cite:
 
->V. Priebe, B. Galvan, A.Drakul, N. Margelisch, J. Aguade-Gorgorio, K. Walavalkar, Y. Huang, H. K. A. Mikkola, B. Bornhauser, R. Santoro, J-P. Bourquin, TCF3::HLF Orchestrates an Enhancer-Promoter Network with Activation of MEF2C to Promote Immature HSC gene Expression in Leukemia, 
->doi:
+>V. Priebe, B. Galvan, A.Drakul, N. Margelisch, J. Aguade-Gorgorio, K. Walavalkar, Y. Huang, H. K. A. Mikkola, B. Bornhauser, R. Santoro, J-P. Bourquin, TCF3::HLF Orchestrates an Enhancer-Promoter Network with Activation of MEF2C to Promote Immature HSC gene Expression in Leukemia, \
+>doi:\
 >PMID: 
 
 Citation for integrated datasets:
@@ -77,7 +81,7 @@ HAL-01 ATAC-seq
 >doi: [10.1158/2643-3230.BCD-21-0224](https://doi.org/10.1158/2643-3230.BCD-21-0224)\
 >PMID: [36350827](https://pubmed.ncbi.nlm.nih.gov/36350827/)
 
-For use of any of the tools described cite the original publisher.
+For use of any of the tools described, cite the original publisher.
 
 FitHiChIP
 
