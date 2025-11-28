@@ -61,7 +61,7 @@ conda activate DovetailHiChIP
 ```
 Log out and back in to refresh your application path.
 
-Make sure pairtools is working in the DovetailHiChIP conda environment
+Make sure pairtools is working in the DovetailHiChIP conda environment.
 
 ```
 pairtools --version

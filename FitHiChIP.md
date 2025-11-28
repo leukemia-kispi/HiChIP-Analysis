@@ -22,7 +22,7 @@ Data inputs needed to run FitHiChIP:
 
 HiC-Pro needs to be installed on the system before the FitHiChIP docker can be run.
 
-Clone the HiC-Pro source code and give it permissions
+Clone the HiC-Pro source code and give it permissions.
 
 ```
 cd /home/$USER
@@ -31,7 +31,7 @@ sudo chmod 777 -R HiC-Pro
 ```
 
 Use the environment.yml file to create a conda environment with HiC-Pro and its dependencies installed. Activate the environment.
-Set the environment on the Path to be able to run it when using docker for FitHiChIP
+Set the environment on the Path to be able to run it when using Docker for FitHiChIP.
 
 ```
 conda env create -f HiC-Pro/environment.yml -p HiCPro_ENV

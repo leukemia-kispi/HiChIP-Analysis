@@ -12,7 +12,7 @@ conda activate coolbox
 python setup.py install
 ```
 
-After installation, you should enable ipywidgets to use the browser in Jupyter Notebook (depending on version this may be already enabled):
+After installation, you should enable ipywidgets to use the browser in Jupyter Notebook (depending on version this may be already enabled).
 
 ```
 jupyter nbextension enable --py widgetsnbextension
@@ -29,9 +29,9 @@ jupyter lab --no-browser --port 8585
 When the server is initiated, a link with the token for access is made available. 
 If working on local machine, copy the link and paste it in your internet browser to begin using coolbox in Jupyter Notebook.
 
-If you run Jypyter from a remote server you need to tunnel the port with SSH first
+If you run Jupyter Notebook from a remote server you need to tunnel the port with SSH first.
 
-On your local machine, open a PowerShell or Command terminal and create a tunnel with SSH:
+On your local machine, open a PowerShell or Command terminal and create a tunnel with SSH.
 
 ```
 ssh -L 8585:localhost:8585 username@remote_server_ip

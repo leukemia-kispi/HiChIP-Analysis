@@ -35,7 +35,7 @@ bash Anaconda3-2023.09-0-Linux-x86_64.sh
 
 Follow the license agreement, type "yes" when prompted. Press Enter to confirm the installation location "[/home/$USER/anaconda3]". Type 'no' for initialization prompt.
 
-Make sure the PATH to anaconda3 is added
+Make sure the PATH to Anaconda3 is added.
 
 ```
 echo $PATH #check current PATH
@@ -56,7 +56,7 @@ Check that Anaconda is working.
 conda --version
 ```
 
-You can now delete teh installer.
+You can now delete the installer.
 
 ```
 sudo rm Anaconda3-2023.09-0-Linux-x86_64.sh
